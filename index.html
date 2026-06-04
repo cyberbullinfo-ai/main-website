@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login</title>
+  <title>CyberBull Student</title>
 
   <style>
     * {
@@ -21,22 +21,212 @@
       align-items: center;
     }
 
-    .login-box {
+    .welcome-box {
       background: white;
-      width: 350px;
-      padding: 40px;
+      width: 400px;
+      padding: 60px 40px;
       border-radius: 12px;
       box-shadow: 0 0 20px rgba(0,0,0,0.4);
+      text-align: center;
     }
 
-    .login-box h2 {
-      text-align: center;
-      <!DOCTYPE html>
-      <html lang="nl">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>CyberBull Student</title>
+    .welcome-box h1 {
+      font-size: 32px;
+      margin-bottom: 15px;
+      color: #333;
+    }
+
+    .welcome-box p {
+      color: #666;
+      margin-bottom: 40px;
+      font-size: 16px;
+    }
+
+    .button-container {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    button {
+      padding: 15px 30px;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+
+    .login-btn {
+      background: #0078ff;
+      color: white;
+    }
+
+    .login-btn:hover {
+      background: #005fd1;
+    }
+
+    .create-btn {
+      background: #28a745;
+      color: white;
+    }
+
+    .create-btn:hover {
+      background: #218838;
+    }
+
+    .language-toggle {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+    }
+
+    .language-menu {
+      display: none;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 8px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.14);
+      min-width: 160px;
+      text-align: left;
+    }
+
+    .language-menu.open {
+      display: block;
+    }
+
+    .language-menu select,
+    .language-menu button {
+      width: 100%;
+      margin-bottom: 6px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="welcome-box">
+  <div class="language-toggle">
+    <button class="lang-btn" id="languageButton">Taal</button>
+    <div class="language-menu" id="languageMenu">
+      <select id="languageSelect">
+        <option value="nl">Nederlands</option>
+        <option value="en">English</option>
+        <option value="es">Español</option>
+        <option value="fr">Français</option>
+        <option value="de">Deutsch</option>
+      </select>
+      <button type="button" id="languageApplyButton">Toepassen</button>
+    </div>
+  </div>
+
+  <h1 id="welcomeTitle">Welkom bij CyberBull Student!</h1>
+  <p id="welcomeText">Beheer je studietijd, doelen en focus</p>
+
+  <div class="button-container">
+    <button class="login-btn" id="loginButton">Inloggen</button>
+    <button class="create-btn" id="createAccountButton">Account aanmaken</button>
+  </div>
+</div>
+
+<script>
+  const defaultLanguage = 'nl';
+  const translations = {
+    landing: {
+      welcomeTitle: {
+        nl: 'Welkom bij CyberBull Student!',
+        en: 'Welcome to CyberBull Student!',
+        es: '¡Bienvenido a CyberBull Student!',
+        fr: 'Bienvenue sur CyberBull Student !',
+        de: 'Willkommen bei CyberBull Student!'
+      },
+      welcomeText: {
+        nl: 'Beheer je studietijd, doelen en focus',
+        en: 'Manage your study time, goals, and focus',
+        es: 'Gestiona tu tiempo de estudio, objetivos y concentracion',
+        fr: 'Gerez votre temps d\'etude, vos objectifs et votre concentration',
+        de: 'Verwalte deine Lernzeit, Ziele und Konzentration'
+      },
+      loginButton: {
+        nl: 'Inloggen',
+        en: 'Login',
+        es: 'Iniciar sesión',
+        fr: 'Connexion',
+        de: 'Anmelden'
+      },
+      createAccountButton: {
+        nl: 'Account aanmaken',
+        en: 'Create Account',
+        es: 'Crear cuenta',
+        fr: 'Créer un compte',
+        de: 'Konto erstellen'
+      },
+      languageButton: {
+        nl: 'Taal',
+        en: 'Language',
+        es: 'Idioma',
+        fr: 'Langue',
+        de: 'Sprache'
+      }
+    }
+  };
+
+  function initLanguage() {
+    const savedLanguage = localStorage.getItem('cyberbullLanguage') || defaultLanguage;
+    const language = savedLanguage || defaultLanguage;
+    localStorage.setItem('cyberbullLanguage', language);
+    document.documentElement.lang = language;
+    document.getElementById('languageSelect').value = language;
+    updateTexts(language);
+  }
+
+  function updateTexts(language) {
+    const page = translations.landing;
+    document.getElementById('welcomeTitle').textContent = page.welcomeTitle[language] || page.welcomeTitle.nl;
+    document.getElementById('welcomeText').textContent = page.welcomeText[language] || page.welcomeText.nl;
+    document.getElementById('loginButton').textContent = page.loginButton[language] || page.loginButton.nl;
+    document.getElementById('createAccountButton').textContent = page.createAccountButton[language] || page.createAccountButton.nl;
+    document.getElementById('languageButton').textContent = page.languageButton[language] || page.languageButton.nl;
+  }
+
+  window.toggleLanguageMenu = function() {
+    document.getElementById('languageMenu').classList.toggle('open');
+  };
+
+  window.applyLanguage = function() {
+    const language = document.getElementById('languageSelect').value;
+    localStorage.setItem('cyberbullLanguage', language);
+    document.documentElement.lang = language;
+    updateTexts(language);
+    document.getElementById('languageMenu').classList.remove('open');
+  };
+
+  window.goToLogin = function() {
+    window.location.href = 'cyberbull-domain.html';
+  };
+
+  window.goToCreateAccount = function() {
+    window.location.href = 'cyberbull-create-account.html';
+  };
+
+  function bindLandingEvents() {
+    document.getElementById('languageButton').addEventListener('click', toggleLanguageMenu);
+    document.getElementById('languageApplyButton').addEventListener('click', applyLanguage);
+    document.getElementById('loginButton').addEventListener('click', goToLogin);
+    document.getElementById('createAccountButton').addEventListener('click', goToCreateAccount);
+  }
+
+  bindLandingEvents();
+  initLanguage();
+</script>
+
+</body>
+</html>
 
         <style>
           * {

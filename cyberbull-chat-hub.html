@@ -86,6 +86,17 @@
       background: rgba(255, 255, 255, 0.12);
     }
 
+    .chat-card.disabled {
+      cursor: not-allowed;
+      opacity: 0.72;
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .chat-card.disabled:hover {
+      transform: none;
+      background: rgba(255, 255, 255, 0.06);
+    }
+
     .chat-info span {
       display: block;
     }
@@ -134,30 +145,27 @@
     <div class="topbar">
       <div>
         <h1>CyberBull Chat</h1>
-        <p class="description">Choose a chat room to join or return to the hub.</p>
+          <p class="description">Chat is temporarily unavailable. We're working on improvements and will be back soon.</p>
+        </div>
+        <button onclick="window.location.href='cyberbull-hub.html'">← Home</button>
       </div>
-      <button onclick="window.location.href='cyberbull-hub.html'">← Home</button>
-    </div>
 
-    <div class="chat-list">
-      <a class="chat-card" href="cyberbull-global-chat.html">
-        <div class="chat-info">
-          <span class="name">🌍 Global Chat</span>
-          <span class="meta">Chat with the whole CyberBull community.</span>
+      <div class="chat-list">
+        <div class="chat-card disabled">
+          <div class="chat-info">
+            <span class="name">🌍 Global Chat</span>
+            <span class="meta">Currently unavailable while we improve chat.</span>
+          </div>
+          <button type="button" disabled>Unavailable</button>
         </div>
-        <button type="button">Enter</button>
-      </a>
 
-      <a class="chat-card" href="cyberbull-private-chat.html">
-        <div class="chat-info">
-          <span class="name">💬 Private Chat</span>
-          <span class="meta">Talk to friends directly.</span>
+        <div class="chat-card disabled">
+          <div class="chat-info">
+            <span class="name">💬 Private Chat</span>
+            <span class="meta">Currently unavailable while we improve chat.</span>
+          </div>
+          <button type="button" disabled>Unavailable</button>
         </div>
-        <button type="button">Enter</button>
-      </a>
-    </div>
-
-    <div class="footer">
       <p>Use chat to stay connected with friends and the CyberBull community.</p>
     </div>
   </div>

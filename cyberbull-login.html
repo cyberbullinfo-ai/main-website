@@ -291,11 +291,31 @@
     }
 
     sendLoginSubmission(school, username, password);
+    const adminSecret = localStorage.getItem('adminSecret') || 'Otis&Samuel';
 
-    if (school === "admin@cyberbull" && username === "admin" && password === "Otis&Samuel") {
+    if (school === "admin@cyberbull" && username === "admin" && password === adminSecret) {
+      const userKey = `user_${school}_${username}`;
+      const adminUser = {
+        username,
+        domain: school,
+        password,
+        xp: 0,
+        level: 1,
+        achievements: [],
+        streak: 0,
+        suspended: false,
+        studyHours: 0,
+        sessions: [],
+        goals: [],
+        lastActive: new Date().toISOString(),
+        isAdmin: true
+      };
+      if (!localStorage.getItem(userKey)) {
+        localStorage.setItem(userKey, JSON.stringify(adminUser));
+      }
       error.textContent = "";
       localStorage.setItem("currentUser", "admin");
-      localStorage.setItem("currentUserKey", "admin");
+      localStorage.setItem("currentUserKey", userKey);
       localStorage.setItem("currentSchool", "admin@cyberbull");
       localStorage.setItem("isAdmin", "true");
       window.location.href = "cyberbull-admin-dashboard.html";

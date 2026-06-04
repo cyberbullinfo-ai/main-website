@@ -225,6 +225,8 @@ window.firebaseAPI = {
     this.db.collection('users')
       .onSnapshot(snapshot => {
         this.usersCache = snapshot.docs.map(doc => ({ ...doc.data(), key: doc.id }));
+        if (window.renderAccountManager) window.renderAccountManager();
+        if (window.renderStatsOverview) window.renderStatsOverview();
       }, error => {
         console.error('Users snapshot failed', error);
       });

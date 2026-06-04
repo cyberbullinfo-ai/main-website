@@ -59,8 +59,48 @@ function getAllUserKeys(){
   return keys;
 }
 
+function normalizeUserProfile(user, key){
+  if (!user || !key) return null;
+  const normalized = {...user};
+  if (!normalized.domain && typeof key === 'string' && key.startsWith('user_')) {
+    const parts = key.split('_');
+    if (parts.length >= 3) {
+      normalized.domain = normalized.domain || parts[1];
+      normalized.username = normalized.username || parts.slice(2).join('_');
+    }
+  }
+  if (!normalized.username && normalized.userKey) {
+    const parts = normalized.userKey.split('_');
+    if (parts.length >= 3) normalized.username = parts.slice(2).join('_');
+  }
+  return normalized;
+}
+
 function getAllUsers(){
-  return getAllUserKeys().map(k=>({key:k,user:getUserByKey(k)})).filter(x=>x.user);
+  const usersByKey = new Map();
+
+  getAllUserKeys().forEach(k => {
+    const user = getUserByKey(k);
+    if (user) {
+      usersByKey.set(k, { key: k, user: normalizeUserProfile(user, k) });
+    }
+  });
+
+  if (window.firebaseAPI?.isEnabled && Array.isArray(window.firebaseAPI.usersCache)) {
+    window.firebaseAPI.usersCache.forEach(raw => {
+      const key = raw.key || raw.userKey;
+      if (!key) return;
+      const normalized = normalizeUserProfile(raw, key);
+      if (usersByKey.has(key)) {
+        const existing = usersByKey.get(key).user;
+        usersByKey.set(key, { key, user: { ...existing, ...normalized } });
+      } else {
+        usersByKey.set(key, { key, user: normalized });
+      }
+    });
+  }
+
+  return Array.from(usersByKey.values()).filter(x => x.user);
 }
 
 // Admin login used by admin-login.html
@@ -117,18 +157,35 @@ function renderAccountManager(){
 
   if(rows.length===0){ container.innerHTML = '<div class="small">No users found.</div>'; return; }
 
-  let html = '<table><thead><tr><th>Username</th><th>Domain</th><th>XP</th><th>Level</th><th>Achievements</th><th>Streak</th><th>Actions</th></tr></thead><tbody>';
+  let html = '<table><thead><tr><th>Username</th><th>Domain</th><th>Admin</th><th>XP</th><th>Level</th><th>Streak</th><th>Actions</th></tr></thead><tbody>';
   rows.forEach(r=>{
     const u = r.user;
-    html += `<tr><td>${u.username}</td><td class="small">${u.domain}</td><td>${u.xp||0}</td><td>${u.level||1}</td><td>${(u.achievements||[]).length}</td><td>${u.streak||0}</td><td>`+
+    html += `<tr><td>${u.username}</td><td class="small">${u.domain || 'unknown'}</td><td>${u.isAdmin ? 'Yes' : 'No'}</td><td>${u.xp||0}</td><td>${u.level||1}</td><td>${u.streak||0}</td><td class="table-actions">`+
       `<button class="btn primary" onclick="inspectUser('${r.key}')">Inspect</button> `+
-      `<button class="btn muted" onclick="toggleSuspend('${r.key}')">${u.suspended? 'Unsuspend':'Suspend'}</button> `+
-      `<button class="btn" onclick="resetPassword('${r.key}')">Reset PW</button> `+
+      `<button class="btn muted" onclick="toggleAdmin('${r.key}', ${u.isAdmin})">${u.isAdmin ? 'Revoke' : 'Grant'} Admin</button> `+
+      `<button class="btn muted" onclick="resetPassword('${r.key}')">Reset PW</button> `+
       `<button class="btn danger" onclick="deleteUser('${r.key}')">Delete</button>`+
       `</td></tr>`;
   });
   html += '</tbody></table>';
   container.innerHTML = html;
+}
+
+function toggleAdmin(key, currentAdmin) {
+  const user = getUserByKey(key);
+  if (!user) return;
+  user.isAdmin = !currentAdmin;
+  saveUser(key, user);
+  renderAccountManager();
+  renderStatsOverview();
+}
+
+function getRecentUsers(count = 5) {
+  return getAllUsers()
+    .map(x => x.user)
+    .filter(u => u?.lastActive)
+    .sort((a, b) => new Date(b.lastActive).getTime() - new Date(a.lastActive).getTime())
+    .slice(0, count);
 }
 
 function inspectUser(key){
@@ -227,15 +284,20 @@ function renderStatsOverview(){
   const users = getAllUsers().map(x=>x.user);
   const total = users.length;
   const active = users.filter(u=>{ if(!u.lastActive) return false; const d = new Date(u.lastActive); return (Date.now()-d.getTime()) < (1000*60*60*24*30); }).length;
+  const adminCount = users.filter(u=>u.isAdmin).length;
   const totalStudy = users.reduce((s,u)=>s + (u.studyHours||0),0);
   const mostActive = users.slice().sort((a,b)=> (b.studyHours||0)-(a.studyHours||0)).slice(0,5);
   const domainCounts = {};
-  users.forEach(u=> domainCounts[u.domain] = (domainCounts[u.domain]||0)+1);
+  users.forEach(u=> domainCounts[u.domain || 'unknown'] = (domainCounts[u.domain || 'unknown']||0)+1);
   const topDomains = Object.entries(domainCounts).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const recent = getRecentUsers(5);
 
-  let html = `<div class="row"><div class="col"><strong>Total users</strong><div class="small">${total}</div></div><div class="col"><strong>Active users (30d)</strong><div class="small">${active}</div></div><div class="col"><strong>Total study hours</strong><div class="small">${totalStudy}</div></div></div>`;
-  html += '<h4>Most active students</h4><ul>' + (mostActive.length? mostActive.map(u=>`<li>${u.username} (${u.studyHours||0}h)</li>`).join('') : '<li class="small">No data</li>') + '</ul>';
-  html += '<h4>Top domains</h4><ul>' + (topDomains.length? topDomains.map(d=>`<li>${d[0]} — ${d[1]} users</li>`).join('') : '<li class="small">No data</li>') + '</ul>';
+  document.getElementById('totalUsersMetric').textContent = total;
+  document.getElementById('activeUsersMetric').textContent = active;
+  document.getElementById('adminCountMetric').textContent = adminCount;
+
+  let html = `<div class="row"><div class="col"><strong>Study time</strong><div class="small">${totalStudy} hours total</div></div><div class="col"><strong>Top domains</strong><div class="small">${topDomains.map(d=>`${d[0]} (${d[1]})`).slice(0,3).join(', ') || 'No data'}</div></div><div class="col"><strong>Recent activity</strong><div class="small">${recent.length ? recent.map(u => `${u.username} (${new Date(u.lastActive).toLocaleDateString()})`).join(', ') : 'No recent activity'}</div></div></div>`;
+  html += '<div class="metrics-list"><div class="metric-card"><strong>Top active students</strong><span>' + (mostActive.length? mostActive.map(u=>`${u.username} — ${u.studyHours||0}h`).join('<br>') : 'No data') + '</span></div></div>';
   container.innerHTML = html;
 }
 

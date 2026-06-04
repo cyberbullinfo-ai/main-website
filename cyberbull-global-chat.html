@@ -37,6 +37,40 @@
     }
     .btn:hover { opacity: 0.9; }
 
+    .maintenance-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.96);
+      backdrop-filter: blur(10px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .maintenance-card {
+      max-width: 520px;
+      width: 100%;
+      padding: 32px;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 24px;
+      text-align: center;
+      box-shadow: 0 30px 70px rgba(0, 0, 0, 0.35);
+    }
+
+    .maintenance-card h1 {
+      font-size: 2rem;
+      margin-bottom: 14px;
+    }
+
+    .maintenance-card p {
+      color: #cbd5e1;
+      line-height: 1.7;
+      margin-bottom: 24px;
+    }
+
     .container {
       max-width: 900px;
       margin: 0 auto;
@@ -526,6 +560,13 @@
   </style>
 </head>
 <body>
+  <div class="maintenance-overlay">
+    <div class="maintenance-card">
+      <h1>Chat Under Maintenance</h1>
+      <p>We’re working on chat right now. Access is temporarily disabled while we improve the experience.</p>
+      <button class="btn" onclick="window.location.href='cyberbull-hub.html'">Return to Home</button>
+    </div>
+  </div>
   <div class="container">
     <div class="header">
       <div>

@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Account - CyberBull Student</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #1e1e1e, #2c2c2c);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .create-account-box {
+      background: white;
+      width: 400px;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.4);
+    }
+
+    .create-account-box h2 {
+      text-align: center;
+      margin-bottom: 25px;
+      color: #333;
+      font-size: 24px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      color: #555;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #0078ff;
+      box-shadow: 0 0 5px rgba(0, 120, 255, 0.3);
+    }
+
+    .button-container {
+      display: flex;
+      gap: 10px;
+      margin-top: 25px;
+    }
+
+    button {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 15px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+
+    .create-btn {
+      background: #28a745;
+      color: white;
+    }
+
+    .create-btn:hover {
+      background: #218838;
+    }
+
+    .back-btn {
+      background: #6c757d;
+      color: white;
+    }
+
+    .back-btn:hover {
+      background: #5a6268;
+    }
+
+    .language-toggle {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+    }
+
+    .language-menu {
+      display: none;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 8px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.14);
+      min-width: 160px;
+      text-align: left;
+    }
+
+    .language-menu.open {
+      display: block;
+    }
+
+    .language-menu select,
+    .language-menu button {
+      width: 100%;
+      margin-bottom: 6px;
+    }
+
+    .error {
+      color: #d32f2f;
+      margin-top: 12px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .success {
+      color: #28a745;
+      margin-top: 12px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .form-hint {
+      font-size: 12px;
+      color: #999;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="create-account-box">
+  <div class="language-toggle">
+    <button class="lang-btn" id="languageButton">Taal</button>
+    <div class="language-menu" id="languageMenu">
+      <select id="languageSelect">
+        <option value="nl">Nederlands</option>
+        <option value="en">English</option>
+        <option value="es">Espanol</option>
+        <option value="fr">Francais</option>
+        <option value="de">Deutsch</option>
+      </select>
+      <button type="button" id="languageApplyButton">Toepassen</button>
+    </div>
+  </div>
+
+  <h2 id="pageTitle">Account aanmaken</h2>
+
+  <div class="form-group">
+    <label for="domain" id="domainLabel">Smartschool domein</label>
+    <input type="text" id="domain" placeholder="bijv. school.smartschool.be" autocomplete="off">
+    <div class="form-hint" id="domainHint">Het Smartschool-domein van je school</div>
+  </div>
+
+  <div class="form-group">
+    <label for="username" id="usernameLabel">Gebruikersnaam</label>
+    <input type="text" id="username" placeholder="Je gebruikersnaam" autocomplete="off">
+    <div class="form-hint" id="usernameHint">Je gebruikersnaam op het Smartschool-domein</div>
+  </div>
+
+  <div class="form-group">
+    <label for="password" id="passwordLabel">Wachtwoord</label>
+    <input type="password" id="password" placeholder="Je wachtwoord">
+    <div class="form-hint" id="passwordHint">Kies een sterk wachtwoord</div>
+  </div>
+
+  <div class="form-group">
+    <label for="adminCode">Admin code (optioneel)</label>
+    <input type="text" id="adminCode" placeholder="Admin code om admin-account te maken (optioneel)">
+    <div class="form-hint">Alleen gebruik voor admin-accounts</div>
+  </div>
+
+  <div class="button-container">
+    <button class="create-btn" id="createAccountButton">Account aanmaken</button>
+    <button class="back-btn" id="backButton">Terug</button>
+  </div>
+
+  <div class="error" id="error"></div>
+  <div class="success" id="success"></div>
+</div>
+
+<script>
+  const defaultLanguage = 'nl';
+  const translations = {
+    nl: {
+      pageTitle: 'Account aanmaken',
+      domainLabel: 'Smartschool domein',
+      domainPlaceholder: 'bijv. school.smartschool.be',
+      domainHint: 'Het Smartschool-domein van je school',
+      usernameLabel: 'Gebruikersnaam',
+      usernamePlaceholder: 'Je gebruikersnaam',
+      usernameHint: 'Je gebruikersnaam op het Smartschool-domein',
+      passwordLabel: 'Wachtwoord',
+      passwordPlaceholder: 'Je wachtwoord',
+      passwordHint: 'Kies een sterk wachtwoord',
+      createAccountButton: 'Account aanmaken',
+      backButton: 'Terug',
+      apply: 'Toepassen',
+      language: 'Taal',
+      errors: {
+        fillFields: 'Vul alle velden in.',
+        invalidDomain: 'Vul een geldig Smartschool-domein in (bijv. school.smartschool.be).',
+        usernameShort: 'Gebruikersnaam moet minimaal 3 tekens lang zijn.',
+        passwordShort: 'Wachtwoord moet minimaal 6 tekens lang zijn.',
+        accountExists: 'Er bestaat al een account met deze gebruikersnaam op dit domein.'
+      },
+      success: 'Account succesvol aangemaakt! Je wordt naar login gestuurd...'
+    },
+    en: {
+      pageTitle: 'Create Account',
+      domainLabel: 'Smartschool Domain',
+      domainPlaceholder: 'e.g., school.smartschool.be',
+      domainHint: 'Your school\'s Smartschool domain',
+      usernameLabel: 'Username',
+      usernamePlaceholder: 'Your username',
+      usernameHint: 'Your username on the Smartschool domain',
+      passwordLabel: 'Password',
+      passwordPlaceholder: 'Your password',
+      passwordHint: 'Choose a strong password',
+      createAccountButton: 'Create Account',
+      backButton: 'Back',
+      apply: 'Apply',
+      language: 'Language',
+      errors: {
+        fillFields: 'Please fill in all fields.',
+        invalidDomain: 'Please enter a valid Smartschool domain (e.g., school.smartschool.be).',
+        usernameShort: 'Username must be at least 3 characters long.',
+        passwordShort: 'Password must be at least 6 characters long.',
+        accountExists: 'An account with this username already exists on this domain.'
+      },
+      success: 'Account created successfully! Redirecting to login...'
+    },
+    es: {
+      pageTitle: 'Crear cuenta',
+      domainLabel: 'Dominio Smartschool',
+      domainPlaceholder: 'p.ej., school.smartschool.be',
+      domainHint: 'El dominio Smartschool de tu escuela',
+      usernameLabel: 'Nombre de usuario',
+      usernamePlaceholder: 'Tu nombre de usuario',
+      usernameHint: 'Tu nombre de usuario en el dominio Smartschool',
+      passwordLabel: 'Contrasena',
+      passwordPlaceholder: 'Tu contrasena',
+      passwordHint: 'Elige una contrasena segura',
+      createAccountButton: 'Crear cuenta',
+      backButton: 'Atras',
+      apply: 'Aplicar',
+      language: 'Idioma',
+      errors: {
+        fillFields: 'Por favor, rellena todos los campos.',
+        invalidDomain: 'Introduce un dominio Smartschool valido (p.ej., school.smartschool.be).',
+        usernameShort: 'El nombre de usuario debe tener al menos 3 caracteres.',
+        passwordShort: 'La contrasena debe tener al menos 6 caracteres.',
+        accountExists: 'Ya existe una cuenta con este nombre de usuario en este dominio.'
+      },
+      success: 'Cuenta creada correctamente! Redirigiendo al inicio de sesion...'
+    },
+    fr: {
+      pageTitle: 'Creer un compte',
+      domainLabel: 'Domaine Smartschool',
+      domainPlaceholder: 'p.ex., school.smartschool.be',
+      domainHint: 'Le domaine Smartschool de votre ecole',
+      usernameLabel: 'Nom d\'utilisateur',
+      usernamePlaceholder: 'Votre nom d\'utilisateur',
+      usernameHint: 'Votre nom d\'utilisateur sur le domaine Smartschool',
+      passwordLabel: 'Mot de passe',
+      passwordPlaceholder: 'Votre mot de passe',
+      passwordHint: 'Choisissez un mot de passe fort',
+      createAccountButton: 'Creer un compte',
+      backButton: 'Retour',
+      apply: 'Appliquer',
+      language: 'Langue',
+      errors: {
+        fillFields: 'Veuillez remplir tous les champs.',
+        invalidDomain: 'Veuillez entrer un domaine Smartschool valide (p.ex., school.smartschool.be).',
+        usernameShort: 'Le nom d\'utilisateur doit contenir au moins 3 caracteres.',
+        passwordShort: 'Le mot de passe doit contenir au moins 6 caracteres.',
+        accountExists: 'Un compte avec ce nom d\'utilisateur existe deja sur ce domaine.'
+      },
+      success: 'Compte cree avec succes ! Redirection vers la connexion...'
+    },
+    de: {
+      pageTitle: 'Konto erstellen',
+      domainLabel: 'Smartschool-Domain',
+      domainPlaceholder: 'z.B. school.smartschool.be',
+      domainHint: 'Die Smartschool-Domain deiner Schule',
+      usernameLabel: 'Benutzername',
+      usernamePlaceholder: 'Dein Benutzername',
+      usernameHint: 'Dein Benutzername auf der Smartschool-Domain',
+      passwordLabel: 'Passwort',
+      passwordPlaceholder: 'Dein Passwort',
+      passwordHint: 'Wahle ein sicheres Passwort',
+      createAccountButton: 'Konto erstellen',
+      backButton: 'Zuruck',
+      apply: 'Ubernehmen',
+      language: 'Sprache',
+      errors: {
+        fillFields: 'Bitte fulle alle Felder aus.',
+        invalidDomain: 'Bitte gib eine gueltige Smartschool-Domain ein (z.B. school.smartschool.be).',
+        usernameShort: 'Der Benutzername muss mindestens 3 Zeichen lang sein.',
+        passwordShort: 'Das Passwort muss mindestens 6 Zeichen lang sein.',
+        accountExists: 'Fur diesen Benutzernamen existiert bereits ein Konto auf dieser Domain.'
+      },
+      success: 'Konto erfolgreich erstellt! Weiterleitung zur Anmeldung...'
+    }
+  };
+
+  function initLanguage() {
+    const language = localStorage.getItem('cyberbullLanguage') || defaultLanguage;
+    localStorage.setItem('cyberbullLanguage', language);
+    document.documentElement.lang = language;
+    document.getElementById('languageSelect').value = language;
+    updateTexts(language);
+  }
+
+  function updateTexts(language) {
+    const page = translations[language] || translations.nl;
+    document.getElementById('pageTitle').textContent = page.pageTitle;
+    document.getElementById('domainLabel').textContent = page.domainLabel;
+    document.getElementById('domain').placeholder = page.domainPlaceholder;
+    document.getElementById('domainHint').textContent = page.domainHint;
+    document.getElementById('usernameLabel').textContent = page.usernameLabel;
+    document.getElementById('username').placeholder = page.usernamePlaceholder;
+    document.getElementById('usernameHint').textContent = page.usernameHint;
+    document.getElementById('passwordLabel').textContent = page.passwordLabel;
+    document.getElementById('password').placeholder = page.passwordPlaceholder;
+    document.getElementById('passwordHint').textContent = page.passwordHint;
+    document.getElementById('createAccountButton').textContent = page.createAccountButton;
+    document.getElementById('backButton').textContent = page.backButton;
+    document.getElementById('languageButton').textContent = page.language;
+    document.querySelector('#languageMenu button').textContent = page.apply;
+  }
+
+  window.toggleLanguageMenu = function() {
+    document.getElementById('languageMenu').classList.toggle('open');
+  };
+
+  window.applyLanguage = function() {
+    const language = document.getElementById('languageSelect').value;
+    localStorage.setItem('cyberbullLanguage', language);
+    document.documentElement.lang = language;
+    updateTexts(language);
+    document.getElementById('languageMenu').classList.remove('open');
+  };
+
+  window.createAccount = function() {
+    const domain = document.getElementById("domain").value.trim().toLowerCase();
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value;
+    const error = document.getElementById("error");
+    const success = document.getElementById("success");
+    const language = localStorage.getItem('cyberbullLanguage') || defaultLanguage;
+    const page = translations[language] || translations.nl;
+
+    error.textContent = "";
+    success.textContent = "";
+
+    const smartschoolRegex = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)*\.smartschool\.be$/;
+    const adminRegex = /^admin@cyberbull$/;
+
+    if (!domain || !username || !password) {
+      error.textContent = page.errors.fillFields;
+      return;
+    }
+
+    const providedAdminCode = document.getElementById('adminCode').value.trim();
+    const adminSecret = localStorage.getItem('adminSecret') || 'letmein-admin';
+    const isAdmin = providedAdminCode && providedAdminCode === adminSecret;
+
+    if (!smartschoolRegex.test(domain) && !(adminRegex.test(domain) && isAdmin)) {
+      error.textContent = page.errors.invalidDomain;
+      return;
+    }
+
+    if (username.length < 3) {
+      error.textContent = page.errors.usernameShort;
+      return;
+    }
+
+    if (password.length < 6) {
+      error.textContent = page.errors.passwordShort;
+      return;
+    }
+
+    const userKey = `user_${domain}_${username}`;
+    const existing = localStorage.getItem(userKey);
+
+    if (existing) {
+      error.textContent = page.errors.accountExists;
+      return;
+    }
+
+    const userObj = {
+      username,
+      domain,
+      password,
+      xp: 0,
+      level: 1,
+      achievements: [],
+      streak: 0,
+      suspended: false,
+      studyHours: 0,
+      sessions: [],
+      goals: [],
+      lastActive: new Date().toISOString(),
+      isAdmin: !!isAdmin
+    };
+
+    localStorage.setItem(userKey, JSON.stringify(userObj));
+    if (window.firebaseAPI?.isEnabled && window.firebaseAPI.saveUserProfile) {
+      window.firebaseAPI.saveUserProfile(userKey, userObj).catch(err => {
+        console.error('Failed to save profile to Firebase', err);
+      });
+    }
+    localStorage.setItem('currentUser', username);
+    localStorage.setItem('currentUserKey', userKey);
+    localStorage.setItem('currentSchool', domain);
+    if (isAdmin) {
+      localStorage.setItem('isAdmin', 'true');
+    }
+
+    success.textContent = page.success;
+
+    setTimeout(() => {
+      if (isAdmin) {
+        window.location.href = 'cyberbull-admin-dashboard.html';
+      } else {
+        window.location.href = 'cyberbull-landing.html';
+      }
+    }, 1200);
+  }
+
+  window.goBack = function() {
+    window.location.href = "cyberbull-landing.html";
+  };
+
+  function bindCreateAccountEvents() {
+    document.getElementById('languageButton').addEventListener('click', toggleLanguageMenu);
+    document.getElementById('languageApplyButton').addEventListener('click', applyLanguage);
+    document.getElementById('createAccountButton').addEventListener('click', createAccount);
+    document.getElementById('backButton').addEventListener('click', goBack);
+  }
+
+  bindCreateAccountEvents();
+
+  document.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+      createAccount();
+    }
+  });
+
+  initLanguage();
+</script>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="firebase-api.js"></script>
+<script src="auth.js"></script>
+</body>
+</html>

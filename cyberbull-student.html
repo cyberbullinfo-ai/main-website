@@ -1,0 +1,1828 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CyberBull Student</title>
+
+  <style>
+    :root {
+      --primary: #2563eb;
+      --dark: #111827;
+      --card: rgba(255,255,255,0.08);
+      --text: #f9fafb;
+      --muted: #9ca3af;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Inter, Arial, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #111827, #1f2937);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 30px;
+      transition: 0.3s;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .topbar h1 {
+      font-size: 34px;
+    }
+
+    .topbar p {
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .clock {
+      background: var(--card);
+      padding: 12px 18px;
+      border-radius: 14px;
+      font-size: 20px;
+      backdrop-filter: blur(10px);
+    }
+
+    button {
+      border: none;
+      padding: 12px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      background: var(--primary);
+      color: white;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    .lang-btn {
+      background: #374151;
+    }
+
+    .language-toggle {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .language-menu {
+      position: absolute;
+      top: 48px;
+      right: 0;
+      background: rgba(15, 23, 42, 0.98);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 14px;
+      padding: 12px;
+      min-width: 180px;
+      display: none;
+      box-shadow: 0 14px 40px rgba(0,0,0,0.25);
+      z-index: 1001;
+    }
+
+    .language-menu.open {
+      display: block;
+    }
+
+    .language-menu select,
+    .language-menu button {
+      width: 100%;
+      padding: 10px 12px;
+      margin-top: 8px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.08);
+      color: white;
+      font-size: 14px;
+    }
+
+    .language-menu button {
+      background: #2563eb;
+      border-color: transparent;
+    }
+
+    .language-menu button:hover {
+      background: #1d4ed8;
+    }
+
+    .grid {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .admin-controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+
+    .admin-search-input {
+      flex: 1;
+      min-width: 220px;
+      padding: 12px;
+      border-radius: 12px;
+      border: none;
+      background: rgba(255,255,255,0.08);
+      color: white;
+    }
+
+    .account-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+    }
+
+    .account-table th,
+    .account-table td {
+      text-align: left;
+      padding: 12px 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.12);
+      color: #e5e7eb;
+      font-size: 14px;
+    }
+
+    .account-table th {
+      color: #cbd5e1;
+      font-weight: 600;
+    }
+
+    .account-action-btn {
+      border: none;
+      border-radius: 10px;
+      padding: 8px 10px;
+      cursor: pointer;
+      background: #2563eb;
+      color: white;
+      margin-right: 6px;
+      font-size: 13px;
+    }
+
+    .account-action-btn.delete {
+      background: #dc2626;
+    }
+
+    .account-row-empty {
+      color: #9ca3af;
+      padding: 18px 0;
+    }
+
+    .card {
+      background: var(--card);
+      backdrop-filter: blur(14px);
+      border-radius: 22px;
+      padding: 25px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    .card h2 {
+      margin-bottom: 20px;
+      font-size: 22px;
+    }
+
+    .timer {
+      text-align: center;
+    }
+
+    .timer-display {
+      font-size: 64px;
+      margin: 20px 0;
+      font-weight: bold;
+    }
+
+    .timer-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .goals-input {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .goals-input input {
+      flex: 1;
+      padding: 12px;
+      border-radius: 12px;
+      border: none;
+      outline: none;
+    }
+
+    .goal-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255,255,255,0.08);
+      padding: 12px;
+      border-radius: 12px;
+      margin-top: 10px;
+    }
+
+    .goal-left {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .delete-btn {
+      background: #dc2626;
+    }
+
+    .stats {
+      display: grid;
+      gap: 15px;
+    }
+
+    .stat-box {
+      background: rgba(255,255,255,0.08);
+      padding: 18px;
+      border-radius: 14px;
+    }
+
+    .stat-box strong {
+      display: block;
+      font-size: 28px;
+      margin-bottom: 5px;
+    }
+
+    .tip {
+      line-height: 1.8;
+      color: #d1d5db;
+    }
+
+    .sticky-bar {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, #ffd700, #ffed4e);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      z-index: 999;
+      border-radius: 8px;
+      border: 3px solid #ffcc00;
+      cursor: grab;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      user-select: none;
+    }
+
+    .sticky-bar:hover {
+      background: linear-gradient(135deg, #ffed4e, #ffffe0);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    }
+
+    .sticky-bar:active {
+      cursor: grabbing;
+    }
+
+    .background-control-button {
+      position: fixed;
+      right: 20px;
+      bottom: 100px;
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, #38bdf8, #6366f1);
+      color: white;
+      border-radius: 16px;
+      border: none;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+      cursor: pointer;
+      font-size: 26px;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .background-control-button:hover {
+      transform: translateY(-2px);
+    }
+
+    .background-menu {
+      position: fixed;
+      right: 20px;
+      bottom: 180px;
+      width: 280px;
+      background: rgba(15, 23, 42, 0.94);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 20px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.32);
+      padding: 22px;
+      color: var(--text);
+      backdrop-filter: blur(18px);
+      z-index: 1000;
+      display: none;
+    }
+
+    .background-menu.open {
+      display: block;
+    }
+
+    .background-menu h3 {
+      margin-bottom: 14px;
+      font-size: 18px;
+      color: #f8fafc;
+    }
+
+    .background-menu label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+      color: #e5e7eb;
+      font-size: 14px;
+    }
+
+    .background-menu input[type="file"] {
+      width: 100%;
+      color: #f9fafb;
+    }
+
+    .background-menu input[type="color"] {
+      width: 46px;
+      height: 46px;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      padding: 0;
+      background: white;
+    }
+
+    .background-menu small {
+      display: block;
+      margin-top: 8px;
+      color: #9ca3af;
+      font-size: 13px;
+    }
+
+    .background-menu-close {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 28px;
+      height: 28px;
+      border: none;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      color: #f8fafc;
+      cursor: pointer;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    body {
+      background: linear-gradient(135deg, #111827, #1f2937);
+      background-size: cover;
+      background-position: center center;
+      background-repeat: no-repeat;
+      color: var(--text);
+      min-height: 100vh;
+      padding: 30px;
+      transition: background 0.3s ease, background-color 0.3s ease;
+    }
+
+    .sticky-notes-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 998;
+    }
+
+    .sticky-note {
+      position: absolute;
+      background: #ffff99;
+      border: 2px solid #ffcc00;
+      border-radius: 5px;
+      box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.2);
+      padding: 12px;
+      cursor: move;
+      pointer-events: all;
+      min-width: 150px;
+      min-height: 150px;
+      width: 200px;
+      height: 200px;
+      display: flex;
+      flex-direction: column;
+      user-select: none;
+    }
+
+    .sticky-note-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      cursor: move;
+    }
+
+    .sticky-note-close {
+      background: #ff6b6b;
+      color: white;
+      border: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 3px;
+      cursor: pointer;
+      padding: 0;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .sticky-note-close:hover {
+      background: #ff5252;
+    }
+
+    .sticky-note-content {
+      flex: 1;
+      font-size: 13px;
+      color: #333;
+      overflow: hidden;
+      word-wrap: break-word;
+    }
+
+    .sticky-note textarea {
+      flex: 1;
+      border: none;
+      background: transparent;
+      resize: none;
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+      color: #333;
+      outline: none;
+    }
+
+    .sticky-note-resize {
+      position: absolute;
+      width: 15px;
+      height: 15px;
+      bottom: 0;
+      right: 0;
+      background: #ffcc00;
+      cursor: nwse-resize;
+      border-radius: 2px;
+    }
+
+    .sticky-note-toolbar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .sticky-note-toolbar button,
+    .sticky-note-toolbar select,
+    .sticky-note-toolbar input[type="color"] {
+      padding: 4px 8px;
+      font-size: 11px;
+      border: 1px solid #999;
+      border-radius: 3px;
+      cursor: pointer;
+      background: white;
+      color: #333;
+    }
+
+    .sticky-note-toolbar button:hover {
+      background: #f0f0f0;
+    }
+
+    .sticky-note-toolbar button.active {
+      background: #ffcc00;
+      font-weight: bold;
+    }
+
+    .sticky-note-toolbar input[type="color"] {
+      width: 30px;
+      height: 26px;
+      padding: 2px;
+    }
+
+    .sticky-note-content {
+      flex: 1;
+      overflow-y: auto;
+      outline: none;
+      word-wrap: break-word;
+      white-space: pre-wrap;
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+      color: #333;
+      padding: 4px 0;
+    }
+
+    .sticky-note-content:focus {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    body {
+      margin: 0;
+    }
+
+    .topbar, .grid {
+      margin: 0;
+    }
+
+    @media(max-width: 700px) {
+      .sticky-bar {
+        right: 10px;
+        bottom: 10px;
+        width: 50px;
+        height: 50px;
+        font-size: 24px;
+      }
+    
+      .timer-display {
+        font-size: 48px;
+      }
+    }
+  </style>
+  <script src="auth.js"></script>
+</head>
+<body>
+  <script>
+    window.globalAuth.requireAuth();
+  </script>
+
+<div class="topbar">
+  <div>
+    <h1 id="pageHeading">CyberBull Student</h1>
+    <p id="schoolText">Verbonden met school...</p>
+  </div>
+
+  <div class="controls">
+    <button onclick="goHome()" style="background:#374151;" title="Back to hub">← Home</button>
+    <div class="language-toggle">
+      <button class="lang-btn" onclick="toggleHomeLanguageMenu()" id="languageButton">Lang</button>
+      <div class="language-menu" id="languageMenu">
+        <select id="languageSelect">
+          <option value="nl">Nederlands</option>
+          <option value="en">English</option>
+          <option value="es">Espanol</option>
+          <option value="fr">Francais</option>
+          <option value="de">Deutsch</option>
+        </select>
+        <button type="button" onclick="applyHomeLanguage()" id="applyLanguageButton">Toepassen</button>
+      </div>
+    </div>
+    <button class="lang-btn" onclick="setLanguage('nl')">NL</button>
+    <button class="lang-btn" onclick="setLanguage('en')">EN</button>
+
+    <div class="clock" id="clock">00:00:00</div>
+
+    <button onclick="goToSession()" style="background:#667eea;" title="Start a study session">📖 Study</button>
+    <button onclick="goToGames()" style="background:#8b5cf6;" title="Play games">🎮 Games</button>
+    <button onclick="goToProfile()" style="background:#f59e0b;" title="View your profile">👤 Profile</button>
+    <button onclick="logout()" id="logoutButton">Uitloggen</button>
+  </div>
+</div>
+
+<!-- Progression Stats Bar -->
+<div style="background: rgba(255,255,255,0.08); backdrop-filter: blur(10px); border-radius: 14px; padding: 15px 25px; margin-bottom: 20px; display: flex; gap: 30px; flex-wrap: wrap;">
+  <div style="display: flex; gap: 8px; align-items: center;">
+    <span style="font-size: 20px;">⭐</span>
+    <div>
+      <div style="font-size: 11px; color: #9ca3af;">LEVEL</div>
+      <div style="font-size: 18px; font-weight: bold;" id="progLevel">1</div>
+    </div>
+  </div>
+  <div style="display: flex; gap: 8px; align-items: center;">
+    <span style="font-size: 20px;">✨</span>
+    <div>
+      <div style="font-size: 11px; color: #9ca3af;">XP</div>
+      <div style="font-size: 18px; font-weight: bold;" id="progXp">0</div>
+    </div>
+  </div>
+  <div style="display: flex; gap: 8px; align-items: center;">
+    <span style="font-size: 20px;">💰</span>
+    <div>
+      <div style="font-size: 11px; color: #9ca3af;">COINS</div>
+      <div style="font-size: 18px; font-weight: bold;" id="progCoins">0</div>
+    </div>
+  </div>
+  <div style="display: flex; gap: 8px; align-items: center;">
+    <span style="font-size: 20px;">🔥</span>
+    <div>
+      <div style="font-size: 11px; color: #9ca3af;">STREAK</div>
+      <div style="font-size: 18px; font-weight: bold;" id="progStreak">0</div>
+    </div>
+  </div>
+</div>
+
+<div class="grid" id="adminGrid" style="display:none;">
+  <div class="card">
+    <h2 id="adminTitle">Admin Dashboard</h2>
+    <div class="admin-controls">
+      <input type="text" id="adminSearchInput" class="admin-search-input" placeholder="Zoek op gebruikersnaam of domein">
+      <button id="adminSearchBtn" onclick="renderAdminAccounts()">Zoek</button>
+      <button id="resetAllBtn" onclick="resetAllAccounts()" style="background:#dc2626;">Reset alles</button>
+    </div>
+    <div id="adminAccountsList"></div>
+  </div>
+</div>
+
+<div class="grid" id="studentGrid">
+
+  <div class="card timer">
+    <h2 id="timerTitle">Focustimer</h2>
+
+    <div class="timer-display" id="timerDisplay">25:00</div>
+
+    <div class="timer-input-section" style="margin: 15px 0; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+      <input type="number" id="timerMinutesInput" value="25" min="0" max="999" style="width: 50px; padding: 8px; border: none; border-radius: 8px; text-align: center;">
+      <span style="font-size: 18px;">:</span>
+      <input type="number" id="timerSecondsInput" value="00" min="0" max="59" style="width: 50px; padding: 8px; border: none; border-radius: 8px; text-align: center;">
+      <button onclick="setTimerFromInput()" style="padding: 8px 12px; font-size: 12px;">Set</button>
+    </div>
+
+    <div class="timer-buttons">
+      <button onclick="startTimer()" id="startBtn">Start</button>
+      <button onclick="pauseTimer()" id="pauseBtn">Pauze</button>
+      <button onclick="resetTimer()" id="resetBtn">Reset</button>
+      <button onclick="changeTime(5)">+5 min</button>
+      <button onclick="changeTime(-5)">-5 min</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 id="goalsTitle">Doelen</h2>
+
+    <div class="goals-input">
+      <input type="text" id="goalInput" placeholder="Nieuw doel...">
+      <button onclick="addGoal()">+</button>
+    </div>
+
+    <div id="goalsList"></div>
+  </div>
+
+  <div class="card" id="friendsCard">
+    <h2>Friends</h2>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
+      <input id="friendInput" placeholder="Friend username" style="flex:1;padding:8px;border-radius:8px;border:none;background:rgba(255,255,255,0.06);color:#fff">
+      <button onclick="addFriend()">Add</button>
+    </div>
+    <div id="friendsList" style="display:flex;flex-direction:column;gap:8px;">
+      <!-- friends appear here -->
+    </div>
+    <div id="friendRequestsBox" style="margin-top:12px;color:#94a3b8"></div>
+    <div id="invitesBox" style="margin-top:12px;color:#94a3b8"></div>
+  </div>
+
+  <div class="card">
+    <h2 id="statsTitle">Statistieken</h2>
+
+    <div class="stats">
+      <div class="stat-box">
+        <strong id="streakValue">0</strong>
+        <span id="streakText">Dagen streak</span>
+      </div>
+
+      <div class="stat-box">
+        <strong id="studyValue">0u 0m</strong>
+        <span id="studyText">Studietijd deze week</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<button class="background-control-button" id="backgroundControlButton" onclick="toggleBackgroundMenu()" title="Background settings">BG</button>
+
+<div class="background-menu" id="backgroundMenu">
+  <button class="background-menu-close" onclick="closeBackgroundMenu()">x</button>
+  <h3>Achtergrond</h3>
+  <label for="backgroundImageInput">Kies een afbeelding</label>
+  <input type="file" id="backgroundImageInput" accept="image/*">
+  <small>Upload een afbeelding uit je bestanden.</small>
+  <label for="backgroundColorInput">Kies een kleur</label>
+  <input type="color" id="backgroundColorInput" value="#111827">
+  <small>Of kies een achtergrondkleur.</small>
+</div>
+
+<div class="sticky-bar" id="stickyBar" onmousedown="startDragFromBar(event)">Note</div>
+
+<div class="sticky-notes-container" id="stickyContainer"></div>
+
+<script src="admin.js"></script>
+<script src="progression.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="firebase-api.js"></script>
+<script src="chat.js"></script>
+
+<script>
+  const currentUser = localStorage.getItem("currentUser");
+  const currentUserKey = localStorage.getItem("currentUserKey");
+  const school = localStorage.getItem("schoolDomain") || localStorage.getItem("currentSchool");
+  const isAdmin = localStorage.getItem("isAdmin") === "true";
+
+  if (!currentUser || (!school && !isAdmin)) {
+    window.location.href = "cyberbull-landing.html";
+  }
+
+  if (isAdmin) {
+    window.location.href = "cyberbull-admin-dashboard.html";
+  }
+
+  if (school) {
+    document.getElementById("schoolText").textContent =
+      "Verbonden met " + school;
+  }
+
+  if (window.firebaseAPI?.isEnabled && currentUserKey) {
+    window.firebaseAPI.subscribeUserFriendData(currentUserKey);
+  }
+
+  function logout() {
+    localStorage.removeItem("isAdmin");
+    localStorage.removeItem("schoolDomain");
+    localStorage.removeItem("currentUser");
+    localStorage.removeItem("currentUserKey");
+    localStorage.removeItem("currentSchool");
+    window.location.href = "cyberbull-landing.html";
+  }
+
+  function updateClock() {
+    const now = new Date();
+
+    document.getElementById("clock").textContent =
+      now.toLocaleTimeString();
+  }
+
+  setInterval(updateClock, 1000);
+  updateClock();
+
+  const defaultHomeLanguage = 'nl';
+  let currentLanguage = 'nl';
+  const homeTranslations = {
+    nl: {
+      timerTitle: 'Focustimer',
+      goalsTitle: 'Doelen',
+      statsTitle: 'Statistieken',
+      tipTitle: 'Tip van de dag',
+      startBtn: 'Start',
+      pauseBtn: 'Pauze',
+      resetBtn: 'Reset',
+      streakText: 'Dagen streak',
+      studyText: 'Studietijd deze week',
+      newTipBtn: 'Nieuwe tip',
+      focusButton: 'Focus Mode',
+      logoutButton: 'Uitloggen',
+      languageButton: 'Lang',
+      schoolPrefix: 'Verbonden met ',
+      adminTitle: 'Admin Dashboard',
+      adminSearchPlaceholder: 'Zoek op gebruikersnaam of domein',
+      adminSearchButton: 'Zoek',
+      adminResetAllButton: 'Alles resetten',
+      adminResetButton: 'Reset',
+      adminDeleteButton: 'Verwijderen',
+      adminResetConfirm: 'Alle studentaccounts resetten?',
+      adminNoAccounts: 'Geen accounts gevonden.',
+      adminUsername: 'Gebruikersnaam',
+      adminDomain: 'Domein',
+      adminPassword: 'Wachtwoord',
+      adminActions: 'Acties'
+    },
+    en: {
+      timerTitle: 'Focus Timer',
+      goalsTitle: 'Goals',
+      statsTitle: 'Statistics',
+      tipTitle: 'Tip of the day',
+      startBtn: 'Start',
+      pauseBtn: 'Pause',
+      resetBtn: 'Reset',
+      streakText: 'Day streak',
+      studyText: 'Study time this week',
+      newTipBtn: 'New tip',
+      focusButton: 'Focus Mode',
+      logoutButton: 'Logout',
+      languageButton: 'Lang',
+      schoolPrefix: 'Connected with ',
+      adminTitle: 'Admin Dashboard',
+      adminPageHeading: 'Admin Panel',
+      adminSearchPlaceholder: 'Search by username or domain',
+      adminSearchButton: 'Search',
+      adminResetAllButton: 'Reset All',
+      adminResetButton: 'Reset',
+      adminDeleteButton: 'Delete',
+      adminResetConfirm: 'Reset all student accounts?',
+      adminNoAccounts: 'No accounts found.',
+      adminUsername: 'Username',
+      adminDomain: 'Domain',
+      adminPassword: 'Password',
+      adminActions: 'Actions'
+    },
+    es: {
+      timerTitle: 'Temporizador',
+      goalsTitle: 'Objetivos',
+      statsTitle: 'Estadisticas',
+      tipTitle: 'Consejo del dia',
+      startBtn: 'Iniciar',
+      pauseBtn: 'Pausa',
+      resetBtn: 'Reiniciar',
+      streakText: 'Racha de dias',
+      studyText: 'Tiempo de estudio esta semana',
+      newTipBtn: 'Nuevo consejo',
+      focusButton: 'Modo enfoque',
+      logoutButton: 'Cerrar sesion',
+      languageButton: 'Lang',
+      schoolPrefix: 'Conectado con ',
+      adminTitle: 'Panel de administrador',
+      adminPageHeading: 'Panel admin',
+      adminSearchPlaceholder: 'Buscar por usuario o dominio',
+      adminSearchButton: 'Buscar',
+      adminResetAllButton: 'Restablecer todo',
+      adminResetButton: 'Restablecer',
+      adminDeleteButton: 'Eliminar',
+      adminResetConfirm: 'Restablecer todas las cuentas de estudiantes?',
+      adminNoAccounts: 'No se encontraron cuentas.',
+      adminUsername: 'Usuario',
+      adminDomain: 'Dominio',
+      adminPassword: 'Contrasena',
+      adminActions: 'Acciones'
+    },
+    fr: {
+      timerTitle: 'Minuteur',
+      goalsTitle: 'Objectifs',
+      statsTitle: 'Statistiques',
+      tipTitle: 'Conseil du jour',
+      startBtn: 'Demarrer',
+      pauseBtn: 'Pause',
+      resetBtn: 'Reinitialiser',
+      streakText: 'Serie de jours',
+      studyText: 'Temps d\'etude cette semaine',
+      newTipBtn: 'Nouveau conseil',
+      focusButton: 'Mode focus',
+      logoutButton: 'Deconnexion',
+      languageButton: 'Lang',
+      schoolPrefix: 'Connecte avec ',
+      adminTitle: 'Tableau de bord admin',
+      adminPageHeading: 'Admin Panel',
+      adminSearchPlaceholder: 'Rechercher par utilisateur ou domaine',
+      adminSearchButton: 'Rechercher',
+      adminResetAllButton: 'Tout reinitialiser',
+      adminResetButton: 'Reinitialiser',
+      adminDeleteButton: 'Supprimer',
+      adminResetConfirm: 'Reinitialiser tous les comptes eleves?',
+      adminNoAccounts: 'Aucun compte trouve.',
+      adminUsername: 'Nom d\'utilisateur',
+      adminDomain: 'Domaine',
+      adminPassword: 'Mot de passe',
+      adminActions: 'Actions'
+    },
+    de: {
+      timerTitle: 'Timer',
+      goalsTitle: 'Ziele',
+      statsTitle: 'Statistiken',
+      tipTitle: 'Tipp des Tages',
+      startBtn: 'Start',
+      pauseBtn: 'Pause',
+      resetBtn: 'Zurucksetzen',
+      streakText: 'Tage in Folge',
+      studyText: 'Lernzeit diese Woche',
+      newTipBtn: 'Neuer Tipp',
+      focusButton: 'Fokusmodus',
+      logoutButton: 'Abmelden',
+      languageButton: 'Lang',
+      schoolPrefix: 'Verbunden mit ',
+      adminTitle: 'Admin Dashboard',
+      adminSearchPlaceholder: 'Suche nach Benutzername oder Domain',
+      adminSearchButton: 'Suchen',
+      adminResetAllButton: 'Alles zurucksetzen',
+      adminResetButton: 'Zurucksetzen',
+      adminDeleteButton: 'Loschen',
+      adminResetConfirm: 'Alle Schuelerkonten zuruecksetzen?',
+      adminNoAccounts: 'Keine Accounts gefunden.',
+      adminUsername: 'Benutzername',
+      adminDomain: 'Domain',
+      adminPassword: 'Passwort',
+      adminActions: 'Aktionen'
+    }
+  };
+
+  function initHomeLanguage() {
+    const language = localStorage.getItem('cyberbullLanguage') || defaultHomeLanguage;
+    localStorage.setItem('cyberbullLanguage', language);
+    document.documentElement.lang = language;
+    document.getElementById('languageSelect').value = language;
+    setLanguage(language);
+    initDashboard();
+  }
+
+  function initDashboard() {
+    const ui = homeTranslations[currentLanguage] || homeTranslations.nl;
+    if (isAdmin) {
+      document.getElementById('pageHeading').textContent = ui.adminPageHeading || 'Admin Panel';
+      document.getElementById('studentGrid').style.display = 'none';
+      document.getElementById('stickyBar').style.display = 'none';
+      document.getElementById('stickyContainer').style.display = 'none';
+      document.getElementById('backgroundControlButton').style.display = 'none';
+      document.getElementById('backgroundMenu').style.display = 'none';
+      document.getElementById('adminGrid').style.display = 'grid';
+      renderAdminAccounts();
+      return;
+    }
+
+    document.getElementById('pageHeading').textContent = 'CyberBull Student';
+    document.getElementById('studentGrid').style.display = 'grid';
+    document.getElementById('adminGrid').style.display = 'none';
+  }
+
+  function applyHomeLanguage() {
+    const language = document.getElementById('languageSelect').value;
+    localStorage.setItem('cyberbullLanguage', language);
+    document.documentElement.lang = language;
+    setLanguage(language);
+    document.getElementById('languageMenu').classList.remove('open');
+  }
+
+  function toggleHomeLanguageMenu() {
+    document.getElementById('languageMenu').classList.toggle('open');
+  }
+
+  function setLanguage(lang) {
+    localStorage.setItem('cyberbullLanguage', lang);
+    document.documentElement.lang = lang;
+    if (document.getElementById('languageSelect')) {
+      document.getElementById('languageSelect').value = lang;
+    }
+    currentLanguage = lang;
+    const ui = homeTranslations[lang] || homeTranslations.nl;
+
+    document.getElementById('timerTitle').textContent = ui.timerTitle;
+    document.getElementById('goalsTitle').textContent = ui.goalsTitle;
+    document.getElementById('statsTitle').textContent = ui.statsTitle;
+    document.getElementById('startBtn').textContent = ui.startBtn;
+    document.getElementById('pauseBtn').textContent = ui.pauseBtn;
+    document.getElementById('resetBtn').textContent = ui.resetBtn;
+    document.getElementById('streakText').textContent = ui.streakText;
+    document.getElementById('studyText').textContent = ui.studyText;
+    document.getElementById('logoutButton').textContent = ui.logoutButton;
+    document.getElementById('languageButton').textContent = ui.languageButton;
+
+    if (document.getElementById('adminTitle')) {
+      document.getElementById('adminTitle').textContent = ui.adminTitle || 'Admin Dashboard';
+    }
+
+    if (isAdmin && document.getElementById('pageHeading')) {
+      document.getElementById('pageHeading').textContent = ui.adminPageHeading || 'Admin Panel';
+    }
+
+    if (document.getElementById('adminSearchInput')) {
+      document.getElementById('adminSearchInput').placeholder = ui.adminSearchPlaceholder || 'Search by username or domain';
+    }
+    if (document.getElementById('adminSearchBtn')) {
+      document.getElementById('adminSearchBtn').textContent = ui.adminSearchButton || 'Search';
+    }
+    if (document.getElementById('resetAllBtn')) {
+      document.getElementById('resetAllBtn').textContent = ui.adminResetAllButton || 'Reset All';
+    }
+
+    if (school) {
+      document.getElementById('schoolText').textContent = ui.schoolPrefix + school;
+    }
+  }
+
+  function getAllAccounts() {
+    const accounts = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (!key.startsWith('user_')) continue;
+      const parts = key.split('_');
+      if (parts.length < 3) continue;
+      const school = parts[1];
+      const username = parts.slice(2).join('_');
+      const password = localStorage.getItem(key);
+      accounts.push({ school, username, password, key });
+    }
+    return accounts.sort((a, b) => a.school.localeCompare(b.school) || a.username.localeCompare(b.username));
+  }
+
+  function renderAdminAccounts() {
+    const query = document.getElementById('adminSearchInput').value.trim().toLowerCase();
+    const accounts = getAllAccounts().filter(account => {
+      if (!query) return true;
+      return account.username.toLowerCase().includes(query) || account.school.toLowerCase().includes(query);
+    });
+
+    const list = document.getElementById('adminAccountsList');
+    const ui = homeTranslations[currentLanguage] || homeTranslations.nl;
+
+    if (!accounts.length) {
+      list.innerHTML = `<div class="account-row-empty">${ui.adminNoAccounts || 'No accounts found.'}</div>`;
+      return;
+    }
+
+    const rows = accounts.map(account => `
+      <tr>
+        <td>${account.username}</td>
+        <td>${account.school}</td>
+        <td>${account.password}</td>
+        <td>
+          <button class="account-action-btn" onclick="resetAccountPassword(${JSON.stringify(account.school)}, ${JSON.stringify(account.username)})">${ui.adminResetButton || 'Reset'}</button>
+          <button class="account-action-btn delete" onclick="deleteAccount(${JSON.stringify(account.school)}, ${JSON.stringify(account.username)})">${ui.adminDeleteButton || 'Delete'}</button>
+        </td>
+      </tr>
+    `).join('');
+
+    list.innerHTML = `
+      <table class="account-table">
+        <thead>
+          <tr>
+            <th>${ui.adminUsername || 'Username'}</th>
+            <th>${ui.adminDomain || 'Domain'}</th>
+            <th>${ui.adminPassword || 'Password'}</th>
+            <th>${ui.adminActions || 'Actions'}</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    `;
+  }
+
+  function deleteAccount(school, username) {
+    localStorage.removeItem(`user_${school}_${username}`);
+    renderAdminAccounts();
+  }
+
+  function resetAccountPassword(school, username) {
+    localStorage.setItem(`user_${school}_${username}`, 'password123');
+    renderAdminAccounts();
+  }
+
+  function resetAllAccounts() {
+    const ui = homeTranslations[currentLanguage] || homeTranslations.nl;
+    if (!confirm(ui.adminResetConfirm || 'Reset all student accounts?')) return;
+    const accounts = getAllAccounts();
+    accounts.forEach(account => localStorage.removeItem(account.key));
+    renderAdminAccounts();
+  }
+
+  initHomeLanguage();
+
+  let timerMinutes = 25;
+  let timerSeconds = 0;
+  let timerInterval = null;
+
+  function updateTimerDisplay() {
+    const m = String(timerMinutes).padStart(2, '0');
+    const s = String(timerSeconds).padStart(2, '0');
+
+    document.getElementById("timerDisplay").textContent =
+      `${m}:${s}`;
+    
+    document.getElementById("timerMinutesInput").value = timerMinutes;
+    document.getElementById("timerSecondsInput").value = String(timerSeconds).padStart(2, '0');
+  }
+
+  function setTimerFromInput() {
+    const minutes = parseInt(document.getElementById("timerMinutesInput").value) || 0;
+    const seconds = parseInt(document.getElementById("timerSecondsInput").value) || 0;
+    
+    if (minutes < 0 || seconds < 0 || seconds > 59) {
+      alert("Please enter valid time values (0-999 min, 0-59 sec)");
+      return;
+    }
+    
+    timerMinutes = minutes;
+    timerSeconds = seconds;
+    updateTimerDisplay();
+  }
+
+  function startTimer() {
+    clearInterval(timerInterval);
+
+    timerInterval = setInterval(() => {
+      if (timerSeconds === 0) {
+        if (timerMinutes === 0) {
+          clearInterval(timerInterval);
+          return;
+        }
+
+        timerMinutes--;
+        timerSeconds = 59;
+      } else {
+        timerSeconds--;
+      }
+
+      updateTimerDisplay();
+    }, 1000);
+  }
+
+  function pauseTimer() {
+    clearInterval(timerInterval);
+  }
+
+  function resetTimer() {
+    clearInterval(timerInterval);
+    timerMinutes = 25;
+    timerSeconds = 0;
+    updateTimerDisplay();
+  }
+
+  function changeTime(amount) {
+    timerMinutes += amount;
+
+    if (timerMinutes < 1) {
+      timerMinutes = 1;
+    }
+
+    updateTimerDisplay();
+  }
+
+  updateTimerDisplay();
+
+  function addGoal() {
+    const input = document.getElementById("goalInput");
+
+    if (!input.value.trim()) return;
+
+    const goalKey = `goals_${currentUser}`;
+    const goals = JSON.parse(localStorage.getItem(goalKey) || "[]");
+
+    goals.push({
+      text: input.value,
+      done: false
+    });
+
+    localStorage.setItem(goalKey, JSON.stringify(goals));
+
+    input.value = "";
+
+    renderGoals();
+  }
+
+  function toggleGoal(index) {
+    const goalKey = `goals_${currentUser}`;
+    const goals = JSON.parse(localStorage.getItem(goalKey) || "[]");
+
+    goals[index].done = !goals[index].done;
+
+    localStorage.setItem(goalKey, JSON.stringify(goals));
+
+    renderGoals();
+  }
+
+  function deleteGoal(index) {
+    const goalKey = `goals_${currentUser}`;
+    const goals = JSON.parse(localStorage.getItem(goalKey) || "[]");
+
+    goals.splice(index, 1);
+
+    localStorage.setItem(goalKey, JSON.stringify(goals));
+
+    renderGoals();
+  }
+
+  function renderGoals() {
+    const goalKey = `goals_${currentUser}`;
+    const goals = JSON.parse(localStorage.getItem(goalKey) || "[]");
+
+    const list = document.getElementById("goalsList");
+
+    list.innerHTML = "";
+
+    goals.forEach((goal, index) => {
+      list.innerHTML += `
+        <div class="goal-item">
+          <div class="goal-left">
+            <input type="checkbox"
+              ${goal.done ? "checked" : ""}
+              onchange="toggleGoal(${index})">
+
+            <span style="
+              text-decoration:${goal.done ? 'line-through' : 'none'}
+            ">
+              ${goal.text}
+            </span>
+          </div>
+
+          <button class="delete-btn"
+            onclick="deleteGoal(${index})">
+            X
+          </button>
+        </div>
+      `;
+    });
+  }
+
+  renderGoals();
+
+  function toggleBackgroundMenu() {
+    document.getElementById("backgroundMenu").classList.toggle("open");
+  }
+
+  function closeBackgroundMenu() {
+    document.getElementById("backgroundMenu").classList.remove("open");
+  }
+
+  function applyBackground(value, type) {
+    if (type === "image") {
+      document.body.style.backgroundImage = `url('${value}')`;
+      document.body.style.backgroundColor = "transparent";
+    } else if (type === "color") {
+      document.body.style.backgroundImage = "none";
+      document.body.style.backgroundColor = value;
+    }
+
+    localStorage.setItem(`background_${currentUser}`, JSON.stringify({ type, value }));
+  }
+
+  function loadBackground() {
+    const stored = localStorage.getItem(`background_${currentUser}`);
+    if (!stored) return;
+
+    try {
+      const { type, value } = JSON.parse(stored);
+      if (type && value) {
+        applyBackground(value, type);
+        if (type === "color") {
+          document.getElementById("backgroundColorInput").value = value;
+        }
+      }
+    } catch (error) {
+      console.warn("Could not load background setting", error);
+    }
+  }
+
+  document.getElementById("backgroundColorInput").addEventListener("input", (event) => {
+    applyBackground(event.target.value, "color");
+  });
+
+  document.getElementById("backgroundImageInput").addEventListener("change", (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result;
+      applyBackground(dataUrl, "image");
+    };
+    reader.readAsDataURL(file);
+  });
+
+  loadBackground();
+
+  // Sticky Notes System
+  // Use `var` so the variables are available if the drag handler
+  // is invoked before this script finishes initializing (avoid TDZ).
+  var creatingNote = null;
+  var dragPreview = null;
+
+  function startDragFromBar(e) {
+    if (e.button !== 0) return; // Only left mouse button
+    
+    e.preventDefault();
+    const startX = e.clientX;
+    const startY = e.clientY;
+    
+    creatingNote = {
+      id: Date.now(),
+      text: "",
+      x: startX - 100,
+      y: startY - 100,
+      width: 200,
+      height: 200
+    };
+    
+    // Create preview
+    dragPreview = document.createElement("div");
+    dragPreview.className = "sticky-note";
+    dragPreview.style.left = (startX - 100) + "px";
+    dragPreview.style.top = (startY - 100) + "px";
+    dragPreview.style.opacity = "0.7";
+    dragPreview.innerHTML = `
+      <div class="sticky-note-header">
+        <span style="font-size: 11px; color: #999;">Notitie</span>
+      </div>
+            <div class="sticky-note-toolbar" style="pointer-events: none;">
+        <select style="pointer-events: auto; font-family: Arial;">
+          <option value="Arial" selected>Arial</option>
+          <option value="Georgia">Georgia</option>
+          <option value="Courier New">Courier</option>
+          <option value="Times New Roman">Times</option>
+          <option value="Verdana">Verdana</option>
+        </select>
+        <select style="pointer-events: auto;">
+          <option value="11px" selected>11px</option>
+          <option value="13px">13px</option>
+          <option value="15px">15px</option>
+          <option value="18px">18px</option>
+          <option value="21px">21px</option>
+        </select>
+        <button style="pointer-events: auto;"><b>B</b></button>
+        <button style="pointer-events: auto;"><i>I</i></button>
+        <button style="pointer-events: auto;"><u>U</u></button>
+        <input type="color" value="#ffff99" style="pointer-events: auto;">
+      </div>
+      <div class="sticky-note-content" contenteditable="true" placeholder="Type here..."></div>
+      <div class="sticky-note-resize"></div>
+    `;
+    document.getElementById("stickyContainer").appendChild(dragPreview);
+    
+    function onMouseMove(moveE) {
+      dragPreview.style.left = (moveE.clientX - 100) + "px";
+      dragPreview.style.top = (moveE.clientY - 100) + "px";
+    }
+    
+    function onMouseUp(upE) {
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
+      
+      if (dragPreview) {
+        dragPreview.remove();
+        dragPreview = null;
+      }
+      
+      if (creatingNote) {
+        creatingNote.x = upE.clientX - 100;
+        creatingNote.y = upE.clientY - 100;
+        createStickyNote(creatingNote.x, creatingNote.y);
+        creatingNote = null;
+      }
+    }
+    
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
+  }
+
+  function createStickyNote(x, y) {
+    const notesKey = `stickynotes_${currentUser}`;
+    const notes = JSON.parse(localStorage.getItem(notesKey) || "[]");
+    
+    const noteId = Date.now();
+    const newNote = {
+      id: noteId,
+      text: "",
+      x: x || 100,
+      y: y || 100,
+      width: 200,
+      height: 200,
+      color: "#ffff99"
+    };
+    
+    notes.push(newNote);
+    localStorage.setItem(notesKey, JSON.stringify(notes));
+    renderStickyNote(newNote);
+  }
+
+  function toggleBold(noteId) {
+    const contentDiv = document.querySelector(`.sticky-note-content[data-id="${noteId}"]`);
+    if (contentDiv) {
+      contentDiv.focus();
+      document.execCommand('bold', false, null);
+    }
+  }
+
+  function toggleItalic(noteId) {
+    const contentDiv = document.querySelector(`.sticky-note-content[data-id="${noteId}"]`);
+    if (contentDiv) {
+      contentDiv.focus();
+      document.execCommand('italic', false, null);
+    }
+  }
+
+  function toggleUnderline(noteId) {
+    const contentDiv = document.querySelector(`.sticky-note-content[data-id="${noteId}"]`);
+    if (contentDiv) {
+      contentDiv.focus();
+      document.execCommand('underline', false, null);
+    }
+  }
+
+  function changeFontFamily(noteId, fontFamily) {
+    document.execCommand('fontName', false, fontFamily);
+    const contentDiv = document.querySelector(`.sticky-note-content[data-id="${noteId}"]`);
+    if (contentDiv) contentDiv.focus();
+  }
+
+  function changeFontSize(noteId, fontSize) {
+    // Convert px to font size value (7 = 96px, 6 = 85px, etc.)
+    const sizeMap = { '11px': 2, '13px': 3, '15px': 3, '18px': 4, '21px': 5 };
+    document.execCommand('fontSize', false, sizeMap[fontSize] || 3);
+    const contentDiv = document.querySelector(`.sticky-note-content[data-id="${noteId}"]`);
+    if (contentDiv) contentDiv.focus();
+  }
+
+  function changeNoteColor(noteId, color) {
+    const notesKey = `stickynotes_${currentUser}`;
+    const notes = JSON.parse(localStorage.getItem(notesKey) || "[]");
+    const note = notes.find(n => n.id === noteId);
+    if (note) {
+      note.color = color;
+      localStorage.setItem(notesKey, JSON.stringify(notes));
+      document.getElementById(`note_${noteId}`).style.backgroundColor = color;
+    }
+  }
+
+  function renderStickyNote(note) {
+    const container = document.getElementById("stickyContainer");
+    const noteEl = document.createElement("div");
+    noteEl.className = "sticky-note";
+    noteEl.id = `note_${note.id}`;
+    noteEl.style.left = note.x + "px";
+    noteEl.style.top = note.y + "px";
+    noteEl.style.width = note.width + "px";
+    noteEl.style.height = note.height + "px";
+    if (note.color) noteEl.style.backgroundColor = note.color;
+    
+    noteEl.innerHTML = `
+      <div class="sticky-note-header">
+        <span style="font-size: 11px; color: #999;">Notitie</span>
+        <button class="sticky-note-close" onclick="deleteNote(${note.id})">x</button>
+      </div>
+      <div class="sticky-note-toolbar">
+        <select onchange="changeFontFamily(${note.id}, this.value)" style="font-family: Arial;">
+          <option value="Arial" selected>Arial</option>
+          <option value="Georgia">Georgia</option>
+          <option value="Courier New">Courier</option>
+          <option value="Times New Roman">Times</option>
+          <option value="Verdana">Verdana</option>
+        </select>
+        <select onchange="changeFontSize(${note.id}, this.value)">
+          <option value="11px" selected>11px</option>
+          <option value="13px">13px</option>
+          <option value="15px">15px</option>
+          <option value="18px">18px</option>
+          <option value="21px">21px</option>
+        </select>
+        <button onclick="toggleBold(${note.id})" title="Bold"><b>B</b></button>
+        <button onclick="toggleItalic(${note.id})" title="Italic"><i>I</i></button>
+        <button onclick="toggleUnderline(${note.id})" title="Underline"><u>U</u></button>
+        <input type="color" onchange="changeNoteColor(${note.id}, this.value)" value="#ffff99" title="Note color">
+      </div>
+      <div class="sticky-note-content" data-id="${note.id}" contenteditable="true" placeholder="Type here...">${note.text || ''}</div>
+      <div class="sticky-note-resize" onmousedown="startResize(event, ${note.id})"></div>
+    `;
+    
+    container.appendChild(noteEl);
+    
+    // Make draggable
+    makeNoteDraggable(noteEl, note.id);
+    
+    // Add text change listener
+    const contentDiv = noteEl.querySelector(".sticky-note-content");
+    contentDiv.addEventListener("input", (e) => {
+      saveNoteText(note.id, e.target.innerHTML);
+    });
+  }
+
+  function makeNoteDraggable(element, noteId) {
+    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+    const header = element.querySelector(".sticky-note-header");
+    
+    header.onmousedown = dragMouseDown;
+    
+    function dragMouseDown(e) {
+      e.preventDefault();
+      pos3 = e.clientX;
+      pos4 = e.clientY;
+      document.onmouseup = closeDragElement;
+      document.onmousemove = elementDrag;
+    }
+    
+    function elementDrag(e) {
+      e.preventDefault();
+      pos1 = pos3 - e.clientX;
+      pos2 = pos4 - e.clientY;
+      pos3 = e.clientX;
+      pos4 = e.clientY;
+      
+      const newTop = element.offsetTop - pos2;
+      const newLeft = element.offsetLeft - pos1;
+      
+      element.style.top = Math.max(0, newTop) + "px";
+      element.style.left = Math.max(0, newLeft) + "px";
+    }
+    
+    function closeDragElement() {
+      document.onmouseup = null;
+      document.onmousemove = null;
+      saveNotePosition(noteId, element.offsetLeft, element.offsetTop);
+    }
+  }
+
+  function startResize(e, noteId) {
+    e.preventDefault();
+    const noteEl = document.getElementById(`note_${noteId}`);
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const startWidth = noteEl.offsetWidth;
+    const startHeight = noteEl.offsetHeight;
+    
+    function doResize(e) {
+      const newWidth = Math.max(150, startWidth + (e.clientX - startX));
+      const newHeight = Math.max(150, startHeight + (e.clientY - startY));
+      
+      noteEl.style.width = newWidth + "px";
+      noteEl.style.height = newHeight + "px";
+    }
+    
+    function stopResize() {
+      document.removeEventListener("mousemove", doResize);
+      document.removeEventListener("mouseup", stopResize);
+      saveNoteSize(noteId, noteEl.offsetWidth, noteEl.offsetHeight);
+    }
+    
+    document.addEventListener("mousemove", doResize);
+    document.addEventListener("mouseup", stopResize);
+  }
+
+  function saveNoteText(noteId, htmlContent) {
+    const notesKey = `stickynotes_${currentUser}`;
+    const notes = JSON.parse(localStorage.getItem(notesKey) || "[]");
+    const note = notes.find(n => n.id === noteId);
+    if (note) {
+      note.text = htmlContent;
+      localStorage.setItem(notesKey, JSON.stringify(notes));
+    }
+  }
+
+  function saveNotePosition(noteId, x, y) {
+    const notesKey = `stickynotes_${currentUser}`;
+    const notes = JSON.parse(localStorage.getItem(notesKey) || "[]");
+    const note = notes.find(n => n.id === noteId);
+    if (note) {
+      note.x = x;
+      note.y = y;
+      localStorage.setItem(notesKey, JSON.stringify(notes));
+    }
+  }
+
+  function saveNoteSize(noteId, width, height) {
+    const notesKey = `stickynotes_${currentUser}`;
+    const notes = JSON.parse(localStorage.getItem(notesKey) || "[]");
+    const note = notes.find(n => n.id === noteId);
+    if (note) {
+      note.width = width;
+      note.height = height;
+      localStorage.setItem(notesKey, JSON.stringify(notes));
+    }
+  }
+
+  function deleteNote(noteId) {
+    const notesKey = `stickynotes_${currentUser}`;
+    const notes = JSON.parse(localStorage.getItem(notesKey) || "[]");
+    const filtered = notes.filter(n => n.id !== noteId);
+    localStorage.setItem(notesKey, JSON.stringify(filtered));
+    
+    const noteEl = document.getElementById(`note_${noteId}`);
+    if (noteEl) noteEl.remove();
+  }
+
+  function loadStickyNotes() {
+    const notesKey = `stickynotes_${currentUser}`;
+    const notes = JSON.parse(localStorage.getItem(notesKey) || "[]");
+    notes.forEach(note => renderStickyNote(note));
+  }
+
+  const stickyContainer = document.getElementById("stickyContainer");
+
+  loadStickyNotes();
+
+  // ===== PROGRESSION SYSTEM INTEGRATION =====
+  function goToSession() {
+    window.location.href = 'cyberbull-study-session.html';
+  }
+
+  function goToGames() {
+    window.location.href = 'cyberbull-games.html';
+  }
+
+  function goToProfile() {
+    window.location.href = 'cyberbull-profile.html';
+  }
+
+  function goHome() {
+    window.location.href = 'cyberbull-hub.html';
+  }
+
+  function initProgressionSystem() {
+    // Update login streak
+    window.progressionAPI.updateLoginStreak(currentUserKey);
+    
+    // Check and award badges
+    window.progressionAPI.checkAndAwardBadges(currentUserKey);
+    
+    // Update progression display
+    updateProgressionDisplay();
+  }
+
+  function updateProgressionDisplay() {
+    const user = getUserByKey(currentUserKey);
+    if (!user) return;
+    
+    const level = window.progressionAPI.getCurrentLevel(user.xp || 0);
+    const coins = window.progressionAPI.getUserCoins(currentUserKey);
+    const streak = user.streak || 0;
+    
+    document.getElementById('progLevel').textContent = level;
+    document.getElementById('progXp').textContent = user.xp || 0;
+    document.getElementById('progCoins').textContent = coins;
+    document.getElementById('progStreak').textContent = streak;
+    updateHomeStats(user);
+  }
+
+  function updateHomeStats(user) {
+    if (!user) user = getUserByKey(currentUserKey);
+    if (!user) return;
+
+    const streak = user.streak || 0;
+    const sessions = Array.isArray(user.sessions) ? user.sessions : [];
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+    const weekMinutes = sessions.reduce((sum, s) => {
+      if (!s || !s.duration) return sum;
+      const sessionEnd = s.endTime ? new Date(s.endTime) : null;
+      if (sessionEnd && sessionEnd < oneWeekAgo) return sum;
+      return sum + Number(s.duration || 0);
+    }, 0);
+
+    const hours = Math.floor(weekMinutes / 60);
+    const minutes = weekMinutes % 60;
+    const formattedStudy = `${hours}u ${minutes}m`;
+
+    const streakEl = document.getElementById('streakValue');
+    const studyEl = document.getElementById('studyValue');
+
+    if (streakEl) streakEl.textContent = streak;
+    if (studyEl) studyEl.textContent = formattedStudy;
+  }
+
+  // Initialize progression system when page loads
+  if (!isAdmin) {
+    initProgressionSystem();
+    
+    // Update progression display every 10 seconds
+    setInterval(updateProgressionDisplay, 10000);
+  }
+
+  // ===== FRIENDS & INVITES =====
+  function getFriends() {
+    const currentUserKey = localStorage.getItem('currentUserKey');
+    if (!currentUserKey) return [];
+    return window.chatAPI.getFriends(currentUserKey);
+  }
+
+  function renderFriends() {
+    const list = document.getElementById('friendsList');
+    list.innerHTML = '';
+    const currentUserKey = localStorage.getItem('currentUserKey');
+    const friends = getFriends();
+    if (!friends.length) { list.innerHTML = '<div style="color:#9ca3af">No friends yet</div>'; return; }
+
+    const allUsers = window.chatAPI.getAllUsers();
+    friends.forEach(friendKey => {
+      const friend = allUsers.find(u => u.key === friendKey) || { username: friendKey, avatar: '😊' };
+      const el = document.createElement('div');
+      el.style.display = 'flex'; el.style.justifyContent = 'space-between'; el.style.alignItems = 'center';
+      el.innerHTML = `<div style="display:flex;gap:8px;align-items:center;"><span>${friend.avatar}</span><span>${friend.username}</span></div>`;
+      const btns = document.createElement('div');
+      const inviteBtn = document.createElement('button'); inviteBtn.textContent = 'Invite';
+      inviteBtn.onclick = () => { sendInviteToFriend(friend.username) };
+      const delBtn = document.createElement('button'); delBtn.textContent = 'Remove'; delBtn.style.background = '#dc2626';
+      delBtn.onclick = () => { removeFriend(friendKey) };
+      btns.appendChild(inviteBtn); btns.appendChild(delBtn);
+      el.appendChild(btns);
+      list.appendChild(el);
+    });
+  }
+
+  function addFriend() {
+    const input = document.getElementById('friendInput');
+    const username = input.value.trim(); if (!username) return;
+    const currentUser = localStorage.getItem('currentUser');
+    const currentUserKey = localStorage.getItem('currentUserKey');
+    if (!currentUser || !currentUserKey) { alert('Not logged in'); return; }
+
+    const user = window.chatAPI.getAllUsers().find(u => u.username.toLowerCase() === username.toLowerCase());
+    if (!user) { alert('User not found'); return; }
+    if (window.chatAPI.isFriend(currentUserKey, user.key)) { alert('Already a friend'); input.value = ''; return; }
+
+    window.chatAPI.sendFriendRequest(currentUserKey, currentUser, user.key, user.username);
+    alert(`Friend request sent to ${user.username}`);
+    input.value = '';
+    renderFriendRequests();
+  }
+
+  function removeFriend(friendKey) {
+    const currentUserKey = localStorage.getItem('currentUserKey');
+    if (!currentUserKey || !friendKey) return;
+    window.chatAPI.removeFriend(currentUserKey, friendKey);
+    renderFriends();
+  }
+
+  function renderFriendRequests() {
+    const box = document.getElementById('friendRequestsBox');
+    const currentUserKey = localStorage.getItem('currentUserKey');
+    const requests = window.chatAPI.getIncomingFriendRequests(currentUserKey);
+    if (!requests || requests.length === 0) {
+      box.textContent = 'No friend requests';
+      return;
+    }
+
+    box.innerHTML = requests.map(req => `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.08);">
+        <div>
+          <strong>${req.fromName}</strong> wants to be your friend.
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button onclick="acceptFriendRequest('${req.id}', '${req.fromKey}', '${req.fromName}')">Accept</button>
+          <button style="background:#dc2626;" onclick="rejectFriendRequest('${req.id}', '${req.fromKey}')">Decline</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function acceptFriendRequest(requestId, fromKey, fromName) {
+    const currentUserKey = localStorage.getItem('currentUserKey');
+    if (!currentUserKey || !requestId || !fromKey) return;
+    window.chatAPI.acceptFriendRequest(currentUserKey, requestId, fromKey, fromName);
+    renderFriends();
+    renderFriendRequests();
+  }
+
+  function rejectFriendRequest(requestId, fromKey) {
+    const currentUserKey = localStorage.getItem('currentUserKey');
+    if (!currentUserKey || !requestId || !fromKey) return;
+    window.chatAPI.rejectFriendRequest(currentUserKey, requestId, fromKey);
+    renderFriendRequests();
+  }
+
+  function sendInviteToFriend(friend) {
+    const from = localStorage.getItem('currentUser') || 'guest';
+    const game = prompt('Which game to invite for?', 'pong') || 'pong';
+    const roomId = 'room_' + Math.random().toString(36).slice(2,10);
+    localStorage.setItem(`invite_${friend}`, JSON.stringify({from, roomId, game, ts: Date.now()}));
+    alert('Invite sent to ' + friend);
+  }
+
+  function checkInvites() {
+    const box = document.getElementById('invitesBox'); box.innerHTML = '';
+    const currentUser = localStorage.getItem('currentUser'); if(!currentUser) return;
+    const key = `invite_${currentUser}`;
+    const raw = localStorage.getItem(key);
+    if(!raw) { box.textContent = 'No invites'; return }
+    try {
+      const inv = JSON.parse(raw);
+      const el = document.createElement('div');
+      el.innerHTML = `<div>Invite from <strong>${inv.from}</strong> to play <em>${inv.game}</em></div>`;
+      const accept = document.createElement('button'); accept.textContent='Accept'; accept.onclick = ()=>{ acceptInvite(inv) };
+      const decline = document.createElement('button'); decline.textContent='Decline'; decline.style.background='#dc2626'; decline.onclick = ()=>{ localStorage.removeItem(key); checkInvites() };
+      el.appendChild(accept); el.appendChild(decline);
+      box.appendChild(el);
+    } catch(e) { box.textContent='No invites' }
+  }
+
+  function acceptInvite(inv) {
+    // navigate to game with room param
+    localStorage.removeItem(`invite_${localStorage.getItem('currentUser')}`);
+    const gamePage = inv.game === 'pong' ? 'pong.html' : `${inv.game}.html`;
+    window.location.href = `${gamePage}?room=${inv.roomId}`;
+  }
+
+  // render friends, friend requests and game invites at start
+  renderFriends();
+  renderFriendRequests();
+  checkInvites();
+  setInterval(checkInvites, 3000);
+</script>
+
+</body>
+</html>
+

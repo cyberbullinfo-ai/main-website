@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Pong - CyberBull</title>
+  <script src="progression.js"></script>
+  <style>
+    html,body{height:100%;margin:0}
+    body{display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#0f172a 0%,#111827 60%,#0f172a 100%);color:#e2e8f0;font-family:Inter,system-ui,sans-serif}
+    .container{width:100%;max-width:820px;padding:18px}
+    canvas{display:block;width:100%;height:auto;background:#0b1220;border-radius:12px;box-shadow:0 20px 40px rgba(0,0,0,.6)}
+    .hud{display:flex;justify-content:space-between;align-items:center;margin-top:12px}
+    .btn{background:#7c3aed;color:#fff;border:none;padding:8px 12px;border-radius:10px;cursor:pointer}
+    .info{color:#94a3b8}
+  </style>
+</head>
+<body>
+  <script src="auth.js"></script>
+  <script>
+    window.globalAuth.requireAuth();
+  </script>
+  <div class="container">
+    <canvas id="game"></canvas>
+    <div class="hud">
+      <div class="info">Left: W / S — Right: ↑ / ↓ — Press Space to (Re)Start</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button id="findMatch" class="btn">Find Online Match</button>
+        <button id="restart" class="btn">Restart</button>
+        <button id="speedBtn" class="btn">Speed: x1</button>
+        <button class="btn" onclick="window.location.href='cyberbull-games.html'">← Games</button>
+        <label style="color:#94a3b8;display:flex;align-items:center;gap:6px">
+          <input id="aiToggle" type="checkbox" /> AI Opponent
+        </label>
+      </div>
+    </div>
+    <div style="margin-top:8px;color:#94a3b8;font-size:13px" id="onlineStatus">Not connected to online server</div>
+  </div>
+  <script src="pong.js"></script>
+</body>
+</html>

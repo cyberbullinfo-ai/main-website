@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Global Chat</title>
+  <style>
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(180deg, #0f172a 0%, #111827 60%, #0f172a 100%);
+      color: #e2e8f0;
+      padding: 24px;
+    }
+    .card {
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 24px;
+      padding: 40px;
+      text-align: center;
+      max-width: 500px;
+    }
+    h1 { font-size: 28px; margin-bottom: 12px; }
+    p { color: #94a3b8; margin-bottom: 24px; line-height: 1.6; }
+    .btn {
+      display: inline-block;
+      background: #7c3aed;
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 12px;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      margin: 8px;
+    }
+    .btn:hover { opacity: 0.9; }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+    }
+
+    .header {
+      background: rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 15px 20px;
+      margin-bottom: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    }
+
+    .header h1 {
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .header-right {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+
+    .online-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(34, 197, 94, 0.2);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+    }
+
+    .online-dot {
+      width: 8px;
+      height: 8px;
+      background: #22c55e;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .nav-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .nav-btn {
+      padding: 8px 16px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #f0f0f0;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.3s;
+    }
+
+    .nav-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .nav-btn.active {
+      background: #2563eb;
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 8px 20px rgba(37, 99, 235, 0.24);
+    }
+
+    .main-area {
+      display: flex;
+      gap: 15px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .chat-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+    }
+
+    .messages-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .messages-container::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .messages-container::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 3px;
+    }
+
+    .messages-container::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 3px;
+    }
+
+    .messages-container::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .message {
+      display: flex;
+      gap: 12px;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .message-avatar {
+      font-size: 32px;
+      flex-shrink: 0;
+    }
+
+    .message-content {
+      flex: 1;
+    }
+
+    .message-header {
+      display: flex;
+      gap: 8px;
+      align-items: baseline;
+      margin-bottom: 4px;
+      flex-wrap: wrap;
+    }
+
+    .message-username {
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .cosmetic-badge {
+      font-size: 10px;
+      background: rgba(255, 215, 0, 0.3);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #ffd700;
+      font-weight: 500;
+    }
+
+    .message-time {
+      font-size: 12px;
+      color: #aaa;
+    }
+
+    .message-text {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 10px 14px;
+      border-radius: 8px;
+      word-wrap: break-word;
+      line-height: 1.4;
+    }
+
+    .message-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 6px;
+      font-size: 12px;
+    }
+
+    .message-action {
+      cursor: pointer;
+      color: #aaa;
+      transition: color 0.3s;
+    }
+
+    .message-action:hover {
+      color: #f0f0f0;
+    }
+
+    .input-area {
+      padding: 15px 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      gap: 10px;
+    }
+
+    .message-input-wrapper {
+      flex: 1;
+      display: flex;
+      gap: 10px;
+    }
+
+    .message-input {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #f0f0f0;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: all 0.3s;
+    }
+
+    .message-input:focus {
+      outline: none;
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .message-input::placeholder {
+      color: #aaa;
+    }
+
+    .send-btn {
+      background: #667eea;
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+      font-size: 14px;
+    }
+
+    .send-btn:hover {
+      background: #5568d3;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .send-btn:active {
+      transform: translateY(0);
+    }
+
+    .sidebar {
+      width: 280px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      max-height: calc(100vh - 150px);
+      overflow-y: auto;
+    }
+
+    .sidebar::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .sidebar::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 2px;
+    }
+
+    .sidebar-card {
+      background: rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 15px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      overflow-y: auto;
+    }
+
+    .shop-card .shop-overview {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 14px;
+      color: #fff;
+    }
+
+    .cosmetic-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 10px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .cosmetic-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s;
+      border: 2px solid transparent;
+    }
+
+    .cosmetic-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .cosmetic-item.equipped {
+      border-color: #10b981;
+      background: rgba(16, 185, 129, 0.1);
+    }
+
+    .cosmetic-emoji {
+      font-size: 24px;
+    }
+
+    .cosmetic-name {
+      font-size: 11px;
+      text-align: center;
+      color: #bbb;
+      word-break: break-word;
+    }
+
+    .cosmetic-btn {
+      font-size: 10px;
+      padding: 4px 8px;
+      background: rgba(102, 126, 234, 0.8);
+      border: none;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+      width: 100%;
+      transition: background 0.2s;
+    }
+
+    .cosmetic-btn:hover {
+      background: rgba(102, 126, 234, 1);
+    }
+
+    .cosmetic-btn.equipped {
+      background: rgba(16, 185, 129, 0.8);
+    }
+
+    .inventory-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .inventory-tab {
+      flex: 1;
+      padding: 6px 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #aaa;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.3s;
+      text-align: center;
+    }
+
+    .inventory-tab.active {
+      background: #667eea;
+      color: white;
+      border-color: #667eea;
+    }
+
+    .shop-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+
+    .shop-item .shop-label {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .shop-item .shop-label strong {
+      font-size: 13px;
+      color: #fff;
+    }
+
+    .shop-item .shop-label span {
+      font-size: 11px;
+      color: #bbb;
+    }
+
+    .purchase-btn {
+      background: #10b981;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: background 0.25s ease;
+    }
+
+    .purchase-btn:hover {
+      background: #0f9f75;
+    }
+
+    .purchase-btn:disabled {
+      background: rgba(255,255,255,0.15);
+      cursor: not-allowed;
+    }
+
+    .chat-shop-panel {
+      max-height: 280px;
+      overflow-y: auto;
+      margin-top: 10px;
+    }
+
+    .sidebar-card h3 {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: #aaa;
+      text-transform: uppercase;
+    }
+
+    .sidebar-card::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .sidebar-card::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 2px;
+    }
+
+    .user-item {
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s;
+    }
+
+    .user-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .user-avatar {
+      font-size: 20px;
+    }
+
+    .user-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .user-name {
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div>
+        <h1>🌍 Global Chat</h1>
+        <div class="header-subtitle">Everyone on CyberBull can chat here.</div>
+      </div>
+      <div class="header-right">
+        <div class="online-badge">
+          <span class="online-dot"></span>
+          <span id="onlineCount">0</span> Online
+        </div>
+        <div class="nav-buttons">
+          <button class="nav-btn active">🌍 Global Chat</button>
+          <button class="nav-btn" onclick="goToPrivateChat()">💬 Private Chat</button>
+          <button class="nav-btn" onclick="goHome()">🏠 Home</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="main-area">
+      <div class="chat-area">
+        <div class="messages-container" id="messagesContainer">
+          <div class="empty-message">Loading messages...</div>
+        </div>
+        <div class="input-area">
+          <div class="message-input-wrapper">
+            <input type="text" id="messageInput" class="message-input" placeholder="Type a message...">
+            <button class="send-btn" onclick="sendMessage()">Send</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar">
+        <div class="sidebar-card">
+          <h3>👥 Online Users</h3>
+          <div id="onlineUsersList"><div style="text-align:center;color:#aaa;font-size:12px;">Loading...</div></div>
+        </div>
+
+        <div class="sidebar-card">
+          <h3>🚫 Blocked Users</h3>
+          <div id="blockedUsersList"><div style="text-align:center;color:#aaa;font-size:12px;">No blocked users</div></div>
+        </div>
+
+        <div class="sidebar-card">
+          <h3>🤝 Friends</h3>
+          <div id="friendsList"><div style="text-align:center;color:#aaa;font-size:12px;">Loading friends...</div></div>
+          <div style="font-size:12px;color:#94a3b8;margin-top:8px;">Friend people from the global chat to open private chats.</div>
+        </div>
+
+        <div class="sidebar-card">
+          <h3>💎 Chat Shop</h3>
+          <div class="shop-item" style="margin-bottom: 12px; display:flex; justify-content:space-between; gap:10px; align-items:center;">
+            <span style="font-size:12px;">Coins: <strong id="userCoins">0</strong></span>
+            <button class="purchase-btn" onclick="toggleChatShop()" style="width:auto;">Shop</button>
+          </div>
+          <div id="chatShopPanel" class="chat-shop-panel" style="display:none;"></div>
+        </div>
+
+        <div class="sidebar-card">
+          <h3>Inventory</h3>
+          <div class="inventory-tabs">
+            <div class="inventory-tab active" onclick="switchInventoryTab('emojis', event)">Emojis</div>
+            <div class="inventory-tab" onclick="switchInventoryTab('colors', event)">Name Colors</div>
+          </div>
+          <div id="inventoryPanel" class="cosmetic-grid"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="admin.js"></script>
+  <script src="progression.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="firebase-api.js"></script>
+  <script src="chat.js"></script>
+  <script>
+    const currentUser = localStorage.getItem("currentUser");
+    const currentUserKey = localStorage.getItem("currentUserKey");
+    const schoolDomain = localStorage.getItem("schoolDomain");
+
+    window.globalAuth.requireAuth();
+
+    // ===== STATE TRACKING =====
+    let lastMessageCount = 0;
+    let lastOnlineCount = 0;
+    let currentInventoryTab = 'emojis';
+    let messagesContainerScroll = null;
+
+    function getAvatarForUser(username) {
+      const emojis = ['😊', '😃', '😄', '😁', '🤗', '😍', '🤩', '😎', '🥳', '😇', '🙂', '😌', '😍', '🤓'];
+      let hash = 0;
+      for (let i = 0; i < username.length; i++) {
+        hash = ((hash << 5) - hash) + username.charCodeAt(i);
+        hash |= 0;
+      }
+      return emojis[Math.abs(hash) % emojis.length];
+    }
+
+    function formatTime(timestamp) {
+      const date = new Date(timestamp);
+      const now = new Date();
+      const diffMs = now - date;
+      const diffMins = Math.floor(diffMs / 60000);
+      
+      if (diffMins < 1) return 'now';
+      if (diffMins < 60) return `${diffMins}m ago`;
+      
+      const diffHours = Math.floor(diffMins / 60);
+      if (diffHours < 24) return `${diffHours}h ago`;
+      
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+
+    function renderMessages() {
+      const messages = window.chatAPI.getGlobalMessages(24);
+      const filtered = window.chatAPI.filterBlockedMessages(messages, currentUserKey);
+      const container = document.getElementById('messagesContainer');
+
+      // Only re-render if message count changed
+      if (filtered.length === lastMessageCount) {
+        return;
+      }
+
+      lastMessageCount = filtered.length;
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<div class="empty-message">No messages yet. Start the conversation! 👋</div>';
+        return;
+      }
+
+      // Save scroll position before rendering
+      const wasAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 50;
+
+      container.innerHTML = filtered.map(msg => {
+        const isOwn = msg.userKey === currentUserKey;
+        const cosmetics = window.chatAPI.getUserCosmetics(msg.userKey);
+        const usernameStyle = cosmetics.nameColor ? `style="color: ${cosmetics.nameColor}"` : '';
+        const cosmeticBadge = (cosmetics.customEmoji || cosmetics.emojiPicture !== '😊') ? '<span class="cosmetic-badge">✨ Premium</span>' : '';
+        
+        const isFriend = !isOwn && window.chatAPI.isFriend(currentUserKey, msg.userKey);
+        return `
+          <div class="message">
+            <div class="message-avatar">${cosmetics.emojiPicture || '😊'}</div>
+            <div class="message-content">
+              <div class="message-header">
+                <span class="message-username" ${usernameStyle}>${msg.username}</span>
+                ${cosmeticBadge}
+                <span class="message-time">${formatTime(msg.timestamp)}</span>
+              </div>
+              <div class="message-text">${escapeHtml(msg.message)}</div>
+              <div class="message-actions">
+                ${isOwn ? `<span class="message-action" onclick="deleteMessage('${msg.id}')">Delete</span>` : ''}
+                ${!isOwn && !isFriend ? `<span class="message-action" onclick="addFriendFromChat('${msg.userKey}', '${msg.username}')">Add Friend</span>` : ''}
+                ${!isOwn && isFriend ? `<span class="message-action friend-status">Friend</span>` : ''}
+                <span class="message-action" onclick="blockUser('${msg.userKey}', '${msg.username}')">Block</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Restore scroll position
+      if (wasAtBottom) {
+        setTimeout(() => {
+          container.scrollTop = container.scrollHeight;
+        }, 0);
+      }
+    }
+
+    function renderOnlineUsers() {
+      const onlineUsers = window.chatAPI.getOnlineUsers();
+      const users = Object.entries(onlineUsers)
+        .filter(([key]) => key !== currentUserKey)
+        .slice(0, 20);
+
+      const listContainer = document.getElementById('onlineUsersList');
+      const onlineCount = Object.keys(onlineUsers).length;
+
+      // Only re-render if count changed significantly
+      if (Math.abs(onlineCount - lastOnlineCount) < 1) {
+        return;
+      }
+
+      lastOnlineCount = onlineCount;
+      document.getElementById('onlineCount').textContent = onlineCount;
+
+      if (users.length === 0) {
+        listContainer.innerHTML = '<div style="text-align: center; color: #aaa; font-size: 12px;">No users online</div>';
+        return;
+      }
+
+      listContainer.innerHTML = users.map(([key, user]) => {
+        const cosmetics = window.chatAPI.getUserCosmetics(key);
+        const usernameStyle = cosmetics.nameColor ? `style="color: ${cosmetics.nameColor}"` : '';
+        return `
+          <div class="user-item" title="Click to message">
+            <div class="user-avatar">${cosmetics.emojiPicture || '😊'}</div>
+            <div class="user-info">
+              <div class="user-name" ${usernameStyle}>${user.username}</div>
+              <div class="user-status">Online</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderBlockedUsers() {
+      const blockedKeys = window.chatAPI.getBlockedUsers(currentUserKey);
+      const allUsers = window.chatAPI.getAllUsers();
+      const blockedUsers = blockedKeys.map(key => allUsers.find(u => u.key === key)).filter(u => u);
+      const listContainer = document.getElementById('blockedUsersList');
+
+      if (blockedUsers.length === 0) {
+        listContainer.innerHTML = '<div style="text-align: center; color: #aaa; font-size: 12px;">None</div>';
+        return;
+      }
+
+      listContainer.innerHTML = blockedUsers.map(user => {
+        const cosmetics = window.chatAPI.getUserCosmetics(user.key);
+        const usernameStyle = cosmetics.nameColor ? `style="color: ${cosmetics.nameColor}"` : '';
+        return `
+          <div class="user-item" style="background: rgba(255, 59, 48, 0.1); border-left: 3px solid #ff3b30;">
+            <div class="user-avatar">${cosmetics.emojiPicture || '😊'}</div>
+            <div class="user-info">
+              <div class="user-name" ${usernameStyle}>${user.username}</div>
+              <div style="font-size: 11px; color: #ff6b6b; cursor: pointer;" onclick="unblockUserConfirm('${user.key}', '${user.username}')">🔓 Unblock</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderUserCoins() {
+      const user = getUserByKey(currentUserKey);
+      document.getElementById('userCoins').textContent = user?.coins || 0;
+    }
+
+    function switchInventoryTab(tab, event) {
+      currentInventoryTab = tab;
+      document.querySelectorAll('.inventory-tab').forEach(el => el.classList.remove('active'));
+      event.target.classList.add('active');
+      renderInventory();
+    }
+
+    function renderInventory() {
+      const panel = document.getElementById('inventoryPanel');
+      const owned = window.progressionAPI.getUserOwnedCosmetics(currentUserKey);
+      const user = getUserByKey(currentUserKey) || {};
+      const cosmetics = window.progressionAPI.CHAT_COSMETICS;
+
+      let items = [];
+      if (currentInventoryTab === 'emojis') {
+        items = cosmetics.emoji_pictures.filter(e => owned.emojis.includes(e.id));
+      } else {
+        items = cosmetics.name_colors.filter(c => owned.colors.includes(c.id));
+      }
+
+      if (items.length === 0) {
+        panel.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #aaa; font-size: 12px; padding: 20px;">No cosmetics owned. Visit the shop!</div>';
+        return;
+      }
+
+      panel.innerHTML = items.map(item => {
+        const isEquipped = currentInventoryTab === 'emojis' 
+          ? user.emojiPicture === (item.emoji || item.emojiPicture)
+          : user.nameColor === item.color;
+        
+        const displayEmoji = item.emoji || item.emojiPicture || '🎨';
+        const displayName = item.name || item.id;
+        const equipBtn = `<button class="cosmetic-btn ${isEquipped ? 'equipped' : ''}" onclick="equipCosmetic('${item.id}', '${currentInventoryTab}')">
+          ${isEquipped ? '✓ Equipped' : 'Equip'}
+        </button>`;
+
+        return `
+          <div class="cosmetic-item ${isEquipped ? 'equipped' : ''}">
+            <div class="cosmetic-emoji">${displayEmoji}</div>
+            <div class="cosmetic-name">${displayName}</div>
+            ${equipBtn}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function equipCosmetic(itemId, type) {
+      const cosmetics = window.progressionAPI.CHAT_COSMETICS;
+      const user = getUserByKey(currentUserKey);
+      if (!user) return;
+
+      if (type === 'emojis') {
+        const emoji = cosmetics.emoji_pictures.find(e => e.id === itemId);
+        if (emoji) {
+          user.emojiPicture = emoji.emoji;
+          saveUser(currentUserKey, user);
+          renderInventory();
+          renderMessages();
+          renderOnlineUsers();
+          alert(`Equipped ${emoji.name}!`);
+        }
+      } else {
+        const color = cosmetics.name_colors.find(c => c.id === itemId);
+        if (color) {
+          user.nameColor = color.color;
+          saveUser(currentUserKey, user);
+          renderInventory();
+          renderMessages();
+          renderOnlineUsers();
+          alert(`Equipped ${color.name}!`);
+        }
+      }
+    }
+
+    function toggleChatShop() {
+      const panel = document.getElementById('chatShopPanel');
+      panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+      if (panel.style.display === 'block') {
+        renderChatShop();
+      }
+    }
+
+    function renderChatShop() {
+      const panel = document.getElementById('chatShopPanel');
+      const cosmetics = window.progressionAPI.CHAT_COSMETICS;
+      const user = getUserByKey(currentUserKey) || {};
+      const owned = window.progressionAPI.getUserOwnedCosmetics(currentUserKey);
+      const items = [...cosmetics.emoji_pictures, ...cosmetics.name_colors.map(color => ({
+        ...color,
+        emoji: '🎨',
+        name: color.name,
+        tier: 'color',
+        type: 'color'
+      }))];
+
+      panel.innerHTML = items.map(item => {
+        const ownedItem = (item.type === 'color')
+          ? owned.colors.includes(item.id)
+          : owned.emojis.includes(item.id);
+        const canAfford = (user.coins || 0) >= item.cost;
+        const displayEmoji = item.emoji || '✨';
+        const subtitle = item.tier === 'color' ? `Name color · ${item.cost} coins` : `${item.rarity || item.tier} · ${item.cost} coins`;
+
+        return `
+          <div class="shop-item">
+            <div class="shop-label">
+              <strong>${displayEmoji} ${item.name}</strong>
+              <span>${subtitle}</span>
+            </div>
+            <button class="purchase-btn" ${ownedItem ? 'disabled' : ''} onclick="buyChatCosmetic('${item.id}', '${item.type || 'emoji'}')">
+              ${ownedItem ? 'Owned' : (canAfford ? 'Buy' : 'Too expensive')}
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function buyChatCosmetic(itemId, type) {
+      const user = getUserByKey(currentUserKey);
+      if (!user) return;
+
+      let result;
+      if (type === 'color') {
+        result = window.progressionAPI.buyCosmeticNameColor(currentUserKey, itemId);
+      } else {
+        result = window.progressionAPI.buyCosmeticEmoji(currentUserKey, itemId);
+      }
+
+      if (!result) {
+        alert('Purchase failed');
+        return;
+      }
+
+      alert(result.message);
+      renderUserCoins();
+      renderChatShop();
+      renderInventory();
+      renderMessages();
+      renderOnlineUsers();
+    }
+
+    function resetChat() {
+      if (!confirm('Reset global chat? This will clear all messages.')) return;
+      localStorage.removeItem('globalChat');
+      lastMessageCount = 0;
+      renderMessages();
+      alert('Chat reset.');
+    }
+
+    function resetBlockedUsers() {
+      if (!confirm('Clear all blocked users?')) return;
+      localStorage.removeItem(`blocked_${currentUserKey}`);
+      renderBlockedUsers();
+      renderMessages();
+      alert('Blocked list cleared.');
+    }
+
+    function sendMessage() {
+      const input = document.getElementById('messageInput');
+      const message = input.value;
+
+      if (!message.trim()) return;
+
+      const cosmetics = window.chatAPI.getUserCosmetics(currentUserKey);
+      const avatar = cosmetics.emojiPicture || getAvatarForUser(currentUser);
+
+      window.chatAPI.sendGlobalMessage(currentUserKey, currentUser, message, avatar);
+      
+      input.value = '';
+      lastMessageCount = 0;
+      renderMessages();
+    }
+
+    function deleteMessage(messageId) {
+      if (confirm('Delete this message?')) {
+        window.chatAPI.deleteGlobalMessage(messageId, currentUserKey);
+        lastMessageCount = 0;
+        renderMessages();
+      }
+    }
+
+    function blockUser(userKey, username) {
+      if (confirm(`Block ${username}? You won't see their messages.`)) {
+        window.chatAPI.blockUser(currentUserKey, userKey);
+        lastMessageCount = 0;
+        renderMessages();
+        renderBlockedUsers();
+        alert(`${username} blocked`);
+      }
+    }
+
+    function unblockUserConfirm(userKey, username) {
+      if (confirm(`Unblock ${username}?`)) {
+        window.chatAPI.unblockUser(currentUserKey, userKey);
+        renderBlockedUsers();
+        lastMessageCount = 0;
+        renderMessages();
+        alert(`${username} unblocked`);
+      }
+    }
+
+    function addFriendFromChat(userKey, username) {
+      if (window.chatAPI.isFriend(currentUserKey, userKey)) {
+        alert(`${username} is already your friend.`);
+        return;
+      }
+      window.chatAPI.sendFriendRequest(currentUserKey, currentUser, userKey, username);
+      alert(`Friend request sent to ${username}.`);
+      renderFriends();
+    }
+
+    function renderFriends() {
+      const friendKeys = window.chatAPI.getFriends(currentUserKey);
+      const allUsers = window.chatAPI.getAllUsers();
+      const listContainer = document.getElementById('friendsList');
+
+      if (friendKeys.length === 0) {
+        listContainer.innerHTML = '<div style="text-align:center;color:#aaa;font-size:12px;">No friends yet</div>';
+        return;
+      }
+
+      listContainer.innerHTML = friendKeys.map(key => {
+        const profile = allUsers.find(u => u.key === key) || { username: 'Unknown', avatar: '😊' };
+        return `
+          <div class="user-item" style="cursor:default;">
+            <div class="user-avatar">${profile.avatar}</div>
+            <div class="user-info">
+              <div class="user-name">${profile.username}</div>
+              <div style="font-size:11px;color:#94a3b8;">Friend</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function goToPrivateChat() {
+      window.location.href = 'cyberbull-private-chat.html';
+    }
+
+    function goHome() {
+      window.location.href = 'cyberbull-hub.html';
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Initialize
+    window.chatAPI.setUserOnline(currentUserKey, currentUser, schoolDomain, getAvatarForUser(currentUser));
+    renderUserCoins();
+    renderMessages();
+    renderOnlineUsers();
+    renderBlockedUsers();
+    renderFriends();
+    renderInventory();
+
+    // Enter to send
+    document.getElementById('messageInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+
+    // Softer refresh: only update if data changes (max every 3 seconds)
+    setInterval(() => {
+      renderMessages();
+      renderOnlineUsers();
+      renderFriends();
+      window.chatAPI.setUserOnline(currentUserKey, currentUser, schoolDomain, getAvatarForUser(currentUser));
+    }, 3000);
+
+    // Update online status and coins every 30 seconds
+    setInterval(() => {
+      renderUserCoins();
+    }, 30000);
+  </script>
+</body>
+</html>
+
+

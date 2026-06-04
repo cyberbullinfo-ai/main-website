@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Snake Game</title>
+  <script src="progression.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Courier New', monospace;
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+    }
+
+    .container {
+      display: flex;
+      gap: 30px;
+      align-items: flex-start;
+    }
+
+    .game-section {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    canvas {
+      border: 4px solid #4CAF50;
+      background: #0a0e27;
+      display: block;
+      image-rendering: pixelated;
+    }
+
+    .hud {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .hud button {
+      flex: 1;
+      min-width: 100px;
+      padding: 10px 15px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+
+    .hud button:hover {
+      background: #45a049;
+      transform: scale(1.05);
+    }
+
+    .hud button:active {
+      transform: scale(0.95);
+    }
+
+    .hud button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    .info-panel {
+      background: rgba(0, 0, 0, 0.5);
+      padding: 20px;
+      border-radius: 8px;
+      border: 2px solid #4CAF50;
+      min-width: 220px;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+
+    .info-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .label {
+      color: #aaa;
+    }
+
+    .value {
+      color: #4CAF50;
+      font-weight: bold;
+    }
+
+    .status {
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid #4CAF50;
+      text-align: center;
+      min-height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .status.game-over {
+      color: #ff6b6b;
+    }
+
+    .status.playing {
+      color: #4CAF50;
+    }
+
+    .friend-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .friend-modal.open {
+      display: flex;
+    }
+
+    .friend-modal-content {
+      background: #1e3c72;
+      padding: 30px;
+      border-radius: 10px;
+      border: 2px solid #4CAF50;
+      text-align: center;
+      max-width: 300px;
+    }
+
+    .friend-modal-content h2 {
+      margin-bottom: 20px;
+    }
+
+    .friend-modal-content select,
+    .friend-modal-content input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #4CAF50;
+      border-radius: 5px;
+      background: #0a0e27;
+      color: #4CAF50;
+      font-family: inherit;
+    }
+
+    .friend-modal-content button {
+      width: 100%;
+      padding: 10px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .friend-modal-content button:hover {
+      background: #45a049;
+    }
+
+    .friend-modal-content button.cancel {
+      background: #666;
+    }
+
+    .friend-modal-content button.cancel:hover {
+      background: #555;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .header h1 {
+      font-size: 32px;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    .online-status {
+      font-size: 12px;
+      color: #4CAF50;
+    }
+
+    .online-status.offline {
+      color: #ff6b6b;
+    }
+  </style>
+</head>
+<body>
+  <script src="auth.js"></script>
+  <script>
+    window.globalAuth.requireAuth();
+  </script>
+  <div class="header">
+    <h1>🐍 Snake</h1>
+    <div class="online-status" id="onlineStatus">Offline Mode</div>
+  </div>
+
+  <div class="container">
+    <div class="game-section">
+      <canvas id="gameCanvas" width="400" height="400"></canvas>
+      <div class="hud">
+        <button id="playBtn" onclick="startGame()">Play</button>
+        <button id="pauseBtn" onclick="togglePause()" disabled>Pause</button>
+        <button id="aiToggle" onclick="toggleAI()">AI: OFF</button>
+        <button id="findMatchBtn" onclick="findMatch()">Find Match</button>
+        <button onclick="window.location.href='cyberbull-games.html'">← Games</button>
+      </div>
+      <button onclick="openFriendModal()" style="background: #ff9800; width: 100%;">Play With Friend 👥</button>
+    </div>
+
+    <div class="info-panel">
+      <div class="info-row">
+        <span class="label">Score:</span>
+        <span class="value" id="score">0</span>
+      </div>
+      <div class="info-row">
+        <span class="label">Length:</span>
+        <span class="value" id="length">1</span>
+      </div>
+      <div class="info-row">
+        <span class="label">Speed:</span>
+        <span class="value" id="speed">5</span>
+      </div>
+      <div class="info-row">
+        <span class="label">High Score:</span>
+        <span class="value" id="highScore">0</span>
+      </div>
+      <div class="status" id="status">
+        Press Play to Start
+      </div>
+    </div>
+  </div>
+
+  <div class="friend-modal" id="friendModal">
+    <div class="friend-modal-content">
+      <h2>Play With Friend</h2>
+      <select id="friendSelect">
+        <option value="">Select a friend...</option>
+      </select>
+      <input type="text" id="roomCode" placeholder="Room Code (auto-generated)" readonly>
+      <button onclick="sendInvite()">Send Invite</button>
+      <button class="cancel" onclick="closeFriendModal()">Cancel</button>
+    </div>
+  </div>
+
+  <script src="snake.js"></script>
+</body>
+</html>

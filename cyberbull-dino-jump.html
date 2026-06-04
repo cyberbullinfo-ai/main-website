@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bird Jump - CyberBull Games</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: #ffffff;
+      font-family: Arial, sans-serif;
+      color: #222;
+    }
+
+    .container {
+      text-align: center;
+      position: relative;
+      width: 800px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      font-size: 32px;
+      margin-bottom: 16px;
+      color: #222;
+    }
+
+    p {
+      font-size: 14px;
+      margin-bottom: 20px;
+      color: #666;
+    }
+
+    canvas {
+      display: block;
+      background: white;
+      border: 3px solid #222;
+      border-radius: 8px;
+      margin: 0 auto;
+    }
+
+    .info {
+      margin-top: 16px;
+      font-size: 18px;
+      color: #222;
+    }
+
+    .back-button {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      padding: 10px 16px;
+      background: #222;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+      transition: background 0.2s;
+    }
+
+    .back-button:hover {
+      background: #444;
+    }
+
+    .start-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.95);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+    }
+    .start-overlay.hidden {
+      display: none;
+    }
+    .start-menu {
+      text-align: center;
+      color: #222;
+    }
+    .start-menu h2 {
+      font-size: 3rem;
+      margin-bottom: 20px;
+    }
+    .start-menu p {
+      font-size: 1.1rem;
+      margin-bottom: 30px;
+      color: #666;
+    }
+    .start-menu button {
+      padding: 14px 40px;
+      font-size: 1rem;
+      background: #222;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-weight: bold;
+    }
+    .start-menu button:hover {
+      background: #444;
+    }
+
+    .game-wrapper {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      justify-content: center;
+    }
+
+    .shop {
+      width: 200px;
+      background: #fff;
+      border: 3px solid #222;
+      border-radius: 8px;
+      padding: 16px;
+      height: fit-content;
+    }
+
+    .shop h3 {
+      font-size: 18px;
+      margin-bottom: 12px;
+      color: #222;
+      text-align: center;
+      border-bottom: 3px solid #222;
+      padding-bottom: 8px;
+    }
+
+    .shop-items {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .hat-item {
+      background: #f5f5f5;
+      border: 2px solid #222;
+      border-radius: 6px;
+      padding: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+
+    .hat-item:hover {
+      background: #e8e8e8;
+      transform: scale(1.05);
+    }
+
+    .hat-item.owned {
+      border: 3px solid #4caf50;
+      background: #f1f8f1;
+    }
+
+    .hat-item.equipped {
+      border: 3px solid #ff9800;
+      background: #fff8f1;
+    }
+
+    .hat-name {
+      font-weight: bold;
+      font-size: 14px;
+      color: #222;
+      margin-bottom: 4px;
+    }
+
+    .hat-price {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 6px;
+    }
+
+    .hat-button {
+      background: #222;
+      color: white;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: bold;
+      transition: background 0.2s;
+    }
+
+    .hat-button:hover {
+      background: #444;
+    }
+
+    .hat-button.owned {
+      background: #4caf50;
+    }
+
+    .hat-button.owned:hover {
+      background: #45a049;
+    }
+
+    .hat-button.equipped {
+      background: #ff9800;
+    }
+
+    .hat-button.equipped:hover {
+      background: #e68900;
+    }
+
+    .shop-info {
+      font-size: 12px;
+      color: #666;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 2px solid #ddd;
+      text-align: center;
+    }
+
+    .container-inner {
+      display: flex;
+      flex-direction: column;
+    }
+  </style>
+</head>
+<body>
+  <script src="progression.js"></script>
+  <script src="auth.js"></script>
+  <script>
+    window.globalAuth.requireAuth();
+    const currentUserKey = localStorage.getItem('currentUserKey');
+  </script>
+  <button class="back-button" onclick="goGames()">← Back</button>
+  <div class="game-wrapper">
+    <div class="container-inner">
+      <div class="container">
+        <div class="start-overlay" id="startOverlay">
+          <div class="start-menu">
+            <h2>🐦 Bird Jump</h2>
+            <p>Press SPACE, CLICK, or TAP to jump and avoid obstacles</p>
+            <button onclick="startGame()">Start Game</button>
+          </div>
+        </div>
+        <h1>🐦 Bird Jump</h1>
+        <p>Press SPACE, CLICK, or TAP to jump</p>
+        <canvas id="game" width="800" height="400"></canvas>
+        <div class="info">
+          <div>Score: <span id="score">0</span> | High Score: <span id="highScore">0</span> | Coins: <span id="coins">0</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="shop">
+      <h3>🛍️ Hat Shop</h3>
+      <div class="shop-items" id="shopItems"></div>
+      <div class="shop-info">
+        <div>💰 You have <span id="shopCoins">0</span> coins</div>
+        <div style="font-size: 11px; margin-top: 8px;">Press 1-4 to buy/equip</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+    const startOverlay = document.getElementById('startOverlay');
+    const scoreEl = document.getElementById('score');
+    const highScoreEl = document.getElementById('highScore');
+    const coinsEl = document.getElementById('coins');
+    const shopCoinsEl = document.getElementById('shopCoins');
+    const shopItemsEl = document.getElementById('shopItems');
+
+    let gameStarted = false;
+    let gameSpeed = 7;
+    let coins = window.progressionAPI && currentUserKey ? window.progressionAPI.getUserCoins(currentUserKey) : Number(localStorage.getItem('dinoCoins')) || 0;
+    let selectedHat = localStorage.getItem('selectedHat') || 'none';
+    let ownedHats = JSON.parse(localStorage.getItem('ownedHats') || '["none"]');
+
+    function getGameCoins() {
+      const sharedCoins = window.progressionAPI?.getUserCoins(currentUserKey);
+      return typeof sharedCoins === 'number' ? sharedCoins : coins;
+    }
+
+    function addGameCoins(amount, reason) {
+      if (window.progressionAPI && currentUserKey) {
+        window.progressionAPI.addCoins(currentUserKey, amount, reason);
+        coins = window.progressionAPI.getUserCoins(currentUserKey);
+        return coins;
+      }
+      coins += amount;
+      localStorage.setItem('dinoCoins', String(coins));
+      return coins;
+    }
+
+    function spendGameCoins(amount, reason) {
+      if (window.progressionAPI && currentUserKey) {
+        const success = window.progressionAPI.spendCoins(currentUserKey, amount, reason);
+        if (success) {
+          coins = window.progressionAPI.getUserCoins(currentUserKey);
+        }
+        return success;
+      }
+      if (coins >= amount) {
+        coins -= amount;
+        localStorage.setItem('dinoCoins', String(coins));
+        return true;
+      }
+      return false;
+    }
+
+    const hats = [
+      { id: 'sombrero', name: 'Sombrero', price: 10, color: '#ff5252' },
+      { id: 'tophat', name: 'Top Hat', price: 15, color: '#222' },
+      { id: 'party', name: 'Party Hat', price: 8, color: '#9c27b0' },
+      { id: 'beanie', name: 'Beanie', price: 12, color: '#6d4c41' }
+    ];
+
+    let gravity = 0.8;
+    let score = 0;
+    let highScore = Number(localStorage.getItem('dinoHighScore')) || 0;
+    let gameOver = false;
+
+    const bird = {
+      x: 120,
+      y: 325,
+      width: 50,
+      height: 50,
+      velocityY: 0,
+      speed: 6,
+      jumping: false,
+      crouching: false
+    };
+
+    const keys = {
+      left: false,
+      right: false,
+      down: false
+    };
+
+    const ground = {
+      y: 350,
+      height: 4
+    };
+
+    const obstacles = [];
+
+    function createObstacle() {
+      const typeRoll = Math.random();
+
+      if (typeRoll < 0.35) {
+        const h = 60 + Math.random() * 50;
+        obstacles.push({
+          x: canvas.width,
+          y: ground.y - h,
+          width: 22,
+          height: h,
+          passed: false
+        });
+        return;
+      }
+
+      if (typeRoll < 0.75) {
+        const count = 2 + Math.floor(Math.random() * 2);
+        for (let i = 0; i < count; i++) {
+          const h = 40 + Math.random() * 40;
+          obstacles.push({
+            x: canvas.width + i * 28,
+            y: ground.y - h,
+            width: 20,
+            height: h,
+            passed: false
+          });
+        }
+        return;
+      }
+
+      const count = 3 + Math.floor(Math.random() * 2);
+      for (let i = 0; i < count; i++) {
+        const h = 35 + Math.random() * 35;
+        obstacles.push({
+          x: canvas.width + i * 25,
+          y: ground.y - h,
+          width: 18,
+          height: h,
+          passed: false
+        });
+      }
+    }
+
+    const obstacleSpawner = setInterval(() => {
+      if (gameStarted && !gameOver) {
+        createObstacle();
+      }
+    }, 1500);
+
+    function jump() {
+      if (!gameStarted) {
+        startGame();
+      }
+
+      if (gameOver) {
+        restartGame();
+        return;
+      }
+
+      if (!bird.jumping) {
+        bird.velocityY = -15;
+        bird.jumping = true;
+      }
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'ArrowUp' || e.code === 'Space') {
+        e.preventDefault();
+        jump();
+      }
+
+      if (e.code === 'ArrowLeft') {
+        keys.left = true;
+      }
+
+      if (e.code === 'ArrowRight') {
+        keys.right = true;
+      }
+
+      if (e.code === 'ArrowDown') {
+        keys.down = true;
+        bird.crouching = true;
+        bird.height = 20;
+        bird.y = 345;
+      }
+
+      if (e.key >= '1' && e.key <= '4') {
+        const index = Number(e.key) - 1;
+        const hat = hats[index];
+        if (!hat) return;
+
+        if (!ownedHats.includes(hat.id)) {
+          buyHat(index);
+        } else {
+          equipHat(index);
+        }
+      }
+    });
+
+    window.addEventListener('keyup', (e) => {
+      if (e.code === 'ArrowLeft') {
+        keys.left = false;
+      }
+
+      if (e.code === 'ArrowRight') {
+        keys.right = false;
+      }
+
+      if (e.code === 'ArrowDown') {
+        keys.down = false;
+        bird.crouching = false;
+        bird.height = 50;
+
+        if (!bird.jumping) {
+          bird.y = 325;
+        }
+      }
+    });
+
+    window.addEventListener('touchstart', jump);
+    window.addEventListener('mousedown', jump);
+
+    function drawHat(ctx, hatId, x, y) {
+      if (hatId === 'sombrero') {
+        ctx.fillStyle = '#ff5252';
+
+        // brim
+        ctx.fillRect(x - 5, y - 10, 60, 8);
+
+        // top
+        ctx.fillRect(x + 10, y - 25, 30, 18);
+
+        // green stripe
+        ctx.fillStyle = '#4caf50';
+        ctx.fillRect(x + 10, y - 10, 30, 3);
+      }
+
+      if (hatId === 'tophat') {
+        ctx.fillStyle = '#222';
+
+        // brim
+        ctx.fillRect(x + 5, y - 8, 40, 6);
+
+        // tall part
+        ctx.fillRect(x + 12, y - 35, 26, 28);
+
+        // red band
+        ctx.fillStyle = '#f44336';
+        ctx.fillRect(x + 12, y - 15, 26, 4);
+      }
+
+      if (hatId === 'party') {
+        ctx.fillStyle = '#9c27b0';
+
+        ctx.beginPath();
+        ctx.moveTo(x + 25, y - 35);
+        ctx.lineTo(x + 5, y);
+        ctx.lineTo(x + 45, y);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      if (hatId === 'beanie') {
+        ctx.fillStyle = '#6d4c41';
+
+        // main hat
+        ctx.fillRect(x + 8, y - 18, 34, 18);
+
+        // top fold
+        ctx.fillStyle = '#4e342e';
+        ctx.fillRect(x + 12, y - 22, 26, 8);
+      }
+
+      if (hatId === 'cap') {
+        // baseball cap
+        ctx.fillStyle = '#e53935';
+
+        // cap body
+        ctx.fillRect(x + 10, y - 18, 30, 14);
+
+        // white front stripe
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(x + 20, y - 18, 6, 14);
+
+        // brim
+        ctx.fillStyle = '#c62828';
+        ctx.fillRect(x - 6, y - 10, 18, 6);
+      }
+    }
+
+    function drawBird() {
+      const halfWidth = bird.width / 2;
+      const halfHeight = bird.height / 2;
+      const scale = bird.width / 24;
+      const eyeSize = 8 * scale;
+      const pupilSize = 4 * scale;
+      const tailWidth = 6 * scale;
+      const tailHeight = 5 * scale;
+
+      ctx.fillStyle = '#3b82f6';
+      ctx.fillRect(bird.x - halfWidth, bird.y - halfHeight, bird.width, bird.height);
+
+      // Draw eye (white with black pupil)
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(bird.x + 2 * scale, bird.y - 8 * scale, eyeSize, eyeSize);
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(bird.x + 4 * scale, bird.y - 6 * scale, pupilSize, pupilSize);
+
+      // Draw beak (orange triangle pointing right)
+      ctx.fillStyle = '#f97316';
+      ctx.beginPath();
+      ctx.moveTo(bird.x + 12 * scale, bird.y - 2 * scale);
+      ctx.lineTo(bird.x + 20 * scale, bird.y);
+      ctx.lineTo(bird.x + 12 * scale, bird.y + 2 * scale);
+      ctx.closePath();
+      ctx.fill();
+
+      // Draw tail (two small blocks)
+      ctx.fillStyle = '#1e40af';
+      ctx.fillRect(bird.x - 18 * scale, bird.y - 6 * scale, tailWidth, tailHeight);
+      ctx.fillRect(bird.x - 18 * scale, bird.y + 2 * scale, tailWidth, tailHeight);
+
+      // Draw hat if equipped
+      if (selectedHat !== 'none') {
+        drawHat(ctx, selectedHat, bird.x - halfWidth, bird.y - halfHeight);
+      }
+    }
+
+    function drawGround() {
+      ctx.fillStyle = '#888';
+      ctx.fillRect(0, ground.y, canvas.width, ground.height);
+    }
+
+    function drawObstacles() {
+      ctx.fillStyle = '#22c55e';
+
+      obstacles.forEach((obstacle) => {
+        ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+
+        ctx.fillStyle = '#16a34a';
+        ctx.fillRect(obstacle.x - 5, obstacle.y + 10, 10, 8);
+        ctx.fillRect(obstacle.x + obstacle.width - 5, obstacle.y + 25, 10, 8);
+        ctx.fillStyle = '#22c55e';
+      });
+    }
+
+    function updateBird() {
+      if (keys.left) {
+        bird.x -= bird.speed;
+      }
+
+      if (keys.right) {
+        bird.x += bird.speed;
+      }
+
+      bird.x = Math.max(20, Math.min(canvas.width - 100, bird.x));
+
+      bird.velocityY += gravity;
+      bird.y += bird.velocityY;
+
+      const groundYVal = bird.crouching ? 345 : 325;
+
+      if (bird.y >= groundYVal) {
+        bird.y = groundYVal;
+        bird.velocityY = 0;
+        bird.jumping = false;
+      }
+    }
+
+    function updateObstacles() {
+      for (let i = obstacles.length - 1; i >= 0; i--) {
+        obstacles[i].x -= gameSpeed;
+
+        if (!obstacles[i].passed && obstacles[i].x + obstacles[i].width < bird.x) {
+          obstacles[i].passed = true;
+          score += 1;
+          addGameCoins(1, 'Bird Jump reward');
+
+          if (score > highScore) {
+            highScore = score;
+            localStorage.setItem('dinoHighScore', String(highScore));
+          }
+
+          if (score % 5 === 0) {
+            gameSpeed += 0.5;
+          }
+
+          updateUI();
+        }
+
+        if (obstacles[i].x + obstacles[i].width < 0) {
+          obstacles.splice(i, 1);
+        }
+      }
+    }
+
+    function collisionDetection() {
+      const birdLeft = bird.x - bird.width / 2;
+      const birdRight = bird.x + bird.width / 2;
+      const birdTop = bird.y - bird.height / 2;
+      const birdBottom = bird.y + bird.height / 2;
+
+      for (const obstacle of obstacles) {
+        if (
+          birdRight > obstacle.x &&
+          birdLeft < obstacle.x + obstacle.width &&
+          birdBottom > obstacle.y &&
+          birdTop < obstacle.y + obstacle.height
+        ) {
+          gameOver = true;
+          return;
+        }
+      }
+    }
+
+    function updateUI() {
+      const currentCoins = getGameCoins();
+      if (scoreEl) scoreEl.textContent = score;
+      if (highScoreEl) highScoreEl.textContent = highScore;
+      if (coinsEl) coinsEl.textContent = currentCoins;
+      if (shopCoinsEl) shopCoinsEl.textContent = currentCoins;
+      renderShop();
+    }
+
+    function renderShop() {
+      if (!shopItemsEl) return;
+      shopItemsEl.innerHTML = '';
+
+      hats.forEach((hat, index) => {
+        const owned = ownedHats.includes(hat.id);
+        const equipped = selectedHat === hat.id;
+
+        const hatItem = document.createElement('div');
+        hatItem.className = 'hat-item';
+        if (owned) hatItem.classList.add('owned');
+        if (equipped) hatItem.classList.add('equipped');
+
+        const name = document.createElement('div');
+        name.className = 'hat-name';
+        name.textContent = hat.name;
+
+        const price = document.createElement('div');
+        price.className = 'hat-price';
+        price.textContent = owned ? '✓ Owned' : `💰 ${hat.price}`;
+
+        const button = document.createElement('button');
+        button.className = 'hat-button';
+        if (equipped) {
+          button.classList.add('equipped');
+          button.textContent = '★ Equipped';
+          button.disabled = true;
+        } else if (owned) {
+          button.classList.add('owned');
+          button.textContent = 'Equip';
+          button.onclick = () => equipHat(index);
+        } else {
+          button.textContent = 'Buy';
+          button.onclick = () => buyHat(index);
+        }
+
+        hatItem.appendChild(name);
+        hatItem.appendChild(price);
+        hatItem.appendChild(button);
+        shopItemsEl.appendChild(hatItem);
+      });
+    }
+
+    function buyHat(index) {
+      const hat = hats[index];
+      if (!hat) return;
+
+      if (!spendGameCoins(hat.price, `Bought hat: ${hat.name}`)) {
+        toastMsg('Not enough coins.');
+        return;
+      }
+
+      ownedHats.push(hat.id);
+      selectedHat = hat.id;
+      localStorage.setItem('ownedHats', JSON.stringify(ownedHats));
+      localStorage.setItem('selectedHat', selectedHat);
+      updateUI();
+    }
+
+    function equipHat(index) {
+      const hat = hats[index];
+      if (!hat || !ownedHats.includes(hat.id)) return;
+
+      selectedHat = hat.id;
+      localStorage.setItem('selectedHat', selectedHat);
+      updateUI();
+    }
+
+    function drawGameOver() {
+      ctx.fillStyle = 'rgba(0,0,0,0.7)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = 'white';
+      ctx.font = '48px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('GAME OVER', canvas.width / 2, 160);
+
+      ctx.font = '24px Arial';
+      ctx.fillText('Final Score: ' + score, canvas.width / 2, 220);
+
+      ctx.font = '18px Arial';
+      ctx.fillText('Press SPACE or CLICK to restart', canvas.width / 2, 280);
+    }
+
+    function restartGame() {
+      score = 0;
+      gameSpeed = 7;
+      obstacles.length = 0;
+      bird.y = 325;
+      bird.x = 120;
+      bird.velocityY = 0;
+      bird.jumping = false;
+      bird.crouching = false;
+      gameOver = false;
+      gameStarted = true;
+      if (startOverlay) {
+        startOverlay.classList.add('hidden');
+      }
+      updateUI();
+    }
+
+    function gameLoop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = '#e0f2fe';
+      ctx.fillRect(0, 0, canvas.width, ground.y);
+
+      drawGround();
+      drawBird();
+      drawObstacles();
+
+      if (!gameOver && gameStarted) {
+        updateBird();
+        updateObstacles();
+        collisionDetection();
+      } else if (gameOver) {
+        drawGameOver();
+      }
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    function startGame() {
+      if (startOverlay) {
+        startOverlay.classList.add('hidden');
+      }
+      gameStarted = true;
+      updateUI();
+    }
+
+    function goGames() {
+      window.location.href = 'cyberbull-games.html';
+    }
+
+    updateUI();
+    renderShop();
+    gameLoop();
+
+    window.addEventListener('beforeunload', () => {
+      clearInterval(obstacleSpawner);
+    });
+  </script>
+
+</body>
+</html>

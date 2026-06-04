@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat - CyberBull Official</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Inter, system-ui, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #0f172a 0%, #111827 60%, #0f172a 100%);
+      color: #e2e8f0;
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .page {
+      width: 100%;
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 24px;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 24px;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3);
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+
+    .topbar h1 {
+      font-size: 1.35rem;
+      letter-spacing: 0.02em;
+    }
+
+    .topbar button {
+      border: none;
+      border-radius: 999px;
+      padding: 10px 14px;
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      cursor: pointer;
+      transition: background 160ms ease;
+    }
+
+    .topbar button:hover {
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    .description {
+      color: #94a3b8;
+      margin-bottom: 22px;
+      line-height: 1.6;
+    }
+
+    .chat-list {
+      display: grid;
+      gap: 14px;
+    }
+
+    .chat-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 20px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 18px;
+      transition: transform 150ms ease, background 150ms ease;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .chat-card:hover {
+      transform: translateY(-2px);
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .chat-info span {
+      display: block;
+    }
+
+    .chat-info .name {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #f8fafc;
+    }
+
+    .chat-info .meta {
+      color: #cbd5e1;
+      font-size: 0.92rem;
+      margin-top: 4px;
+    }
+
+    .chat-card button {
+      border: none;
+      background: #10b981;
+      color: #fff;
+      border-radius: 999px;
+      padding: 10px 14px;
+      cursor: pointer;
+      transition: background 150ms ease;
+    }
+
+    .chat-card button:hover {
+      background: #059669;
+    }
+
+    .footer {
+      margin-top: 24px;
+      color: #94a3b8;
+      font-size: 0.95rem;
+      text-align: center;
+    }
+  </style>
+  <script src="auth.js"></script>
+</head>
+<body>
+  <script>
+    window.globalAuth.requireAuth();
+  </script>
+
+  <div class="page">
+    <div class="topbar">
+      <div>
+        <h1>CyberBull Chat</h1>
+        <p class="description">Choose a chat room to join or return to the hub.</p>
+      </div>
+      <button onclick="window.location.href='cyberbull-hub.html'">← Home</button>
+    </div>
+
+    <div class="chat-list">
+      <a class="chat-card" href="cyberbull-global-chat.html">
+        <div class="chat-info">
+          <span class="name">🌍 Global Chat</span>
+          <span class="meta">Chat with the whole CyberBull community.</span>
+        </div>
+        <button type="button">Enter</button>
+      </a>
+
+      <a class="chat-card" href="cyberbull-private-chat.html">
+        <div class="chat-info">
+          <span class="name">💬 Private Chat</span>
+          <span class="meta">Talk to friends directly.</span>
+        </div>
+        <button type="button">Enter</button>
+      </a>
+    </div>
+
+    <div class="footer">
+      <p>Use chat to stay connected with friends and the CyberBull community.</p>
+    </div>
+  </div>
+</body>
+</html>

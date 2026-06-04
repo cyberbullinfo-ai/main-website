@@ -647,5 +647,47 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="firebase-api.js"></script>
 <script src="auth.js"></script>
+
+  <style>
+    /* Translate UI (page-specific lighter style) */
+    #translateUI { position: fixed; top: 16px; right: 16px; z-index: 9999 }
+    #translateUI .translate-btn{border:none;padding:8px 10px;border-radius:10px;background:#eef6ff;color:#0d2f66;font-weight:700}
+    #translateUI .translate-menu{display:none;margin-top:8px;background:#fff;border-radius:8px;padding:8px;box-shadow:0 8px 24px rgba(2,6,23,0.06)}
+    #translateUI .translate-menu.open{display:block}
+    #translateUI select{width:100%;padding:6px;border-radius:6px;margin-bottom:8px}
+    #translateUI button.apply{background:#1a67d8;color:#fff;border:none;padding:8px;border-radius:6px}
+  </style>
+
+  <div id="translateUI">
+    <button id="translateButton" class="translate-btn" aria-label="Translate">🌐 Taal</button>
+    <div id="translateMenu" class="translate-menu" role="dialog" aria-hidden="true">
+      <select id="translateSelect">
+        <option value="nl">Nederlands</option>
+        <option value="en">English</option>
+        <option value="es">Espanol</option>
+        <option value="fr">Francais</option>
+        <option value="de">Deutsch</option>
+      </select>
+      <button id="translateApplyButton" class="apply" type="button">Toepassen</button>
+    </div>
+  </div>
+  <script>
+  (function(){
+    const btn=document.getElementById('translateButton');
+    const menu=document.getElementById('translateMenu');
+    const sel=document.getElementById('translateSelect');
+    const apply=document.getElementById('translateApplyButton');
+    if(!btn||!menu) return;
+    btn.addEventListener('click',()=>menu.classList.toggle('open'));
+    apply.addEventListener('click',()=>{
+      const lang=sel.value;
+      localStorage.setItem('cyberbullLanguage',lang);
+      menu.classList.remove('open');
+      if(typeof updateTexts==='function') try{updateTexts(lang)}catch(e){}
+    });
+    const lang=localStorage.getItem('cyberbullLanguage')||'nl';
+    if(sel) sel.value=lang;
+  })();
+  </script>
 </body>
 </html>

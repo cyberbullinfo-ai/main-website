@@ -327,6 +327,14 @@
       #gameCanvas { width: min(360px, 100%); height: auto; }
     }
   </style>
+  <style>
+    /* Translate UI styles */
+    .translate-btn{position:fixed;top:18px;right:18px;z-index:9999;border:none;padding:8px 10px;border-radius:10px;background:rgba(0,0,0,0.36);color:#fff;font-size:14px;backdrop-filter:blur(6px)}
+    .translate-menu{display:none;position:fixed;top:56px;right:18px;z-index:10000;background:#fff;color:#111;border-radius:10px;padding:8px;box-shadow:0 8px 24px rgba(2,6,23,0.6)}
+    .translate-menu.open{display:block}
+    .translate-menu select{display:block;margin-bottom:8px;padding:6px;border-radius:6px;border:1px solid #d1d5db}
+    .translate-menu button{display:block;padding:8px;border-radius:6px;border:none;background:#1a67d8;color:#fff;cursor:pointer}
+  </style>
 </head>
 <body>
   <script src="auth.js"></script>
@@ -1077,6 +1085,37 @@
     }
 
     window.addEventListener('load', initGame);
+  </script>
+  <div id="translateUI">
+    <button id="translateButton" class="translate-btn" aria-label="Translate">🌐</button>
+    <div id="translateMenu" class="translate-menu" role="dialog" aria-hidden="true">
+      <select id="translateSelect">
+        <option value="nl">Nederlands</option>
+        <option value="en">English</option>
+        <option value="es">Espanol</option>
+        <option value="fr">Francais</option>
+        <option value="de">Deutsch</option>
+      </select>
+      <button id="translateApplyButton" type="button">Apply</button>
+    </div>
+  </div>
+  <script>
+  (function(){
+    const btn=document.getElementById('translateButton');
+    const menu=document.getElementById('translateMenu');
+    const sel=document.getElementById('translateSelect');
+    const apply=document.getElementById('translateApplyButton');
+    if(!btn||!menu) return;
+    btn.addEventListener('click',()=>menu.classList.toggle('open'));
+    apply.addEventListener('click',()=>{
+      const lang=sel.value;
+      localStorage.setItem('cyberbullLanguage',lang);
+      menu.classList.remove('open');
+      if(typeof updateTexts==='function') try{updateTexts(lang)}catch(e){}
+    });
+    const lang=localStorage.getItem('cyberbullLanguage')||'nl';
+    if(sel) sel.value=lang;
+  })();
   </script>
 </body>
 </html>

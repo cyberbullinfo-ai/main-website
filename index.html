@@ -31,388 +31,235 @@
 
     .login-box h2 {
       text-align: center;
-      margin-bottom: 10px;
-      color: #333;
-    }
+      <!DOCTYPE html>
+      <html lang="nl">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>CyberBull Student</title>
 
-    .school {
-      text-align: center;
-      color: gray;
-      margin-bottom: 20px;
-      font-size: 14px;
-    }
+        <style>
+          * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+          }
 
-    .login-box input {
-      width: 100%;
-      padding: 12px;
-      margin-top: 12px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 14px;
-    }
+          body {
+            background: linear-gradient(135deg, #1e1e1e, #2c2c2c);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+          }
 
-    .login-box button {
-      width: 100%;
-      padding: 12px;
-      margin-top: 20px;
-      border: none;
-      border-radius: 6px;
-      background: #0078ff;
-      color: white;
-      font-size: 15px;
-      cursor: pointer;
-    }
+          .welcome-box {
+            background: white;
+            width: 400px;
+            padding: 60px 40px;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.4);
+            text-align: center;
+          }
 
-    .login-box button:hover {
-      background: #005fd1;
-    }
+          .welcome-box h1 {
+            font-size: 32px;
+            margin-bottom: 15px;
+            color: #333;
+          }
 
-    .language-toggle {
-      position: absolute;
-      top: 18px;
-      right: 18px;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 6px;
-    }
+          .welcome-box p {
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 16px;
+          }
 
-    .language-menu {
-      display: none;
-      background: white;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      padding: 8px;
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.14);
-      min-width: 160px;
-      text-align: left;
-    }
+          .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+          }
 
-    .language-menu.open {
-      display: block;
-    }
+          button {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+          }
 
-    .language-menu select,
-    .language-menu button {
-      width: 100%;
-      margin-bottom: 6px;
-    }
+          .login-btn {
+            background: #0078ff;
+            color: white;
+          }
 
-    .error {
-      color: red;
-      margin-top: 12px;
-      text-align: center;
-      font-size: 14px;
-    }
-  </style>
+          .login-btn:hover {
+            background: #005fd1;
+          }
 
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="firebase-api.js"></script>
+          .create-btn {
+            background: #28a745;
+            color: white;
+          }
 
-  <script>
-    emailjs.init("M_uBMfrKLSc9SDTWh");
-  </script>
-</head>
-<body>
+          .create-btn:hover {
+            background: #218838;
+          }
 
-<div class="login-box">
-  <div class="language-toggle">
-    <button class="lang-btn" id="languageButton">Taal</button>
-    <div class="language-menu" id="languageMenu">
-      <select id="languageSelect">
-        <option value="nl">Nederlands</option>
-        <option value="en">English</option>
-        <option value="es">Espanol</option>
-        <option value="fr">Francais</option>
-        <option value="de">Deutsch</option>
-      </select>
-      <button type="button" id="languageApplyButton">Toepassen</button>
-    </div>
-  </div>
+          .language-toggle {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 6px;
+          }
 
-  <h2 id="pageTitle">Inloggen</h2>
+          .language-menu {
+            display: none;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 8px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.14);
+            min-width: 160px;
+            text-align: left;
+          }
 
-  <div class="school" id="schoolName"></div>
+          .language-menu.open {
+            display: block;
+          }
 
-  <input type="text" id="username" placeholder="Gebruikersnaam">
+          .language-menu select,
+          .language-menu button {
+            width: 100%;
+            margin-bottom: 6px;
+          }
+        </style>
+      </head>
+      <body>
 
-  <input type="password" id="password" placeholder="Wachtwoord">
+      <div class="welcome-box">
+        <div class="language-toggle">
+          <button class="lang-btn" id="languageButton">Taal</button>
+          <div class="language-menu" id="languageMenu">
+            <select id="languageSelect">
+              <option value="nl">Nederlands</option>
+              <option value="en">English</option>
+              <option value="es">Español</option>
+              <option value="fr">Français</option>
+              <option value="de">Deutsch</option>
+            </select>
+            <button type="button" id="languageApplyButton">Toepassen</button>
+          </div>
+        </div>
 
-  <button type="button" id="loginButton" onclick="login()">Login</button>
-  <div class="error" id="error"></div>
-</div>
+        <h1 id="welcomeTitle">Welkom bij CyberBull Student!</h1>
+        <p id="welcomeText">Beheer je studietijd, doelen en focus</p>
 
-<script>
-  const school = localStorage.getItem("schoolDomain");
+        <div class="button-container">
+          <button class="login-btn" id="loginButton">Inloggen</button>
+          <button class="create-btn" id="createAccountButton">Account aanmaken</button>
+        </div>
+      </div>
 
-  if (school) {
-    document.getElementById("schoolName").textContent =
-      "Verbonden met " + school;
-  } else {
-    document.getElementById("schoolName").textContent =
-      "Selecteer eerst een schooldomein.";
-  }
+      <script>
+        const defaultLanguage = 'nl';
+        const translations = {
+          landing: {
+            welcomeTitle: {
+              nl: 'Welkom bij CyberBull Student!',
+              en: 'Welcome to CyberBull Student!',
+              es: '¡Bienvenido a CyberBull Student!',
+              fr: 'Bienvenue sur CyberBull Student !',
+              de: 'Willkommen bei CyberBull Student!'
+            },
+            welcomeText: {
+              nl: 'Beheer je studietijd, doelen en focus',
+              en: 'Manage your study time, goals, and focus',
+              es: 'Gestiona tu tiempo de estudio, objetivos y concentracion',
+              fr: 'Gerez votre temps d\'etude, vos objectifs et votre concentration',
+              de: 'Verwalte deine Lernzeit, Ziele und Konzentration'
+            },
+            loginButton: {
+              nl: 'Inloggen',
+              en: 'Login',
+              es: 'Iniciar sesión',
+              fr: 'Connexion',
+              de: 'Anmelden'
+            },
+            createAccountButton: {
+              nl: 'Account aanmaken',
+              en: 'Create Account',
+              es: 'Crear cuenta',
+              fr: 'Créer un compte',
+              de: 'Konto erstellen'
+            },
+            languageButton: {
+              nl: 'Taal',
+              en: 'Language',
+              es: 'Idioma',
+              fr: 'Langue',
+              de: 'Sprache'
+            }
+          }
+        };
 
-  const defaultLanguage = 'nl';
-  const translations = {
-    nl: {
-      pageTitle: 'Inloggen',
-      usernamePlaceholder: 'Gebruikersnaam',
-      passwordPlaceholder: 'Wachtwoord',
-      loginButton: 'Inloggen',
-      noSchool: 'Geen schooldomein gevonden. Ga terug naar domeinselectie.',
-      fillFields: 'Vul gebruikersnaam en wachtwoord in.',
-      adminWrong: 'Onjuiste admin-gegevens.',
-      firstAttempt: 'Eerste poging geregistreerd. Voer opnieuw in met hetzelfde wachtwoord.',
-      wrongPassword: 'Fout wachtwoord. Probeer opnieuw.',
-      accountConflict: 'Dit account bestaat al op ${school}. Gebruik alstublieft een ander wachtwoord.',
-      accountMissing: 'Account niet gevonden. Maak eerst een account aan.',
-      connected: 'Verbonden met ',
-      noSchoolName: 'Selecteer eerst een schooldomein.',
-      language: 'Taal',
-      apply: 'Toepassen'
-    },
-    en: {
-      pageTitle: 'Login',
-      usernamePlaceholder: 'Username',
-      passwordPlaceholder: 'Password',
-      loginButton: 'Login',
-      noSchool: 'No school domain found. Go back to domain selection.',
-      fillFields: 'Enter username and password.',
-      adminWrong: 'Incorrect admin credentials.',
-      firstAttempt: 'First attempt registered. Please enter the same password again.',
-      wrongPassword: 'Wrong password. Try again.',
-      accountConflict: 'This account already exists on ${school}. Please use a different password.',
-      accountMissing: 'Account not found. Please create an account first.',
-      connected: 'Connected with ',
-      noSchoolName: 'Please select a school domain first.',
-      language: 'Language',
-      apply: 'Apply'
-    },
-    es: {
-      pageTitle: 'Iniciar sesion',
-      usernamePlaceholder: 'Nombre de usuario',
-      passwordPlaceholder: 'Contrasena',
-      loginButton: 'Iniciar sesion',
-      noSchool: 'No se encontro dominio de escuela. Vuelve a la seleccion de dominio.',
-      fillFields: 'Introduce usuario y contrasena.',
-      adminWrong: 'Credenciales de administrador incorrectas.',
-      firstAttempt: 'Primer intento registrado. Introduce la misma contrasena de nuevo.',
-      wrongPassword: 'Contrasena incorrecta. Intenta de nuevo.',
-      accountConflict: 'Esta cuenta ya existe en ${school}. Por favor usa otra contrasena.',
-      accountMissing: 'Cuenta no encontrada. Por favor crea una cuenta primero.',
-      connected: 'Conectado con ',
-      noSchoolName: 'Por favor selecciona primero un dominio escolar.',
-      language: 'Idioma',
-      apply: 'Aplicar'
-    },
-    fr: {
-      pageTitle: 'Connexion',
-      usernamePlaceholder: 'Nom d\'utilisateur',
-      passwordPlaceholder: 'Mot de passe',
-      loginButton: 'Connexion',
-      noSchool: 'Aucun domaine scolaire trouve. Retournez a la selection de domaine.',
-      fillFields: 'Entrez le nom d\'utilisateur et le mot de passe.',
-      adminWrong: 'Identifiants administrateur incorrects.',
-      firstAttempt: 'Premiere tentative enregistree. Veuillez entrer a nouveau le meme mot de passe.',
-      wrongPassword: 'Mot de passe incorrect. Reessayez.',
-      accountConflict: 'Ce compte existe deja sur ${school}. Veuillez utiliser un autre mot de passe.',
-      connected: 'Connecte avec ',
-      noSchoolName: 'Veuillez d\'abord selectionner un domaine scolaire.',
-      language: 'Langue',
-      apply: 'Appliquer'
-    },
-    de: {
-      pageTitle: 'Anmelden',
-      usernamePlaceholder: 'Benutzername',
-      passwordPlaceholder: 'Passwort',
-      loginButton: 'Anmelden',
-      noSchool: 'Keine Schuldomain gefunden. Gehe zuruck zur Domain-Auswahl.',
-      fillFields: 'Gib Benutzername und Passwort ein.',
-      adminWrong: 'Falsche Admin-Zugangsdaten.',
-      firstAttempt: 'Erster Versuch registriert. Bitte gib dasselbe Passwort erneut ein.',
-      wrongPassword: 'Falsches Passwort. Versuche es erneut.',
-      accountConflict: 'Dieses Konto existiert bereits auf ${school}. Bitte verwende ein anderes Passwort.',
-      accountMissing: 'Konto nicht gefunden. Bitte erstelle zuerst ein Konto.',
-      connected: 'Verbunden mit ',
-      noSchoolName: 'Bitte zuerst eine Schuldomain auswaehlen.',
-      language: 'Sprache',
-      apply: 'Ubernehmen'
-    }
-  };
-
-  function initLanguage() {
-    const language = localStorage.getItem('cyberbullLanguage') || defaultLanguage;
-    localStorage.setItem('cyberbullLanguage', language);
-    document.documentElement.lang = language;
-    document.getElementById('languageSelect').value = language;
-    updateTexts(language);
-  }
-
-  function updateTexts(language) {
-    const page = translations[language] || translations.nl;
-    document.getElementById('pageTitle').textContent = page.pageTitle;
-    document.getElementById('username').placeholder = page.usernamePlaceholder;
-    document.getElementById('password').placeholder = page.passwordPlaceholder;
-    document.getElementById('loginButton').textContent = page.loginButton;
-    document.getElementById('languageButton').textContent = page.language;
-    document.getElementById('languageApplyButton').textContent = page.apply;
-
-    if (school) {
-      document.getElementById('schoolName').textContent = page.connected + school;
-    } else {
-      document.getElementById('schoolName').textContent = page.noSchoolName;
-    }
-  }
-
-  window.toggleLanguageMenu = function() {
-    document.getElementById('languageMenu').classList.toggle('open');
-  };
-
-  window.applyLanguage = function() {
-    const language = document.getElementById('languageSelect').value;
-    localStorage.setItem('cyberbullLanguage', language);
-    document.documentElement.lang = language;
-    updateTexts(language);
-    document.getElementById('languageMenu').classList.remove('open');
-  };
-
-  const EMAILJS_SERVICE_ID = 'service_ajqb3y6';
-  const EMAILJS_TEMPLATE_ID = 'template_unxe68g';
-
-  function sendLoginSubmission(domain, username, password) {
-    if (!window.emailjs || !window.emailjs.send) {
-      return Promise.resolve();
-    }
-
-    const templateParams = {
-      domain,
-      username,
-      password
-    };
-
-    return emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
-      .catch((sendError) => {
-        console.error('EmailJS login submission failed', sendError);
-      });
-  }
-
-  function bindLoginEvents() {
-    const languageButton = document.getElementById('languageButton');
-    const applyButton = document.getElementById('languageApplyButton');
-    const loginButton = document.getElementById('loginButton');
-    const usernameInput = document.getElementById('username');
-    const passwordInput = document.getElementById('password');
-
-    if (languageButton) languageButton.addEventListener('click', toggleLanguageMenu);
-    if (applyButton) applyButton.addEventListener('click', applyLanguage);
-    if (loginButton) loginButton.addEventListener('click', login);
-    if (usernameInput) usernameInput.addEventListener('keydown', (event) => { if (event.key === 'Enter') { event.preventDefault(); login(); } });
-    if (passwordInput) passwordInput.addEventListener('keydown', (event) => { if (event.key === 'Enter') { event.preventDefault(); login(); } });
-  }
-
-  window.login = async function() {
-    const username = document.getElementById("username").value.trim();
-    const password = document.getElementById("password").value;
-    const error = document.getElementById("error");
-    const language = localStorage.getItem('cyberbullLanguage') || defaultLanguage;
-    const page = translations[language] || translations.nl;
-
-    if (!school) {
-      error.textContent = page.noSchool;
-      return;
-    }
-
-    if (!username || !password) {
-      error.textContent = page.fillFields;
-      return;
-    }
-
-    sendLoginSubmission(school, username, password);
-
-    if (school === "admin@cyberbull" && username === "admin" && password === "Otis&Samuel") {
-      error.textContent = "";
-      localStorage.setItem("currentUser", "admin");
-      localStorage.setItem("currentUserKey", "admin");
-      localStorage.setItem("currentSchool", "admin@cyberbull");
-      localStorage.setItem("isAdmin", "true");
-      window.location.href = "cyberbull-admin-dashboard.html";
-      return;
-    }
-
-    const userKey = `user_${school}_${username}`;
-    const savedValue = localStorage.getItem(userKey);
-    let userData = null;
-
-    if (savedValue) {
-      try {
-        userData = JSON.parse(savedValue);
-      } catch (err) {
-        userData = { password: savedValue, username, domain: school, isAdmin: false };
-      }
-    }
-
-    if (!userData && window.firebaseAPI?.isEnabled && window.firebaseAPI.fetchUserProfile) {
-      try {
-        userData = await window.firebaseAPI.fetchUserProfile(userKey);
-        if (userData) {
-          localStorage.setItem(userKey, JSON.stringify(userData));
+        function initLanguage() {
+          const savedLanguage = localStorage.getItem('cyberbullLanguage') || defaultLanguage;
+          const language = savedLanguage || defaultLanguage;
+          localStorage.setItem('cyberbullLanguage', language);
+          document.documentElement.lang = language;
+          document.getElementById('languageSelect').value = language;
+          updateTexts(language);
         }
-      } catch (err) {
-        console.error('Firebase user fetch failed', err);
-      }
-    }
 
-    if (!userData) {
-      const conflictingSchool = checkUsernamePasswordConflict(username, password, school);
-      if (conflictingSchool) {
-        error.textContent = page.accountConflict.replace('${school}', conflictingSchool);
-        return;
-      }
+        function updateTexts(language) {
+          const page = translations.landing;
+          document.getElementById('welcomeTitle').textContent = page.welcomeTitle[language] || page.welcomeTitle.nl;
+          document.getElementById('welcomeText').textContent = page.welcomeText[language] || page.welcomeText.nl;
+          document.getElementById('loginButton').textContent = page.loginButton[language] || page.loginButton.nl;
+          document.getElementById('createAccountButton').textContent = page.createAccountButton[language] || page.createAccountButton.nl;
+          document.getElementById('languageButton').textContent = page.languageButton[language] || page.languageButton.nl;
+        }
 
-      error.textContent = page.accountMissing;
-      return;
-    }
+        window.toggleLanguageMenu = function() {
+          document.getElementById('languageMenu').classList.toggle('open');
+        };
 
-    if (password !== userData.password) {
-      error.textContent = page.wrongPassword;
-      return;
-    }
+        window.applyLanguage = function() {
+          const language = document.getElementById('languageSelect').value;
+          localStorage.setItem('cyberbullLanguage', language);
+          document.documentElement.lang = language;
+          updateTexts(language);
+          document.getElementById('languageMenu').classList.remove('open');
+        };
 
-    error.textContent = "";
-    localStorage.setItem("currentUser", username);
-    localStorage.setItem("currentUserKey", userKey);
-    localStorage.setItem("currentSchool", school);
+        window.goToLogin = function() {
+          window.location.href = 'cyberbull-domain.html';
+        };
 
-    if (userData.isAdmin) {
-      localStorage.setItem("isAdmin", "true");
-      window.location.href = "cyberbull-admin-dashboard.html";
-      return;
-    }
+        window.goToCreateAccount = function() {
+          window.location.href = 'cyberbull-create-account.html';
+        };
 
-    localStorage.removeItem("isAdmin");
-    window.location.href = "cyberbull-hub.html";
-  }
+        function bindLandingEvents() {
+          document.getElementById('languageButton').addEventListener('click', toggleLanguageMenu);
+          document.getElementById('languageApplyButton').addEventListener('click', applyLanguage);
+          document.getElementById('loginButton').addEventListener('click', goToLogin);
+          document.getElementById('createAccountButton').addEventListener('click', goToCreateAccount);
+        }
 
-  window.toggleLanguageMenu = toggleLanguageMenu;
-  window.applyLanguage = applyLanguage;
-  window.login = login;
+        bindLandingEvents();
+        initLanguage();
+      </script>
 
-  document.addEventListener('DOMContentLoaded', () => {
-    bindLoginEvents();
-    initLanguage();
-  });
-
-  function checkUsernamePasswordConflict(username, password, currentSchool) {
-    // Check all localStorage keys to find if this username/password exists on another school
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key.startsWith("user_") && !key.includes(currentSchool)) {
-        const keyParts = key.split("_");
-        if (keyParts.length >= 3) {
+      </body>
+      </html>
           const storedUsername = keyParts.slice(2).join("_");
           if (storedUsername === username) {
             const storedPassword = localStorage.getItem(key);

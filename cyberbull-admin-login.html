@@ -29,6 +29,9 @@
     <div class="form-group">
       <button id="loginBtn">Login</button>
     </div>
+    <div class="form-group">
+      <button id="backBtn" style="width:100%;padding:10px 14px;border:none;border-radius:6px;background:#6c757d;color:#fff;cursor:pointer;margin-top:8px;">Back</button>
+    </div>
     <div class="error" id="error"></div>
   </div>
 
@@ -43,6 +46,10 @@
         if (res.success) window.location.href = 'cyberbull-admin-dashboard.html';
         else err.textContent = res.message || 'Login failed';
       });
+    });
+
+    document.getElementById('backBtn').addEventListener('click', ()=>{
+      window.location.href = 'cyberbull-landing.html';
     });
   </script>
 </body>

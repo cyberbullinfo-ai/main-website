@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Private Chat</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(180deg, #0f172a 0%, #111827 60%, #0f172a 100%);
+      min-height: 100vh;
+      color: #f0f0f0;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+    }
+
+    .header {
+      background: rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 15px 20px;
+      margin-bottom: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    }
+
+    .header h1 {
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .nav-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .nav-btn {
+      padding: 8px 16px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #f0f0f0;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.3s;
+    }
+
+    .nav-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .nav-btn.active {
+      background: #2563eb;
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 8px 20px rgba(37, 99, 235, 0.24);
+    }
+
+    .main-area {
+      display: flex;
+      gap: 15px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .conversations-panel {
+      width: 280px;
+      background: rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 15px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      gap: 8px;
+      flex-direction: column;
+    }
+
+    .panel-header h3 {
+      font-size: 13px;
+      font-weight: 600;
+      color: #aaa;
+      text-transform: uppercase;
+    }
+
+    .new-chat-btn {
+      background: #00f2fe;
+      border: none;
+      color: #000;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 12px;
+      transition: all 0.3s;
+    }
+
+    .new-chat-btn:hover {
+      background: #00d4e8;
+      transform: translateY(-2px);
+    }
+
+    .conversations-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+    }
+
+    .conversations-list::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .conversations-list::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 2px;
+    }
+
+    .conversation-item {
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .conversation-item:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: translateX(4px);
+    }
+
+    .conversation-item.active {
+      background: rgba(0, 242, 254, 0.3);
+      border-left: 3px solid #00f2fe;
+    }
+
+    .conv-avatar {
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+
+    .conv-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .conv-name {
+      font-weight: 600;
+      font-size: 13px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .conv-preview {
+      font-size: 11px;
+      color: #aaa;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 2px;
+    }
+
+    .unread-badge {
+      background: #00f2fe;
+      color: #000;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 10px;
+      flex-shrink: 0;
+    }
+
+    .empty-list {
+      text-align: center;
+      color: #aaa;
+      font-size: 12px;
+      padding: 20px 10px;
+    }
+
+    .chat-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+    }
+
+    .chat-header {
+      padding: 15px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(0, 0, 0, 0.1);
+    }
+
+    .chat-header-avatar {
+      font-size: 28px;
+    }
+
+    .chat-header-info {
+      flex: 1;
+    }
+
+    .chat-header-name {
+      font-weight: 600;
+      font-size: 16px;
+    }
+
+    .chat-header-status {
+      font-size: 12px;
+      color: #22c55e;
+    }
+
+    .chat-header-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .action-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #f0f0f0;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.3s;
+    }
+
+    .action-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .messages-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .messages-container::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .messages-container::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 3px;
+    }
+
+    .messages-container::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 3px;
+    }
+
+    .messages-container::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .message {
+      display: flex;
+      gap: 10px;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    .message.own {
+      flex-direction: row-reverse;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .message-avatar {
+      font-size: 28px;
+      flex-shrink: 0;
+    }
+
+    .message-content {
+      flex: 1;
+      max-width: 70%;
+    }
+
+    .message.own .message-content {
+      text-align: right;
+    }
+
+    .message-bubble {
+      background: rgba(255, 255, 255, 0.15);
+      padding: 10px 14px;
+      border-radius: 12px;
+      word-wrap: break-word;
+      line-height: 1.4;
+    }
+
+    .message.own .message-bubble {
+      background: rgba(0, 242, 254, 0.3);
+      border: 1px solid rgba(0, 242, 254, 0.5);
+    }
+
+    .message-time {
+      font-size: 11px;
+      color: #aaa;
+      margin-top: 4px;
+      padding: 0 4px;
+    }
+
+    .message-actions {
+      display: flex;
+      gap: 6px;
+      margin-top: 4px;
+      font-size: 11px;
+      padding: 0 4px;
+    }
+
+    .message-action {
+      cursor: pointer;
+      color: #aaa;
+      transition: color 0.3s;
+    }
+
+    .message-action:hover {
+      color: #f0f0f0;
+    }
+
+    .input-area {
+      padding: 15px 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      gap: 10px;
+    }
+
+    .message-input-wrapper {
+      flex: 1;
+      display: flex;
+      gap: 10px;
+    }
+
+    .message-input {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #f0f0f0;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: all 0.3s;
+    }
+
+    .message-input:focus {
+      outline: none;
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .message-input::placeholder {
+      color: #aaa;
+    }
+
+    .send-btn {
+      background: #00f2fe;
+      border: none;
+      color: #000;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+      font-size: 14px;
+    }
+
+    .send-btn:hover {
+      background: #00d4e8;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 242, 254, 0.4);
+    }
+
+    .send-btn:active {
+      transform: translateY(0);
+    }
+
+    .empty-chat {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: #aaa;
+      padding: 40px 20px;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .empty-chat h2 {
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.show {
+      display: flex;
+    }
+
+    .modal-content {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      border-radius: 12px;
+      padding: 30px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .modal-close {
+      cursor: pointer;
+      font-size: 24px;
+      color: #f0f0f0;
+      transition: transform 0.3s;
+    }
+
+    .modal-close:hover {
+      transform: scale(1.2);
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 10px 14px;
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: #f0f0f0;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      font-size: 14px;
+    }
+
+    .search-input:focus {
+      outline: none;
+      background: rgba(0, 0, 0, 0.3);
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .search-input::placeholder {
+      color: #aaa;
+    }
+
+    .user-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .user-list-item {
+      padding: 12px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .user-list-item:hover {
+      background: rgba(0, 0, 0, 0.3);
+      transform: translateX(4px);
+    }
+
+    .user-list-item .avatar {
+      font-size: 24px;
+    }
+
+    .user-list-item .info {
+      flex: 1;
+    }
+
+    .user-list-item .name {
+      font-weight: 600;
+    }
+
+    .user-list-item .school {
+      font-size: 12px;
+      color: #aaa;
+    }
+
+    @media (max-width: 768px) {
+      .conversations-panel {
+        display: none;
+      }
+
+      .message-content {
+        max-width: 90%;
+      }
+
+      .container {
+        padding: 5px;
+      }
+
+      .header {
+        padding: 10px 15px;
+      }
+
+      .header h1 {
+        font-size: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <script>
+    if (!localStorage.getItem('currentUser')) {
+      window.location.href = 'cyberbull-landing.html';
+    }
+  </script>
+  <div class="container">
+    <div class="header">
+      <h1>💬 Private Chat</h1>
+      <div class="nav-buttons">
+        <button class="nav-btn" onclick="goToGlobalChat()">🌍 Global Chat</button>
+        <button class="nav-btn active">💬 Private Chat</button>
+        <button class="nav-btn" onclick="goHome()">🏠 Home</button>
+      </div>
+    </div>
+
+    <div class="main-area">
+      <div class="conversations-panel">
+        <div class="panel-header">
+          <h3>Conversations</h3>
+          <button class="new-chat-btn" onclick="openNewChatModal()">+ New Chat</button>
+        </div>
+        <div class="conversations-list" id="conversationsList">
+          <div class="empty-list">No conversations yet</div>
+        </div>
+      </div>
+
+      <div class="chat-area">
+        <div id="noChatSelected" class="empty-chat">
+          <h2>Select a conversation</h2>
+          <p>Choose someone from the list or start a new chat</p>
+          <button class="nav-btn" onclick="openNewChatModal()" style="margin-top: 10px;">Start New Chat</button>
+        </div>
+
+        <div id="chatContainer" style="display: none; flex: 1; display: flex; flex-direction: column;">
+          <div class="chat-header">
+            <div class="chat-header-avatar" id="chatHeaderAvatar">😊</div>
+            <div class="chat-header-info">
+              <div class="chat-header-name" id="chatHeaderName">User</div>
+              <div class="chat-header-status">Online</div>
+            </div>
+            <div class="chat-header-actions">
+              <button class="action-btn" onclick="blockCurrentUser()">Block</button>
+              <button class="action-btn" onclick="closeChat()">Close</button>
+            </div>
+          </div>
+
+          <div class="messages-container" id="messagesContainer">
+            <div style="text-align: center; color: #aaa; padding: 20px;">Loading messages...</div>
+          </div>
+
+          <div class="input-area">
+            <div class="message-input-wrapper">
+              <input type="text" class="message-input" id="messageInput" placeholder="Type a message...">
+              <button class="send-btn" onclick="sendMessage()">Send</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- New Chat Modal -->
+  <div class="modal" id="newChatModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <span>Start New Chat</span>
+        <span class="modal-close" onclick="closeNewChatModal()">&times;</span>
+      </div>
+      <input type="text" class="search-input" id="searchUsers" placeholder="Search users...">
+      <div class="user-list" id="userList"></div>
+    </div>
+  </div>
+
+  <script src="admin.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="firebase-api.js"></script>
+  <script src="chat.js"></script>
+  <script src="auth.js"></script>
+  <script>
+    const currentUser = localStorage.getItem("currentUser");
+    const currentUserKey = localStorage.getItem("currentUserKey");
+    const schoolDomain = localStorage.getItem("schoolDomain");
+
+    window.globalAuth.requireAuth();
+
+    if (window.firebaseAPI?.isEnabled) {
+      window.firebaseAPI.subscribeUserFriendData(currentUserKey);
+      window.firebaseAPI.subscribeUserConversations(currentUserKey);
+    }
+
+    let selectedUserKey = localStorage.getItem('privateChatWith');
+    let selectedUserName = localStorage.getItem('privateChatWithName');
+
+    if (selectedUserKey) {
+      localStorage.removeItem('privateChatWith');
+      localStorage.removeItem('privateChatWithName');
+      openConversation(selectedUserKey, selectedUserName);
+    }
+
+    function getAvatarForUser(username) {
+      const emojis = ['😊', '😃', '😄', '😁', '🤗', '😍', '🤩', '😎', '🥳', '😇', '🙂', '😌', '😍', '🤓'];
+      let hash = 0;
+      for (let i = 0; i < username.length; i++) {
+        hash = ((hash << 5) - hash) + username.charCodeAt(i);
+        hash |= 0;
+      }
+      return emojis[Math.abs(hash) % emojis.length];
+    }
+
+    function formatTime(timestamp) {
+      const date = new Date(timestamp);
+      const now = new Date();
+      const diffMs = now - date;
+      const diffMins = Math.floor(diffMs / 60000);
+      
+      if (diffMins < 1) return 'now';
+      if (diffMins < 60) return `${diffMins}m ago`;
+      
+      const diffHours = Math.floor(diffMins / 60);
+      if (diffHours < 24) return `${diffHours}h ago`;
+      
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+
+    function renderConversations() {
+      const conversations = window.chatAPI.getUserConversations(currentUserKey);
+      const listContainer = document.getElementById('conversationsList');
+
+      if (Object.keys(conversations).length === 0) {
+        listContainer.innerHTML = '<div class="empty-list">No conversations yet</div>';
+        return;
+      }
+
+      const items = Object.entries(conversations)
+        .sort((a, b) => (b[1].lastMessageTime || 0) - (a[1].lastMessageTime || 0))
+        .map(([userKey, conv]) => {
+          const isActive = selectedUserKey === userKey;
+          return `
+            <div class="conversation-item ${isActive ? 'active' : ''}" onclick="openConversation('${userKey}', '${conv.name}')">
+              <div class="conv-avatar">${getAvatarForUser(conv.name)}</div>
+              <div class="conv-info">
+                <div class="conv-name">${conv.name}</div>
+                <div class="conv-preview">${conv.lastMessage || 'No messages'}</div>
+              </div>
+              ${conv.unread ? `<div class="unread-badge">${conv.unread}</div>` : ''}
+            </div>
+          `;
+        }).join('');
+
+      listContainer.innerHTML = items;
+    }
+
+    function openConversation(userKey, userName) {
+      selectedUserKey = userKey;
+      selectedUserName = userName;
+
+      if (window.firebaseAPI?.isEnabled) {
+        window.firebaseAPI.subscribePrivateMessages(currentUserKey, selectedUserKey);
+      }
+
+      document.getElementById('noChatSelected').style.display = 'none';
+      document.getElementById('chatContainer').style.display = 'flex';
+      document.getElementById('chatHeaderName').textContent = userName;
+      document.getElementById('chatHeaderAvatar').textContent = getAvatarForUser(userName);
+
+      window.chatAPI.markConversationAsRead(currentUserKey, userKey);
+      renderMessages();
+      renderConversations();
+      document.getElementById('messageInput').focus();
+    }
+
+    function renderMessages() {
+      if (!selectedUserKey) return;
+
+      const messages = window.chatAPI.getPrivateMessages(currentUserKey, selectedUserKey);
+      const container = document.getElementById('messagesContainer');
+
+      if (messages.length === 0) {
+        container.innerHTML = '<div style="text-align: center; color: #aaa; padding: 40px 20px;">No messages yet. Start the conversation!</div>';
+        return;
+      }
+
+      container.innerHTML = messages.map(msg => {
+        const isOwn = msg.senderKey === currentUserKey;
+        return `
+          <div class="message ${isOwn ? 'own' : ''}">
+            <div class="message-avatar">${isOwn ? '😊' : getAvatarForUser(selectedUserName)}</div>
+            <div class="message-content">
+              <div class="message-bubble">${escapeHtml(msg.message)}</div>
+              <div class="message-time">${formatTime(msg.timestamp)}</div>
+              ${isOwn ? `<div class="message-actions"><span class="message-action" onclick="deleteMessage('${msg.id}')">Delete</span></div>` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function sendMessage() {
+      if (!selectedUserKey) return;
+
+      const input = document.getElementById('messageInput');
+      const message = input.value;
+
+      if (!message.trim()) return;
+
+      window.chatAPI.sendPrivateMessage(
+        currentUserKey,
+        currentUser,
+        selectedUserKey,
+        selectedUserName,
+        message
+      );
+
+      input.value = '';
+      renderMessages();
+      renderConversations();
+    }
+
+    function deleteMessage(messageId) {
+      if (confirm('Delete this message?')) {
+        window.chatAPI.deletePrivateMessage(messageId, currentUserKey, currentUserKey, selectedUserKey);
+        renderMessages();
+      }
+    }
+
+    function blockCurrentUser() {
+      if (confirm(`Block ${selectedUserName}? You won't see their messages.`)) {
+        window.chatAPI.blockUser(currentUserKey, selectedUserKey);
+        alert(`${selectedUserName} blocked`);
+        closeChat();
+      }
+    }
+
+    function closeChat() {
+      selectedUserKey = null;
+      selectedUserName = null;
+      document.getElementById('noChatSelected').style.display = 'flex';
+      document.getElementById('chatContainer').style.display = 'none';
+      renderConversations();
+    }
+
+    function openNewChatModal() {
+      document.getElementById('newChatModal').classList.add('show');
+      populateUserList();
+    }
+
+    function closeNewChatModal() {
+      document.getElementById('newChatModal').classList.remove('show');
+    }
+
+    function populateUserList() {
+      const friendKeys = window.chatAPI.getFriends(currentUserKey);
+      const allUsers = window.chatAPI.getAllUsers()
+        .filter(u => friendKeys.includes(u.key))
+        .sort((a, b) => a.username.localeCompare(b.username));
+
+      const listContainer = document.getElementById('userList');
+      if (allUsers.length === 0) {
+        listContainer.innerHTML = '<div style="text-align: center; color: #aaa; padding: 20px;">No friends yet. Add someone from the global chat to start private conversations.</div>';
+        return;
+      }
+
+      listContainer.innerHTML = allUsers.map(user => `
+        <div class="user-list-item" onclick="startChatWithUser('${user.key}', '${user.username}')">
+          <div class="avatar">${user.avatar}</div>
+          <div class="info">
+            <div class="name">${user.username}</div>
+            <div class="school">${user.schoolDomain}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function startChatWithUser(userKey, userName) {
+      closeNewChatModal();
+      openConversation(userKey, userName);
+    }
+
+    function goToGlobalChat() {
+      window.location.href = 'cyberbull-global-chat.html';
+    }
+
+    function goHome() {
+      window.location.href = 'cyberbull-hub.html';
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Initialize
+    renderConversations();
+
+    // Enter to send
+    document.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey && document.activeElement.id === 'messageInput') {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+
+    // Refresh conversations every 3 seconds
+    setInterval(renderConversations, 3000);
+
+    // Search users in modal
+    document.getElementById('searchUsers').addEventListener('input', (e) => {
+      const search = e.target.value.toLowerCase();
+      const friendKeys = window.chatAPI.getFriends(currentUserKey);
+      const allUsers = window.chatAPI.getAllUsers()
+        .filter(u => friendKeys.includes(u.key) && u.username.toLowerCase().includes(search))
+        .sort((a, b) => a.username.localeCompare(b.username));
+
+      const listContainer = document.getElementById('userList');
+      if (allUsers.length === 0) {
+        listContainer.innerHTML = '<div style="text-align: center; color: #aaa; padding: 20px;">No friends found</div>';
+        return;
+      }
+
+      listContainer.innerHTML = allUsers.map(user => `
+        <div class="user-list-item" onclick="startChatWithUser('${user.key}', '${user.username}')">
+          <div class="avatar">${user.avatar}</div>
+          <div class="info">
+            <div class="name">${user.username}</div>
+            <div class="school">${user.schoolDomain}</div>
+          </div>
+        </div>
+      `).join('');
+    });
+
+    // Close modal on backdrop click
+    document.getElementById('newChatModal').addEventListener('click', (e) => {
+      if (e.target.id === 'newChatModal') {
+        closeNewChatModal();
+      }
+    });
+  </script>
+</body>
+</html>

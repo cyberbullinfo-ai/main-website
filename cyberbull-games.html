@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Games - CyberBull</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Inter, system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(180deg, #0f172a 0%, #111827 60%, #0f172a 100%);
+      color: #e2e8f0;
+      padding: 24px;
+    }
+    .page {
+      width: 100%;
+      max-width: 520px;
+      padding: 24px;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 24px;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3);
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+    .topbar h1 {
+      font-size: 1.35rem;
+      letter-spacing: 0.02em;
+    }
+    .topbar button {
+      border: none;
+      border-radius: 999px;
+      padding: 10px 14px;
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+      cursor: pointer;
+      transition: background 160ms ease;
+    }
+    .topbar button:hover {
+      background: rgba(255,255,255,0.18);
+    }
+    .description {
+      color: #94a3b8;
+      margin-bottom: 22px;
+      line-height: 1.6;
+    }
+    .game-list {
+      display: grid;
+      gap: 14px;
+    }
+    .game-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 20px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 18px;
+      transition: transform 150ms ease, background 150ms ease;
+      cursor: pointer;
+    }
+    .game-card:hover {
+      transform: translateY(-2px);
+      background: rgba(255,255,255,0.12);
+    }
+    .game-card span {
+      display: block;
+    }
+    .game-card .name {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #f8fafc;
+    }
+    .game-card .meta {
+      color: #cbd5e1;
+      font-size: 0.92rem;
+      margin-top: 4px;
+    }
+    .game-card button {
+      border: none;
+      background: #7c3aed;
+      color: #fff;
+      border-radius: 999px;
+      padding: 10px 14px;
+      cursor: pointer;
+    }
+    .footer {
+      margin-top: 24px;
+      color: #94a3b8;
+      font-size: 0.95rem;
+      text-align: center;
+    }
+  </style>
+  <script src="auth.js"></script>
+</head>
+<body>
+  <script>
+    window.globalAuth.requireAuth();
+  </script>
+  <div class="page">
+    <div class="topbar">
+      <button onclick="goHome()">← Home</button>
+      <h1>Games</h1>
+      <div></div>
+    </div>
+    <p class="description">Choose a game below. More fun titles will be added soon, so check back later.</p>
+    <div class="game-list">
+      <div class="game-card" onclick="playFlappy()">
+        <div>
+          <span class="name">🎮 Flappy Bird</span>
+          <span class="meta">Classic tap-to-fly arcade challenge</span>
+        </div>
+        <button type="button">Play</button>
+      </div>
+      <div class="game-card" onclick="playDino()">
+        <div>
+          <span class="name">🐦 Bird Jump</span>
+          <span class="meta">Jump through pipes as a blocky bird</span>
+        </div>
+        <button type="button">Play</button>
+      </div>
+      <div class="game-card" onclick="playSpaceShooter()">
+        <div>
+          <span class="name">🚀 Space Extermination</span>
+          <span class="meta">Browser playable retro shooter</span>
+        </div>
+        <button type="button">Play</button>
+      </div>
+      <div class="game-card" onclick="playPong()">
+        <div>
+          <span class="name">🏓 Pong</span>
+          <span class="meta">Classic table-tennis arcade challenge</span>
+        </div>
+        <button type="button">Play</button>
+      </div>
+      <div class="game-card" onclick="playSnake()">
+        <div>
+          <span class="name">🐍 Snake</span>
+          <span class="meta">Eat food and grow without hitting walls</span>
+        </div>
+        <button type="button">Play</button>
+      </div>
+      <div class="game-card" onclick="playTetris()">
+        <div>
+          <span class="name">🧱 Tetris</span>
+          <span class="meta">Stack blocks and clear lines</span>
+        </div>
+        <button type="button">Play</button>
+      </div>
+      <div class="game-card" onclick="playCyberBreakout()">
+        <div>
+          <span class="name">🕹️ Cyber Breakout</span>
+          <span class="meta">Cyber-themed breakout — paddle, powerups, and progression</span>
+        </div>
+        <button type="button">Play</button>
+      </div>
+      <div class="game-card">
+        <div>
+          <span class="name">🤝 Play With Friend</span>
+          <span class="meta">Invite a friend to play any game</span>
+        </div>
+        <button type="button" onclick="openFriendModal()">Invite</button>
+      </div>
+    </div>
+    <div class="footer">Tip: Use spacebar or click on the game screen to play. All games run in the browser.</div>
+  </div>
+
+  <!-- Friend invite modal -->
+  <div id="friendModal" style="display:none; position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); background:rgba(15,23,42,0.98); padding:18px; border-radius:12px; border:1px solid rgba(255,255,255,0.08); z-index:2000; width:320px;">
+    <h3 style="margin-bottom:8px">Invite Friend</h3>
+    <select id="friendSelect" style="width:100%; padding:8px; border-radius:8px; margin-bottom:8px"></select>
+    <select id="gameSelect" style="width:100%; padding:8px; border-radius:8px; margin-bottom:8px">
+      <option value="pong">Pong</option>
+      <option value="snake">Snake</option>
+      <option value="tetris">Tetris</option>
+      <option value="flappy-bird">Flappy Bird</option>
+      <option value="space-shooter">Space Extermination</option>
+      <option value="dino-jump">Bird Jump</option>
+      <option value="cyberbull-cyberbreakout">Cyber Breakout</option>
+    </select>
+    <div style="display:flex; gap:8px; justify-content:flex-end">
+      <button onclick="sendInvite()" class="btn">Send Invite</button>
+      <button onclick="closeFriendModal()" class="btn" style="background:#374151">Close</button>
+    </div>
+  </div>
+
+  <script>
+    function goHome() {
+      window.location.href = 'cyberbull-hub.html';
+    }
+    function playFlappy() {
+      window.location.href = 'cyberbull-flappy-bird.html';
+    }
+    function playDino() {
+      window.location.href = 'cyberbull-dino-jump.html';
+    }
+    function playSpaceShooter() {
+      window.location.href = 'cyberbull-space-shooter.html';
+    }
+    function playPong() {
+      window.location.href = 'cyberbull-pong.html';
+    }
+    function playSnake() {
+      window.location.href = 'cyberbull-snake.html';
+    }
+    function playTetris() {
+      window.location.href = 'cyberbull-tetris.html';
+    }
+    function playCyberBreakout() {
+      window.location.href = 'cyberbull-cyberbreakout.html';
+    }
+
+    function openFriendModal() {
+      populateFriends();
+      document.getElementById('friendModal').style.display = 'block';
+    }
+    function closeFriendModal() { document.getElementById('friendModal').style.display = 'none'; }
+
+    function populateFriends() {
+      const currentUser = localStorage.getItem('currentUser');
+      const sel = document.getElementById('friendSelect');
+      sel.innerHTML = '';
+      if(!currentUser) return;
+      const friends = JSON.parse(localStorage.getItem(`friends_${currentUser}`) || '[]');
+      if(!friends.length) { sel.innerHTML = '<option value="">No friends</option>'; return; }
+      friends.forEach(f => { const o = document.createElement('option'); o.value = f; o.textContent = f; sel.appendChild(o) });
+    }
+
+    function sendInvite() {
+      const friend = document.getElementById('friendSelect').value;
+      const game = document.getElementById('gameSelect').value;
+      const from = localStorage.getItem('currentUser') || 'guest';
+      if(!friend) { alert('Select a friend'); return }
+      // create room id
+      const roomId = 'room_' + Math.random().toString(36).slice(2,10);
+      // store invite for friend
+      localStorage.setItem(`invite_${friend}`, JSON.stringify({from, roomId, game, ts: Date.now()}));
+      alert('Invite sent to ' + friend + '. They will see it on their home page.');
+      closeFriendModal();
+    }
+  </script>
+</body>
+</html>

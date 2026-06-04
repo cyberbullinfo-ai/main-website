@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smartschool</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #1e1e1e, #2c2c2c);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .box {
+      background: white;
+      width: 350px;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.4);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 25px;
+      color: #333;
+    }
+
+    .error {
+      color: #d32f2f;
+      margin-top: 12px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 20px;
+      border: none;
+      border-radius: 6px;
+      background: #0078ff;
+      color: white;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    button:hover {
+      background: #005fd1;
+    }
+
+    .language-toggle {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+    }
+
+    .language-menu {
+      display: none;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 8px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.14);
+      min-width: 160px;
+      text-align: left;
+    }
+
+    .language-menu.open {
+      display: block;
+    }
+
+    .language-menu select,
+    .language-menu button {
+      width: 100%;
+      margin-bottom: 6px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="box">
+  <div class="language-toggle">
+    <button class="lang-btn" id="languageButton">Taal</button>
+    <div class="language-menu" id="languageMenu">
+      <select id="languageSelect">
+        <option value="nl">Nederlands</option>
+        <option value="en">English</option>
+        <option value="es">Espanol</option>
+        <option value="fr">Francais</option>
+        <option value="de">Deutsch</option>
+      </select>
+      <button type="button" id="languageApplyButton">Toepassen</button>
+    </div>
+  </div>
+
+  <h2 id="pageTitle">Smartschool</h2>
+
+  <input type="text" id="domain" placeholder="bv. school.smartschool.be of admin@cyberbull" autocomplete="off">
+  <div class="error" id="error"></div>
+
+  <button id="nextButton">Volgende</button>
+  <button id="backButton" style="margin-top: 12px; width: 100%; padding: 12px; border-radius: 6px; border: none; background: #6c757d; color: white; cursor: pointer; font-size: 15px;">Terug</button>
+</div>
+
+<script>
+  window.goBack = function() {
+    window.location.href = "cyberbull-landing.html";
+  };
+
+  window.toggleLanguageMenu = function() {
+    document.getElementById('languageMenu').classList.toggle('open');
+  };
+
+  window.applyLanguage = function() {
+    const language = document.getElementById('languageSelect').value;
+    localStorage.setItem('cyberbullLanguage', language);
+    document.documentElement.lang = language;
+    updateTexts(language);
+    document.getElementById('languageMenu').classList.remove('open');
+  };
+
+  function updateTexts(language) {
+    const strings = {
+      nl: {
+        title: 'Smartschool',
+        placeholder: 'bv. school.smartschool.be of admin@cyberbull',
+        next: 'Volgende',
+        back: 'Terug',
+        emptyError: 'Vul een Smartschool-domein in.',
+        invalidError: 'Gelieve een geldig Smartschool-domein of admin@cyberbull in te vullen.',
+        language: 'Taal',
+        apply: 'Toepassen'
+      },
+      en: {
+        title: 'Smartschool',
+        placeholder: 'e.g., school.smartschool.be or admin@cyberbull',
+        next: 'Next',
+        back: 'Back',
+        emptyError: 'Enter a Smartschool domain.',
+        invalidError: 'Please enter a valid Smartschool domain or admin@cyberbull.',
+        language: 'Language',
+        apply: 'Apply'
+      },
+      es: {
+        title: 'Smartschool',
+        placeholder: 'p.ej., school.smartschool.be o admin@cyberbull',
+        next: 'Siguiente',
+        back: 'Atras',
+        emptyError: 'Introduce un dominio Smartschool.',
+        invalidError: 'Introduce un dominio Smartschool valido o admin@cyberbull.',
+        language: 'Idioma',
+        apply: 'Aplicar'
+      },
+      fr: {
+        title: 'Smartschool',
+        placeholder: 'p.ex., school.smartschool.be ou admin@cyberbull',
+        next: 'Suivant',
+        back: 'Retour',
+        emptyError: 'Entrez un domaine Smartschool.',
+        invalidError: 'Veuillez entrer un domaine Smartschool valide ou admin@cyberbull.',
+        language: 'Langue',
+        apply: 'Appliquer'
+      },
+      de: {
+        title: 'Smartschool',
+        placeholder: 'z.B. school.smartschool.be oder admin@cyberbull',
+        next: 'Weiter',
+        back: 'Zuruck',
+        emptyError: 'Gib eine Smartschool-Domain ein.',
+        invalidError: 'Bitte gib eine gueltige Smartschool-Domain oder admin@cyberbull ein.',
+        language: 'Sprache',
+        apply: 'Ubernehmen'
+      }
+    };
+
+    const page = strings[language] || strings.nl;
+    document.getElementById('pageTitle').textContent = page.title;
+    document.getElementById('domain').placeholder = page.placeholder;
+    document.getElementById('nextButton').textContent = page.next;
+    document.getElementById('backButton').textContent = page.back;
+    document.getElementById('languageButton').textContent = page.language;
+    document.getElementById('languageSelect').value = language;
+    document.querySelector('#languageMenu button').textContent = page.apply;
+  }
+
+  function initLanguage() {
+    const language = localStorage.getItem('cyberbullLanguage') || 'nl';
+    localStorage.setItem('cyberbullLanguage', language);
+    document.documentElement.lang = language;
+    document.getElementById('languageSelect').value = language;
+    updateTexts(language);
+  }
+
+  let domainAutoFilled = false;
+
+  function bindDomainEvents() {
+    document.getElementById('languageButton').addEventListener('click', toggleLanguageMenu);
+    document.getElementById('languageApplyButton').addEventListener('click', applyLanguage);
+    document.getElementById('nextButton').addEventListener('click', nextPage);
+    document.getElementById('backButton').addEventListener('click', goBack);
+    document.getElementById('domain').addEventListener('input', smartschoolAutofill);
+  }
+
+  function smartschoolAutofill() {
+    if (domainAutoFilled) return;
+
+    const input = document.getElementById('domain');
+    const value = input.value;
+    const lower = value.trim().toLowerCase();
+
+    const shorthandMatch = lower.match(/^([a-z0-9][a-z0-9-]*)\.$/);
+    const smartschoolMatch = lower.match(/^([a-z0-9][a-z0-9-]*)\.smartschool(?:\.)?$/);
+
+    if (shorthandMatch) {
+      input.value = `${shorthandMatch[1]}.smartschool.be`;
+      domainAutoFilled = true;
+    } else if (smartschoolMatch) {
+      input.value = `${smartschoolMatch[1]}.smartschool.be`;
+      domainAutoFilled = true;
+    }
+  }
+
+  window.nextPage = function() {
+    const domainInput = document.getElementById("domain");
+    const error = document.getElementById("error");
+    const domain = domainInput.value.trim().toLowerCase();
+
+    const smartschoolRegex = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)*\.smartschool\.be$/;
+    const adminRegex = /^admin@cyberbull$/;
+
+    if (!domain) {
+      error.textContent = document.getElementById('languageSelect').value === 'en' ? 'Enter a Smartschool domain.' : document.getElementById('languageSelect').value === 'es' ? 'Introduce un dominio Smartschool.' : document.getElementById('languageSelect').value === 'fr' ? 'Entrez un domaine Smartschool.' : document.getElementById('languageSelect').value === 'de' ? 'Gib eine Smartschool-Domain ein.' : 'Vul een Smartschool-domein in.';
+      return;
+    }
+
+    if (!smartschoolRegex.test(domain) && !adminRegex.test(domain)) {
+      error.textContent = document.getElementById('languageSelect').value === 'en' ? 'Please enter a valid Smartschool domain or admin@cyberbull.' : document.getElementById('languageSelect').value === 'es' ? 'Introduce un dominio Smartschool valido o admin@cyberbull.' : document.getElementById('languageSelect').value === 'fr' ? 'Veuillez entrer un domaine Smartschool valide ou admin@cyberbull.' : document.getElementById('languageSelect').value === 'de' ? 'Bitte gib eine gueltige Smartschool-Domain oder admin@cyberbull ein.' : 'Gelieve een geldig Smartschool-domein of admin@cyberbull in te vullen.';
+      return;
+    }
+
+    error.textContent = "";
+    localStorage.setItem("schoolDomain", domain);
+
+    window.location.href = "index.html";
+  }
+
+  initLanguage();
+  bindDomainEvents();
+</script>
+
+</body>
+</html>

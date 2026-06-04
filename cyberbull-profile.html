@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile - CyberBull</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      color: white;
+    }
+    
+    .header h1 {
+      font-size: 32px;
+    }
+    
+    .header-buttons {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .btn-header {
+      background: rgba(255,255,255,0.2);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+    
+    .btn-header:hover {
+      background: rgba(255,255,255,0.3);
+    }
+    
+    .profile-header {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 15px 50px rgba(0,0,0,0.2);
+      margin-bottom: 30px;
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 40px;
+      align-items: center;
+    }
+    
+    .profile-avatar {
+      text-align: center;
+    }
+    
+    .avatar-circle {
+      width: 150px;
+      height: 150px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 70px;
+      margin: 0 auto 20px;
+      box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    }
+    
+    .username {
+      font-size: 24px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 5px;
+    }
+    
+    .level-badge {
+      background: #667eea;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: bold;
+      display: inline-block;
+      font-size: 14px;
+    }
+    
+    .profile-info {
+      display: grid;
+      gap: 20px;
+    }
+    
+    .level-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    
+    .level-info {
+      background: #f9f9f9;
+      padding: 20px;
+      border-radius: 12px;
+      border-left: 4px solid #667eea;
+    }
+    
+    .level-info label {
+      font-size: 12px;
+      color: #999;
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 8px;
+    }
+    
+    .level-info .value {
+      font-size: 32px;
+      font-weight: bold;
+      color: #667eea;
+    }
+    
+    .xp-progress {
+      background: #f9f9f9;
+      padding: 20px;
+      border-radius: 12px;
+      border-left: 4px solid #f59e0b;
+    }
+    
+    .xp-progress label {
+      font-size: 12px;
+      color: #999;
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 10px;
+    }
+    
+    .progress-bar {
+      width: 100%;
+      height: 12px;
+      background: #e0e0e0;
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    
+    .progress-text {
+      font-size: 12px;
+      color: #666;
+      font-weight: bold;
+    }
+    
+    .title-section {
+      background: #f9f9f9;
+      padding: 20px;
+      border-radius: 12px;
+      border-left: 4px solid #2ecc71;
+    }
+    
+    .title-section label {
+      font-size: 12px;
+      color: #999;
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 8px;
+    }
+    
+    .title-display {
+      font-size: 18px;
+      font-weight: bold;
+      color: #333;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    
+    .unlocks-section {
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 15px 50px rgba(0,0,0,0.2);
+      margin-bottom: 30px;
+    }
+    
+    .unlocks-section h2 {
+      color: #333;
+      margin-bottom: 20px;
+      font-size: 20px;
+    }
+    
+    .unlocks-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 15px;
+    }
+    
+    .unlock-card {
+      background: #f9f9f9;
+      border: 2px solid #eee;
+      border-radius: 12px;
+      padding: 15px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+    
+    .unlock-card.locked {
+      opacity: 0.5;
+      background: #f5f5f5;
+    }
+    
+    .unlock-card:not(.locked):hover {
+      border-color: #667eea;
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+    }
+    
+    .unlock-icon {
+      font-size: 32px;
+      margin-bottom: 10px;
+    }
+    
+    .unlock-name {
+      font-weight: bold;
+      color: #333;
+      font-size: 14px;
+      margin-bottom: 5px;
+    }
+    
+    .unlock-level {
+      font-size: 12px;
+      color: #999;
+    }
+    
+    .badges-section {
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 15px 50px rgba(0,0,0,0.2);
+      margin-bottom: 30px;
+    }
+    
+    .badges-section h2 {
+      color: #333;
+      margin-bottom: 20px;
+      font-size: 20px;
+    }
+    
+    .badges-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 15px;
+    }
+    
+    .badge-card {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+      transition: all 0.3s ease;
+    }
+    
+    .badge-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+    }
+    
+    .badge-card.locked {
+      background: #ddd;
+      opacity: 0.5;
+    }
+    
+    .badge-icon {
+      font-size: 40px;
+      margin-bottom: 10px;
+    }
+    
+    .badge-name {
+      font-weight: bold;
+      font-size: 14px;
+      margin-bottom: 5px;
+    }
+    
+    .badge-desc {
+      font-size: 11px;
+      opacity: 0.9;
+    }
+    
+    .stats-section {
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 15px 50px rgba(0,0,0,0.2);
+      margin-bottom: 30px;
+    }
+    
+    .stats-section h2 {
+      color: #333;
+      margin-bottom: 20px;
+      font-size: 20px;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 20px;
+    }
+    
+    .stat {
+      background: #f9f9f9;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+    }
+    
+    .stat label {
+      font-size: 12px;
+      color: #999;
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 8px;
+    }
+    
+    .stat .value {
+      font-size: 24px;
+      font-weight: bold;
+      color: #667eea;
+    }
+    
+    .button-group {
+      display: flex;
+      gap: 15px;
+    }
+    
+    .btn {
+      flex: 1;
+      padding: 15px 30px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-primary {
+      background: white;
+      color: #667eea;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    
+    .btn-secondary {
+      background: rgba(255,255,255,0.2);
+      color: white;
+      backdrop-filter: blur(10px);
+    }
+    
+    .btn-secondary:hover {
+      background: rgba(255,255,255,0.3);
+    }
+  </style>
+  <script src="auth.js"></script>
+</head>
+<body>
+  <script>
+    window.globalAuth.requireAuth();
+  </script>
+
+<div class="container">
+  <div class="header">
+    <h1>👤 My Profile</h1>
+    <div class="header-buttons">
+      <button class="btn-header" onclick="goToProgress()">📊 Progression</button>
+      <button class="btn-header" onclick="goBack()">← Back</button>
+    </div>
+  </div>
+  
+  <div class="profile-header">
+    <div class="profile-avatar">
+      <div class="avatar-circle" id="avatar">🎓</div>
+      <div class="username" id="username">Loading...</div>
+      <div class="level-badge" id="titleBadge">Level 1</div>
+    </div>
+    
+    <div class="profile-info">
+      <div class="level-section">
+        <div class="level-info">
+          <label>Current Level</label>
+          <div class="value" id="levelDisplay">1</div>
+        </div>
+        <div class="level-info">
+          <label>Total XP</label>
+          <div class="value" id="totalXpDisplay">0</div>
+        </div>
+      </div>
+      
+      <div class="xp-progress">
+        <label>XP to Next Level</label>
+        <div class="progress-bar">
+          <div class="progress-fill" id="xpBar"></div>
+        </div>
+        <div class="progress-text" id="xpText">0 / 100 XP</div>
+      </div>
+      
+      <div class="title-section">
+        <label>Your Title</label>
+        <div class="title-display" id="titleDisplay">🎓 Novice</div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="stats-section">
+    <h2>📊 Statistics</h2>
+    <div class="stats-grid">
+      <div class="stat">
+        <label>Study Sessions</label>
+        <div class="value" id="sessionCount">0</div>
+      </div>
+      <div class="stat">
+        <label>Total Study Time</label>
+        <div class="value" id="totalStudyTime">0h</div>
+      </div>
+      <div class="stat">
+        <label>Current Streak</label>
+        <div class="value" id="streakDisplay">0</div>
+      </div>
+      <div class="stat">
+        <label>Coins Earned</label>
+        <div class="value" id="totalCoins">0</div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="badges-section">
+    <h2>🏆 Badges Earned</h2>
+    <div class="badges-grid" id="badgesGrid">
+      Loading badges...
+    </div>
+  </div>
+  
+  <div class="unlocks-section">
+    <h2>🎁 Level Unlocks</h2>
+    <div class="unlocks-grid" id="unlocksGrid">
+      Loading unlocks...
+    </div>
+  </div>
+  
+  <div class="button-group">
+    <button class="btn btn-secondary" onclick="goBack()">← Back to Home</button>
+  </div>
+</div>
+
+<script src="admin.js"></script>
+<script src="progression.js"></script>
+
+<script>
+  const currentUser = localStorage.getItem('currentUser');
+  const currentUserKey = localStorage.getItem('currentUserKey');
+  
+  if (!currentUser || !currentUserKey) {
+    window.location.href = 'cyberbull-landing.html';
+  }
+  
+  function loadProfile() {
+    const user = getUserByKey(currentUserKey);
+    if (!user) {
+      alert('Error loading profile');
+      window.location.href = 'cyberbull-student.html';
+      return;
+    }
+    
+    const level = window.progressionAPI.getCurrentLevel(user.xp || 0);
+    const xpProgress = window.progressionAPI.getXpProgressInLevel(user.xp || 0);
+    const levelConfig = window.progressionAPI.LEVEL_CONFIG.levels[level] || { title: 'Unknown', badge: '❓', unlocks: [] };
+    
+    // Update header
+    document.getElementById('username').textContent = user.username;
+    document.getElementById('levelDisplay').textContent = level;
+    document.getElementById('totalXpDisplay').textContent = user.xp || 0;
+    document.getElementById('titleBadge').textContent = `${levelConfig.badge} Level ${level}`;
+    document.getElementById('titleDisplay').textContent = `${levelConfig.badge} ${levelConfig.title}`;
+    
+    // Update XP progress
+    const xpPercent = xpProgress.percent;
+    document.getElementById('xpBar').style.width = xpPercent + '%';
+    document.getElementById('xpText').textContent = `${xpProgress.current} / ${xpProgress.needed} XP`;
+    
+    // Update stats
+    const totalStudyMinutes = (user.sessions || []).reduce((sum, s) => sum + (s.duration || 0), 0);
+    const totalStudyHours = Math.floor(totalStudyMinutes / 60);
+    
+    document.getElementById('sessionCount').textContent = (user.sessions || []).length;
+    document.getElementById('totalStudyTime').textContent = totalStudyHours + 'h';
+    document.getElementById('streakDisplay').textContent = (user.streak || 0);
+    document.getElementById('totalCoins').textContent = (user.coins || 0);
+    
+    // Render badges
+    renderBadges(user);
+    
+    // Render level unlocks
+    renderUnlocks(level);
+  }
+  
+  function renderBadges(user) {
+    const badges = user.badges || [];
+    const badgeConfig = window.progressionAPI.BADGE_CONFIG;
+
+    let html = '';
+    Object.entries(badgeConfig).forEach(([badgeId, badgeInfo]) => {
+      const hasBadge = badges.includes(badgeId);
+      html += `
+        <div class="badge-card ${!hasBadge ? 'locked' : ''}">
+          <div class="badge-icon">${badgeInfo.icon}</div>
+          <div class="badge-name">${badgeInfo.name}</div>
+          <div class="badge-desc">${hasBadge ? '✓ Unlocked' : '🔒 Locked'}</div>
+        </div>
+      `;
+    });
+
+    document.getElementById('badgesGrid').innerHTML = html;
+  }
+
+  function renderUnlocks(level) {
+    const levelConfig = window.progressionAPI.LEVEL_CONFIG;
+    const allUnlocks = [];
+    
+    Object.entries(levelConfig.levels).forEach(([lvl, config]) => {
+      const lvlNum = parseInt(lvl);
+      config.unlocks?.forEach(unlock => {
+        allUnlocks.push({
+          level: lvlNum,
+          unlock: unlock,
+          isUnlocked: level >= lvlNum
+        });
+      });
+    });
+    
+    const unlocksMap = {
+      'theme_dark': { icon: '🌙', name: 'Dark Theme' },
+      'profile_border_gold': { icon: '⭐', name: 'Gold Border' },
+      'theme_neon': { icon: '⚡', name: 'Neon Theme' },
+      'profile_title': { icon: '📝', name: 'Custom Title' },
+      'theme_custom': { icon: '🎨', name: 'Custom Theme' },
+      'exclusive_pet_dragon': { icon: '🐉', name: 'Dragon Pet' },
+      'theme_hologram': { icon: '🌈', name: 'Hologram Theme' },
+      'exclusive_pet_phoenix': { icon: '🔥', name: 'Phoenix Pet' }
+    };
+    
+    let html = '';
+    Object.entries(unlocksMap).forEach(([unlockId, unlockInfo]) => {
+      const unlock = allUnlocks.find(u => u.unlock === unlockId);
+      if (unlock) {
+        html += `
+          <div class="unlock-card ${!unlock.isUnlocked ? 'locked' : ''}">
+            <div class="unlock-icon">${unlockInfo.icon}</div>
+            <div class="unlock-name">${unlockInfo.name}</div>
+            <div class="unlock-level">Level ${unlock.level}</div>
+          </div>
+        `;
+      }
+    });
+    
+    document.getElementById('unlocksGrid').innerHTML = html;
+  }
+  
+  function goToProgress() {
+    window.location.href = 'cyberbull-daily-quests.html';
+  }
+  
+  function goBack() {
+    window.location.href = 'cyberbull-student.html';
+  }
+  
+  loadProfile();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Local Chat</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      min-height: 100vh;
+      color: #f0f0f0;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+    }
+
+    .header {
+      background: rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 15px 20px;
+      margin-bottom: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    }
+
+    .header h1 {
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .header-subtitle {
+      font-size: 12px;
+      color: #aaa;
+      margin-top: 4px;
+    }
+
+    .header-right {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+
+    .online-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(34, 197, 94, 0.2);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+    }
+
+    .online-dot {
+      width: 8px;
+      height: 8px;
+      background: #22c55e;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .nav-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .nav-btn {
+      padding: 8px 16px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #f0f0f0;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.3s;
+    }
+
+    .nav-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .main-area {
+      display: flex;
+      gap: 15px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .chat-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+    }
+
+    .messages-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .messages-container::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .messages-container::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 3px;
+    }
+
+    .messages-container::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 3px;
+    }
+
+    .messages-container::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .message {
+      display: flex;
+      gap: 12px;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .message-avatar {
+      font-size: 32px;
+      flex-shrink: 0;
+    }
+
+    .message-content {
+      flex: 1;
+    }
+
+    .message-header {
+      display: flex;
+      gap: 8px;
+      align-items: baseline;
+      margin-bottom: 4px;
+    }
+
+    .message-username {
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .message-time {
+      font-size: 12px;
+      color: #aaa;
+    }
+
+    .message-text {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 10px 14px;
+      border-radius: 8px;
+      word-wrap: break-word;
+      line-height: 1.4;
+    }
+
+    .message-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 6px;
+      font-size: 12px;
+    }
+
+    .message-action {
+      cursor: pointer;
+      color: #aaa;
+      transition: color 0.3s;
+    }
+
+    .message-action:hover {
+      color: #f0f0f0;
+    }
+
+    .input-area {
+      padding: 15px 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      gap: 10px;
+    }
+
+    .message-input-wrapper {
+      flex: 1;
+      display: flex;
+      gap: 10px;
+    }
+
+    .message-input {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #f0f0f0;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: all 0.3s;
+    }
+
+    .message-input:focus {
+      outline: none;
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .message-input::placeholder {
+      color: #aaa;
+    }
+
+    .send-btn {
+      background: #f5576c;
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+      font-size: 14px;
+    }
+
+    .send-btn:hover {
+      background: #e83e5a;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(245, 87, 108, 0.4);
+    }
+
+    .send-btn:active {
+      transform: translateY(0);
+    }
+
+    .sidebar {
+      width: 250px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      max-height: calc(100vh - 150px);
+    }
+
+    .sidebar-card {
+      background: rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 15px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      overflow-y: auto;
+    }
+
+    .sidebar-card h3 {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: #aaa;
+      text-transform: uppercase;
+    }
+
+    .sidebar-card::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .sidebar-card::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 2px;
+    }
+
+    .user-item {
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+
+    .user-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .user-avatar {
+      font-size: 20px;
+    }
+
+    .user-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .user-name {
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .user-status {
+      font-size: 11px;
+      color: #22c55e;
+    }
+
+    .empty-message {
+      text-align: center;
+      color: #aaa;
+      padding: 40px 20px;
+      margin: auto;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        display: none;
+      }
+
+      .container {
+        padding: 5px;
+      }
+
+      .header {
+        padding: 10px 15px;
+      }
+
+      .header h1 {
+        font-size: 18px;
+      }
+
+      .nav-buttons {
+        gap: 5px;
+      }
+
+      .nav-btn {
+        padding: 6px 12px;
+        font-size: 12px;
+      }
+    }
+  </style>
+  <script src="auth.js"></script>
+</head>
+<body>
+  <script>
+    window.globalAuth.requireAuth();
+  </script>
+  <div class="container">
+    <div class="header">
+      <div>
+        <h1>🏫 Local Chat</h1>
+        <div class="header-subtitle" id="schoolDisplay"></div>
+      </div>
+      <div class="header-right">
+        <div class="online-badge">
+          <span class="online-dot"></span>
+          <span id="onlineCount">0</span> Online
+        </div>
+        <div class="nav-buttons">
+          <button class="nav-btn" onclick="goToGlobalChat()">🌍 Global Chat</button>
+          <button class="nav-btn" onclick="goToPrivateChat()">💬 Private Chat</button>
+          <button class="nav-btn" onclick="goHome()">🏠 Home</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="main-area">
+      <div class="chat-area">
+        <div class="messages-container" id="messagesContainer">
+          <div class="empty-message">Loading messages...</div>
+        </div>
+        <div class="input-area">
+          <div class="message-input-wrapper">
+            <input type="text" class="message-input" id="messageInput" placeholder="Chat with your school... 👋">
+            <button class="send-btn" onclick="sendMessage()">Send</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar">
+        <div class="sidebar-card">
+          <h3>👥 Online at Your School</h3>
+          <div id="onlineUsersList">
+            <div style="text-align: center; color: #aaa; font-size: 12px;">Loading...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="admin.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="firebase-api.js"></script>
+  <script src="chat.js"></script>
+  <script>
+    const currentUser = localStorage.getItem("currentUser");
+    const currentUserKey = localStorage.getItem("currentUserKey");
+    const schoolDomain = localStorage.getItem("schoolDomain");
+
+    if (window.firebaseAPI?.isEnabled) {
+      window.firebaseAPI.subscribeLocalMessages(schoolDomain);
+    }
+
+    document.getElementById('schoolDisplay').textContent = `Chat with your school (${schoolDomain})`;
+
+    function getAvatarForUser(username) {
+      const emojis = ['😊', '😃', '😄', '😁', '🤗', '😍', '🤩', '😎', '🥳', '😇', '🙂', '😌', '😍', '🤓'];
+      let hash = 0;
+      for (let i = 0; i < username.length; i++) {
+        hash = ((hash << 5) - hash) + username.charCodeAt(i);
+        hash |= 0;
+      }
+      return emojis[Math.abs(hash) % emojis.length];
+    }
+
+    function formatTime(timestamp) {
+      const date = new Date(timestamp);
+      const now = new Date();
+      const diffMs = now - date;
+      const diffMins = Math.floor(diffMs / 60000);
+      
+      if (diffMins < 1) return 'now';
+      if (diffMins < 60) return `${diffMins}m ago`;
+      
+      const diffHours = Math.floor(diffMins / 60);
+      if (diffHours < 24) return `${diffHours}h ago`;
+      
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+
+    function renderMessages() {
+      const messages = window.chatAPI.getLocalMessages(schoolDomain, 24);
+      const filtered = window.chatAPI.filterBlockedMessages(messages, currentUserKey);
+      const container = document.getElementById('messagesContainer');
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<div class="empty-message">Start a conversation with your classmates! 👋</div>';
+        return;
+      }
+
+      container.innerHTML = filtered.map(msg => {
+        const isOwn = msg.userKey === currentUserKey;
+        return `
+          <div class="message">
+            <div class="message-avatar">${msg.avatar || '😊'}</div>
+            <div class="message-content">
+              <div class="message-header">
+                <span class="message-username">${msg.username}</span>
+                <span class="message-time">${formatTime(msg.timestamp)}</span>
+              </div>
+              <div class="message-text">${escapeHtml(msg.message)}</div>
+              <div class="message-actions">
+                ${isOwn ? `<span class="message-action" onclick="deleteMessage('${msg.id}')">Delete</span>` : ''}
+                <span class="message-action" onclick="blockUser('${msg.userKey}', '${msg.username}')">Block</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function renderOnlineUsers() {
+      const onlineUsers = window.chatAPI.getOnlineUsersInSchool(schoolDomain);
+      const users = Object.entries(onlineUsers)
+        .filter(([key]) => key !== currentUserKey)
+        .slice(0, 20);
+
+      const listContainer = document.getElementById('onlineUsersList');
+      
+      document.getElementById('onlineCount').textContent = Object.keys(onlineUsers).length;
+
+      if (users.length === 0) {
+        listContainer.innerHTML = '<div style="text-align: center; color: #aaa; font-size: 12px;">You are the only one here</div>';
+        return;
+      }
+
+      listContainer.innerHTML = users.map(([key, user]) => `
+        <div class="user-item" onclick="startPrivateChat('${key}', '${user.username}')">
+          <div class="user-avatar">${user.avatar || '😊'}</div>
+          <div class="user-info">
+            <div class="user-name">${user.username}</div>
+            <div class="user-status">Online</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function sendMessage() {
+      const input = document.getElementById('messageInput');
+      const message = input.value;
+
+      if (!message.trim()) return;
+
+      const avatar = getAvatarForUser(currentUser);
+
+      window.chatAPI.sendLocalMessage(currentUserKey, currentUser, schoolDomain, message, avatar);
+      
+      input.value = '';
+      renderMessages();
+    }
+
+    function deleteMessage(messageId) {
+      if (confirm('Delete this message?')) {
+        window.chatAPI.deleteLocalMessage(messageId, currentUserKey, schoolDomain);
+        renderMessages();
+      }
+    }
+
+    function blockUser(userKey, username) {
+      if (confirm(`Block ${username}? You won't see their messages.`)) {
+        window.chatAPI.blockUser(currentUserKey, userKey);
+        renderMessages();
+        alert(`${username} blocked`);
+      }
+    }
+
+    function startPrivateChat(userKey, username) {
+      localStorage.setItem('privateChatWith', userKey);
+      localStorage.setItem('privateChatWithName', username);
+      window.location.href = 'cyberbull-private-chat.html';
+    }
+
+    function goToGlobalChat() {
+      window.location.href = 'cyberbull-global-chat.html';
+    }
+
+    function goToPrivateChat() {
+      window.location.href = 'cyberbull-private-chat.html';
+    }
+
+    function goHome() {
+      window.location.href = 'cyberbull-student.html';
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Initialize
+    window.chatAPI.setUserOnline(currentUserKey, currentUser, schoolDomain, getAvatarForUser(currentUser));
+    renderMessages();
+    renderOnlineUsers();
+
+    // Enter to send
+    document.getElementById('messageInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+
+    // Refresh messages and online users every 2 seconds
+    setInterval(() => {
+      renderMessages();
+      renderOnlineUsers();
+      window.chatAPI.setUserOnline(currentUserKey, currentUser, schoolDomain, getAvatarForUser(currentUser));
+    }, 2000);
+  </script>
+</body>
+</html>

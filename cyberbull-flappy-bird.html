@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Flappy Bird+</title>
+<script src="progression.js"></script>
+<style>
+  :root{
+    --bg:#0f172a;
+    --card:#111827;
+    --text:#f8fafc;
+    --muted:#cbd5e1;
+    --accent:#3b82f6;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+  }
+  .topbar{
+    width:100%;
+    max-width:560px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:16px;
+    gap:12px;
+  }
+  .topbar h2{font-size:1.25rem;font-weight:800;letter-spacing:.2px;}
+  .topbar button,
+  .menu button{border:none;cursor:pointer;font-weight:800;}
+  .topbar button{
+    background:rgba(255,255,255,0.12);
+    color:white;
+    padding:10px 14px;
+    border-radius:999px;
+  }
+  .spacer{width:84px;}
+  .game-card{
+    width:100%;
+    max-width:560px;
+    background:var(--card);
+    position:relative;
+    border-radius:24px;
+    padding:18px;
+    box-shadow:0 24px 80px rgba(0,0,0,0.35);
+  }
+  .canvas-wrap{width:100%;aspect-ratio:3/4;}
+  canvas{
+    width:100%;
+    height:100%;
+    display:block;
+    border-radius:18px;
+    background:#87ceeb;
+    touch-action:manipulation;
+  }
+  .info{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:10px;
+    margin-top:16px;
+  }
+  .info div{
+    text-align:center;
+    padding:12px 10px;
+    border-radius:14px;
+    background:rgba(255,255,255,0.08);
+    font-weight:800;
+    line-height:1.25;
+    min-height:48px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:.92rem;
+  }
+  .hint{
+    margin-top:12px;
+    text-align:center;
+    color:var(--muted);
+    line-height:1.5;
+    font-size:.95rem;
+  }
+  .overlay{
+    position:absolute;
+    inset:0;
+    background:rgba(0,0,0,0.82);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:50;
+    padding:24px;
+    border-radius:18px;
+  }
+  .overlay.hidden{display:none;}
+  .menu{
+    background:#111827;
+    border-radius:24px;
+    padding:32px;
+    text-align:center;
+    width:min(460px,92vw);
+    box-shadow:0 24px 80px rgba(0,0,0,0.4);
+  }
+  .menu h1{font-size:2.6rem;margin-bottom:12px;}
+  .menu p{color:var(--muted);margin-bottom:16px;line-height:1.5;}
+  .menu .sub{font-size:.95rem;margin-bottom:24px;}
+  .menu button{
+    background:var(--accent);
+    color:white;
+    padding:16px 36px;
+    border-radius:14px;
+    font-size:1rem;
+  }
+</style>
+</head>
+<body>
+  <script src="auth.js"></script>
+  <script>
+    window.globalAuth.requireAuth();
+  </script>
+  <div class="topbar">
+    <button onclick="goGames()">← Games</button>
+    <h2>Flappy Bird+</h2>
+    <div class="spacer"></div>
+  </div>
+
+  <div class="game-card">
+    <div class="overlay" id="overlay">
+      <div class="menu">
+        <h1>🐦 Flappy Bird+</h1>
+        <p>Space / Arrow Up / Tap to flap</p>
+        <p class="sub">Shield gives 3 hits. Gravity flip reverses the world. Pipes change behavior in sections. Madness Mode removes powerups and gives 3 emergency revives.</p>
+        <button onclick="startGame()">Start Game</button>
+      </div>
+    </div>
+    <div class="canvas-wrap"><canvas id="gameCanvas"></canvas></div>
+    <div class="info">
+      <div id="score">Score: 0</div>
+      <div id="best">High Score: 0</div>
+      <div id="status">Status: Ready</div>
+      <div id="lives">Madness Revives: 0</div>
+    </div>
+    <div class="hint">Clouds and grass are purely visual. Caps are safe to touch. Pipe bodies are deadly. Madness Mode is pure survival.</div>
+  </div>
+
+<script>
+(() => {
+  const canvas = document.getElementById('gameCanvas');
+  const ctx = canvas.getContext('2d');
+  const currentUserKey = localStorage.getItem('currentUserKey');
+  const overlay = document.getElementById('overlay');
+  const ui = {
+    score: document.getElementById('score'),
+    best: document.getElementById('best'),
+    status: document.getElementById('status'),
+    lives: document.getElementById('lives'),
+  };
+
+  const world = { width: 480, height: 640 };
+  const GameState = { READY: 'ready', PLAYING: 'playing', OVER: 'over' };
+  const PIPE_TYPES = ['static', 'wave', 'pulsing', 'alternating', 'tight', 'tunnel', 'moving'];
+
+  const config = {
+    bird: { x: 100, w: 24, h: 24 },
+    pipe: { w: 42, gap: 170, speed: 172, cap: 12, spikeH: 18, spikeBase: 10, spacing: 206 },
+    grassH: 42,
+    cloudCount: 7,
+  };
+
+  const physics = {
+    gravity: 1120,
+    flapPower: -355,
+    maxFall: 710,
+    shieldGravityScale: 0.82,
+    shieldDamping: 0.994,
+    shieldBounce: -0.18,
+  };
+
+  const state = {
+    game: GameState.READY,
+    score: 0,
+    best: safeReadBest(),
+    sceneTime: 0,
+    lastTime: 0,
+    pipes: [],
+    powerUps: [],
+    removePowerupType: null,
+    clouds: [],
+    stars: [],
+    section: { type: 'static', remaining: 0, count: 0 },
+    pipeId: 1,
+    powerUpId: 1,
+    shake: { timer: 0, strength: 0 },
+    transitionSafety: 0,
+    shield: { active: false, charges: 0, hitCooldown: 0, flashTimer: 0 },
+    gravityFlip: { active: false, timer: 0 },
+    recovery: { active: false, timer: 0, duration: 0.72, startY: 0, targetY: 0 },
+    madness: { active: false, timer: 0, triggered: false, revives: 0 },
+    respawn: { active: false, timer: 0, duration: 0.75 },
+  };
+
+  const bird = { x: config.bird.x, y: 0, vy: 0, w: config.bird.w, h: config.bird.h };
+
+  function safeReadBest(){
+    try { return Number(localStorage.getItem('flappyBest') || 0) || 0; }
+    catch { return 0; }
+  }
+  function safeWriteBest(v){
+    try { localStorage.setItem('flappyBest', String(v)); }
+    catch {}
+  }
+
+  function resizeCanvas(){
+    const rect = canvas.getBoundingClientRect();
+    const dpr = Math.max(1, window.devicePixelRatio || 1);
+    canvas.width = Math.round(rect.width * dpr);
+    canvas.height = Math.round(rect.height * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    world.width = rect.width;
+    world.height = rect.height;
+    resetStars();
+  }
+
+  function rand(min, max){ return Math.random() * (max - min) + min; }
+  function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
+  function lerp(a, b, t){ return a + (b - a) * t; }
+  function easeInOutCubic(t){ return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+  function pick(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
+  function overlaps(ax1, ay1, ax2, ay2, bx1, by1, bx2, by2){ return ax1 < bx2 && ax2 > bx1 && ay1 < by2 && ay2 > by1; }
+
+  function updateHUD(){
+    ui.score.textContent = `Score: ${state.score}`;
+    ui.best.textContent = `High Score: ${state.best}`;
+    if(state.respawn.active) ui.status.textContent = 'Status: Respawn';
+    else if(state.recovery.active) ui.status.textContent = 'Status: Shield recovery';
+    else if(state.madness.active) ui.status.textContent = `Status: Madness ${Math.ceil(state.madness.timer)}s`;
+    else if(state.shield.active) ui.status.textContent = `Status: Shield x${state.shield.charges}`;
+    else if(state.gravityFlip.active) ui.status.textContent = `Status: Gravity Flip ${Math.ceil(state.gravityFlip.timer)}s`;
+    else ui.status.textContent = 'Status: Calm';
+    ui.lives.textContent = `Madness Revives: ${state.madness.active ? state.madness.revives : 0}`;
+  }
+
+  function createCloud(x){ return { x, y: rand(24, world.height * 0.24), scale: rand(0.7, 1.5), speed: rand(16, 30), puffs: Math.floor(rand(3, 5)) }; }
+  function resetClouds(){
+    state.clouds = [];
+    let x = -20;
+    for(let i = 0; i < config.cloudCount; i++){
+      state.clouds.push(createCloud(x));
+      x += rand(95, 160);
+    }
+  }
+  function resetStars(){
+    state.stars = [];
+    for(let i = 0; i < 34; i++){
+      state.stars.push({ x: rand(0, world.width), y: rand(0, world.height * 0.38), r: rand(0.8, 2.2), twinkle: rand(0, Math.PI * 2), speed: rand(0.5, 1.2) });
+    }
+  }
+
+  function nightProgress(){ return clamp((state.score - 20) / 10, 0, 1); }
+  function difficulty(){ return clamp(state.score / 90, 0, 1); }
+
+  function sectionLabel(type){
+    return {
+      static: 'STATIC',
+      wave: 'WAVE',
+      pulsing: 'PULSING',
+      alternating: 'ALTERNATING',
+      tight: 'TIGHT',
+      tunnel: 'TUNNEL',
+      moving: 'MOVING'
+    }[type] || 'STATIC';
+  }
+
+  function chooseSectionType(){
+    const s = state.score;
+    const pool = [];
+    const add = (type, w) => { for(let i = 0; i < Math.max(1, Math.round(w * 10)); i++) pool.push(type); };
+    add('static', s < 8 ? 8 : s < 20 ? 5 : 3);
+    add('wave', s < 10 ? 2 : 5);
+    add('pulsing', s < 12 ? 1 : 4);
+    add('alternating', s < 14 ? 1 : 4);
+    add('tight', s < 8 ? 1 : 4);
+    add('tunnel', s < 18 ? 0.5 : 3);
+    add('moving', s < 10 ? 1 : 5);
+    return pick(pool.length ? pool : PIPE_TYPES);
+  }
+
+  function refreshSectionPlan(){
+    state.section.type = chooseSectionType();
+    state.section.count = state.madness.active ? Math.floor(rand(2, 5)) : Math.floor(rand(3, 6));
+    state.section.remaining = state.section.count;
+  }
+
+  function getPipeBehavior(type, indexInSection){
+    const d = difficulty();
+    const speedScale = 1 + d * 0.42 + (state.madness.active ? 0.18 : 0);
+    const gapPenalty = d * 26 + (state.madness.active ? 18 : 0);
+
+    if(type === 'tunnel') return { type, gap: Math.max(108, 124 - gapPenalty), amp: 0, freq: 0, speed: config.pipe.speed * (1.02 + d * 0.1), spacing: 40 };
+    if(type === 'tight') return { type, gap: Math.max(122, 138 - gapPenalty), amp: 0, freq: 0, speed: config.pipe.speed * speedScale, spacing: 200 };
+    if(type === 'pulsing') return { type, gap: Math.max(148, 164 - d * 10), amp: 18 + d * 8, freq: 1.15 + d * 0.55, speed: config.pipe.speed * speedScale, spacing: 204 };
+    if(type === 'alternating') return { type, gap: Math.max(146, 164 - d * 8), amp: 24 + d * 7, freq: 1.0 + d * 0.4, speed: config.pipe.speed * speedScale, spacing: 202, altOffset: indexInSection % 2 === 0 ? -34 : 34 };
+    if(type === 'wave') return { type, gap: Math.max(150, 170 - d * 8), amp: 26 + d * 10, freq: 0.9 + d * 0.5, speed: config.pipe.speed * speedScale, spacing: 206 };
+    if(type === 'moving') return { type, gap: Math.max(148, 170 - d * 9), amp: 34 + d * 12, freq: 1.2 + d * 0.55, speed: config.pipe.speed * speedScale, spacing: 208 };
+    return { type: 'static', gap: Math.max(150, 170 - d * 6), amp: 0, freq: 0, speed: config.pipe.speed * speedScale, spacing: 206 };
+  }
+
+  function getPipeTop(pipe){
+    const b = pipe.behavior;
+    let top = pipe.baseTop;
+    if(b.type === 'wave' || b.type === 'moving') top += Math.sin(state.sceneTime * b.freq + pipe.phase) * b.amp;
+    else if(b.type === 'pulsing') top += Math.sin(state.sceneTime * b.freq + pipe.phase) * (b.amp * 0.42);
+    else if(b.type === 'alternating') top += Math.sin(state.sceneTime * b.freq + pipe.phase) * b.amp + b.altOffset;
+    return clamp(top, pipe.minTop, pipe.maxTop);
+  }
+  function updatePipeGeometry(pipe){ pipe.top = getPipeTop(pipe); pipe.bottom = pipe.top + pipe.behavior.gap; }
+
+  function createPowerUp(pipe, type){
+    return { id: state.powerUpId++, pipeId: pipe.id, type, phase: Math.random() * Math.PI * 2, bobAmp: rand(5, 10), bobSpeed: rand(2.0, 3.2), size: 18 };
+  }
+  function shouldSpawnPowerUp(){
+    if(state.madness.active) return false;
+    // if both powerups already active, don't spawn any
+    if(state.shield.active && state.gravityFlip.active) return false;
+    if(state.powerUps.length >= 3) return false;
+    return Math.random() < 0.38;
+  }
+
+  function createPipe(x){
+    if(state.section.remaining <= 0) refreshSectionPlan();
+    const type = state.section.type;
+    const indexInSection = state.section.count - state.section.remaining;
+    state.section.remaining--;
+
+    const behavior = getPipeBehavior(type, indexInSection);
+    const minTop = 68;
+    const maxTop = world.height - config.grassH - behavior.gap - 76;
+    let baseTop = rand(minTop, maxTop);
+
+    if(type === 'tunnel') baseTop = clamp(rand(92, world.height * 0.34), minTop, maxTop);
+    else if(type === 'pulsing') baseTop = clamp(rand(86, world.height - config.grassH - behavior.gap - 92), minTop, maxTop);
+    else if(type === 'alternating') baseTop = clamp(baseTop + behavior.altOffset, minTop, maxTop);
+
+    const pipe = {
+      id: state.pipeId++,
+      x,
+      baseTop,
+      top: baseTop,
+      bottom: baseTop + behavior.gap,
+      passed: false,
+      minTop,
+      maxTop,
+      phase: Math.random() * Math.PI * 2,
+      behavior,
+      spikesTop: false,
+      spikesBottom: false,
+    };
+
+    if(state.madness.active){
+      const r = Math.random();
+      pipe.spikesTop = r < 0.56;
+      pipe.spikesBottom = r > 0.44;
+      pipe.behavior.gap = Math.max(106, pipe.behavior.gap - 18);
+      pipe.behavior.speed *= 1.08;
+    }
+
+    updatePipeGeometry(pipe);
+
+    if(shouldSpawnPowerUp()){
+      const available = [];
+      if(!state.shield.active) available.push('shield');
+      if(!state.gravityFlip.active) available.push('gravity');
+      if(available.length > 0){
+        const type = pick(available);
+        state.powerUps.push(createPowerUp(pipe, type));
+      }
+    }
+
+    return pipe;
+  }
+
+  function resetGame(){
+    state.score = 0;
+    state.sceneTime = 0;
+    state.pipes = [];
+    state.powerUps = [];
+    state.pipeId = 1;
+    state.powerUpId = 1;
+    state.shake.timer = 0;
+    state.shake.strength = 0;
+    state.transitionSafety = 0;
+    state.section = { type: 'static', remaining: 0, count: 0 };
+    state.shield.active = false;
+    state.shield.charges = 0;
+    state.shield.hitCooldown = 0;
+    state.shield.flashTimer = 0;
+    state.gravityFlip.active = false;
+    state.gravityFlip.timer = 0;
+    state.recovery.active = false;
+    state.recovery.timer = 0;
+    state.madness.active = false;
+    state.madness.timer = 0;
+    state.madness.triggered = false;
+    state.madness.revives = 0;
+    state.respawn.active = false;
+    state.respawn.timer = 0;
+    refreshSectionPlan();
+
+    bird.x = Math.max(90, world.width * 0.2);
+    bird.y = world.height / 2;
+    bird.vy = 0;
+
+    resetClouds();
+    resetStars();
+    state.pipes = [createPipe(world.width + 120), createPipe(world.width + 320), createPipe(world.width + 520)];
+    updateHUD();
+  }
+
+  function startGame(){
+    resetGame();
+    state.game = GameState.PLAYING;
+    overlay.classList.add('hidden');
+    state.lastTime = performance.now();
+  }
+
+  function goGames(){ window.location.href = 'cyberbull-games.html'; }
+  window.goGames = goGames;
+  window.startGame = startGame;
+  window.flap = flap;
+
+  function activateShield(){
+    if(state.recovery.active || state.madness.active) return;
+    if(!state.shield.active){
+      state.shield.active = true;
+      state.shield.charges = 3;
+    } else {
+      state.shield.charges = Math.max(state.shield.charges, 3);
+    }
+    state.shield.hitCooldown = 0;
+    state.shield.flashTimer = 0;
+    updateHUD();
+  }
+  function activateGravityFlip(){
+    if(state.madness.active) return;
+    state.gravityFlip.active = true;
+    state.gravityFlip.timer = 8.5;
+    updateHUD();
+  }
+  function collectPowerUp(powerUp){
+    // mark collected type to remove duplicates, then activate
+    state.removePowerupType = powerUp.type;
+    if(powerUp.type === 'shield') activateShield();
+    else if(powerUp.type === 'gravity') activateGravityFlip();
+  }
+
+  function birdBox(){
+    return { x1: bird.x - bird.w / 2, y1: bird.y - bird.h / 2, x2: bird.x + bird.w / 2, y2: bird.y + bird.h / 2 };
+  }
+
+  function pipeBodyRects(pipe){
+    const bottomLimit = world.height - config.grassH;
+    return [
+      { x1: pipe.x, y1: 0, x2: pipe.x + config.pipe.w, y2: pipe.top - config.pipe.cap },
+      { x1: pipe.x, y1: pipe.bottom + config.pipe.cap, x2: pipe.x + config.pipe.w, y2: bottomLimit }
+    ];
+  }
+
+  function pipeCapRects(pipe){
+    return [
+      { x1: pipe.x - 8, y1: pipe.top - config.pipe.cap, x2: pipe.x + config.pipe.w + 8, y2: pipe.top },
+      { x1: pipe.x - 8, y1: pipe.bottom, x2: pipe.x + config.pipe.w + 8, y2: pipe.bottom + config.pipe.cap }
+    ];
+  }
+
+  function resolveCaps(pipe, prevBox){
+    const box = birdBox();
+    const [topCap, bottomCap] = pipeCapRects(pipe);
+    const hitTop = overlaps(box.x1, box.y1, box.x2, box.y2, topCap.x1, topCap.y1, topCap.x2, topCap.y2);
+    const hitBottom = overlaps(box.x1, box.y1, box.x2, box.y2, bottomCap.x1, bottomCap.y1, bottomCap.x2, bottomCap.y2);
+
+    if(hitTop){
+      if(bird.vy > 0 && prevBox.y2 <= topCap.y1){ bird.y = topCap.y1 - bird.h / 2; bird.vy = 0; }
+      else if(bird.vy < 0 && prevBox.y1 >= topCap.y2){ bird.y = topCap.y2 + bird.h / 2; bird.vy = 0; }
+      else { bird.y = (Math.abs(prevBox.y2 - topCap.y1) <= Math.abs(prevBox.y1 - topCap.y2)) ? topCap.y1 - bird.h / 2 : topCap.y2 + bird.h / 2; bird.vy = 0; }
+    }
+
+    if(hitBottom){
+      if(bird.vy > 0 && prevBox.y2 <= bottomCap.y1){ bird.y = bottomCap.y1 - bird.h / 2; bird.vy = 0; }
+      else if(bird.vy < 0 && prevBox.y1 >= bottomCap.y2){ bird.y = bottomCap.y2 + bird.h / 2; bird.vy = 0; }
+      else { bird.y = (Math.abs(prevBox.y2 - bottomCap.y1) <= Math.abs(prevBox.y1 - bottomCap.y2)) ? bottomCap.y1 - bird.h / 2 : bottomCap.y2 + bird.h / 2; bird.vy = 0; }
+    }
+  }
+
+  function hitPipeBody(pipe, box){ return pipeBodyRects(pipe).some(r => overlaps(box.x1, box.y1, box.x2, box.y2, r.x1, r.y1, r.x2, r.y2)); }
+  function hitPipeSpike(pipe, box){
+    const spikePad = 8;
+    if(pipe.spikesTop && overlaps(box.x1, box.y1, box.x2, box.y2, pipe.x - spikePad, pipe.top - config.pipe.spikeH, pipe.x + config.pipe.w + spikePad, pipe.top)) return true;
+    if(pipe.spikesBottom && overlaps(box.x1, box.y1, box.x2, box.y2, pipe.x - spikePad, pipe.bottom, pipe.x + config.pipe.w + spikePad, pipe.bottom + config.pipe.spikeH)) return true;
+    return false;
+  }
+
+  function getNearestSafeRespawnY(){
+    let chosen = null;
+    let bestDistance = Infinity;
+    for(const pipe of state.pipes){
+      const pipeRight = pipe.x + config.pipe.w;
+      const distance = pipeRight >= bird.x - 30 ? pipeRight - bird.x : Infinity;
+      if(distance < bestDistance){ bestDistance = distance; chosen = pipe; }
+    }
+    if(!chosen) chosen = state.pipes[0] || null;
+    if(!chosen) return world.height / 2;
+    return clamp(chosen.top + chosen.behavior.gap / 2, 90, world.height - config.grassH - 90);
+  }
+
+  function startShieldRecoveryTeleport(){
+    state.recovery.active = true;
+    state.recovery.timer = 0;
+    state.recovery.startY = bird.y;
+    state.recovery.targetY = getNearestSafeRespawnY();
+    bird.vy = 0;
+    state.transitionSafety = 0.25;
+    updateHUD();
+  }
+
+  function activateMadness(){
+    state.madness.active = true;
+    state.madness.triggered = true;
+    state.madness.timer = 20;
+    state.madness.revives = 3;
+    state.powerUps = [];
+    state.shake.timer = 0.75;
+    state.shake.strength = 5.5;
+    updateHUD();
+  }
+
+  function startMadnessRespawn(){
+    if(!state.madness.active || state.madness.revives <= 0) return false;
+    state.madness.revives--;
+    state.respawn.active = true;
+    state.respawn.timer = 0;
+    bird.x = Math.max(90, world.width * 0.2);
+    bird.y = getNearestSafeRespawnY();
+    bird.vy = 0;
+    state.transitionSafety = 1.0;
+    state.shake.timer = 0.35;
+    state.shake.strength = 3.0;
+    updateHUD();
+    return true;
+  }
+
+  function endGame(){
+    if(state.game === GameState.OVER) return;
+    state.game = GameState.OVER;
+    state.best = Math.max(state.best, state.score);
+    safeWriteBest(state.best);
+    updateHUD();
+    overlay.classList.remove('hidden');
+  }
+
+  function flap(){
+    if(state.game === GameState.READY || state.game === GameState.OVER){ startGame(); return; }
+    if(state.game !== GameState.PLAYING) return;
+    if(state.recovery.active || state.respawn.active) return;
+    const direction = state.gravityFlip.active ? -1 : 1;
+    bird.vy = physics.flapPower * direction;
+  }
+
+  function advancePipes(dt){
+    for(const pipe of state.pipes){
+      pipe.x -= pipe.behavior.speed * dt;
+      updatePipeGeometry(pipe);
+      if(!pipe.passed && pipe.x + config.pipe.w < bird.x){
+        pipe.passed = true;
+        state.score++;
+        if(state.score > state.best){ state.best = state.score; safeWriteBest(state.best); }
+        if(window.progressionAPI && currentUserKey){
+          window.progressionAPI.addCoins(currentUserKey, 5, 'Flappy Bird pipe passed');
+        }
+        updateHUD();
+      }
+      if(pipe.x + config.pipe.w < -60){
+        const farthestX = Math.max(...state.pipes.map(p => p.x));
+        // create a fresh pipe then position it relative to the farthest pipe
+        const fresh = createPipe(0);
+        const spacing = (fresh.behavior && fresh.behavior.spacing) ? fresh.behavior.spacing : 206;
+        const minGap = config.pipe.w + 48;
+        const spacingFinal = Math.max(spacing, minGap);
+        fresh.x = farthestX + spacingFinal;
+        updatePipeGeometry(fresh);
+        Object.assign(pipe, fresh);
+      }
+    }
+  }
+
+  function update(dt){
+    state.sceneTime += dt;
+    if(state.transitionSafety > 0) state.transitionSafety = Math.max(0, state.transitionSafety - dt);
+    if(state.shield.hitCooldown > 0) state.shield.hitCooldown = Math.max(0, state.shield.hitCooldown - dt);
+    if(state.shield.flashTimer > 0) state.shield.flashTimer = Math.max(0, state.shield.flashTimer - dt);
+    if(state.shake.timer > 0) state.shake.timer = Math.max(0, state.shake.timer - dt);
+
+    for(const cloud of state.clouds){
+      cloud.x -= cloud.speed * dt;
+      const widthEstimate = 95 * cloud.scale + 30;
+      if(cloud.x + widthEstimate < -20){
+        cloud.x = world.width + rand(30, 120);
+        cloud.y = rand(22, world.height * 0.22);
+        cloud.scale = rand(0.7, 1.5);
+        cloud.speed = rand(16, 30);
+        cloud.puffs = Math.floor(rand(3, 5));
+      }
+    }
+
+    if(state.game !== GameState.PLAYING) return;
+
+    if(state.madness.active){
+      state.madness.timer -= dt;
+      if(state.madness.timer <= 0){
+        state.madness.active = false;
+        state.madness.timer = 0;
+        state.madness.revives = 0;
+        state.transitionSafety = 0.6;
+        updateHUD();
+      }
+    } else if(!state.madness.triggered && state.score >= 100){
+      activateMadness();
+    }
+
+    if(state.gravityFlip.active){
+      state.gravityFlip.timer -= dt;
+      if(state.gravityFlip.timer <= 0){ state.gravityFlip.active = false; state.gravityFlip.timer = 0; }
+    }
+
+    if(state.recovery.active){
+      state.recovery.timer += dt;
+      const t = clamp(state.recovery.timer / state.recovery.duration, 0, 1);
+      bird.y = lerp(state.recovery.startY, state.recovery.targetY, easeInOutCubic(t));
+      bird.vy = 0;
+      if(state.recovery.timer >= state.recovery.duration){
+        state.recovery.active = false;
+        state.recovery.timer = 0;
+        state.transitionSafety = 0.45;
+        updateHUD();
+      }
+      return;
+    }
+
+    if(state.respawn.active){
+      state.respawn.timer += dt;
+      if(state.respawn.timer >= state.respawn.duration){ state.respawn.active = false; state.respawn.timer = 0; }
+    }
+
+    const gravityDir = state.gravityFlip.active ? -1 : 1;
+    const prevBox = birdBox();
+
+    if(state.shield.active){
+      bird.vy *= physics.shieldDamping;
+      bird.vy += physics.gravity * physics.shieldGravityScale * dt * gravityDir;
+      bird.vy = clamp(bird.vy, -physics.maxFall, physics.maxFall);
+      bird.y += bird.vy * dt;
+    } else {
+      bird.vy += physics.gravity * dt * gravityDir;
+      bird.vy = clamp(bird.vy, -physics.maxFall, physics.maxFall);
+      bird.y += bird.vy * dt;
+    }
+
+    advancePipes(dt);
+
+    const topLimit = 0;
+    const bottomLimit = world.height - config.grassH;
+    let box = birdBox();
+
+    for(const pipe of state.pipes){
+      resolveCaps(pipe, prevBox);
+      box = birdBox();
+
+      if(hitPipeBody(pipe, box) || hitPipeSpike(pipe, box)){
+        if(state.shield.active){
+          if(state.shield.hitCooldown <= 0){
+            state.shield.charges--;
+            state.shield.hitCooldown = 0.42;
+            state.shield.flashTimer = 0.18;
+            state.shake.timer = 0.16;
+            state.shake.strength = 2.5;
+            bird.vy *= physics.shieldBounce;
+            if(state.shield.charges <= 0){
+              state.shield.active = false;
+              state.shield.charges = 0;
+              state.shield.flashTimer = 0;
+              startShieldRecoveryTeleport();
+            }
+            updateHUD();
+          }
+          return;
+        }
+
+        if(state.madness.active && state.madness.revives > 0 && !state.respawn.active){
+          if(startMadnessRespawn()) return;
+        } else if(state.transitionSafety <= 0 && !state.respawn.active){
+          endGame();
+          return;
+        }
+      }
+    }
+
+    state.powerUps = state.powerUps.filter(powerUp => {
+      const pipe = state.pipes.find(p => p.id === powerUp.pipeId);
+      if(!pipe) return false;
+      const px = pipe.x + config.pipe.w / 2;
+      const py = pipe.top + pipe.behavior.gap / 2 + Math.sin(state.sceneTime * powerUp.bobSpeed + powerUp.phase) * powerUp.bobAmp;
+      const half = powerUp.size / 2;
+      if(overlaps(box.x1, box.y1, box.x2, box.y2, px - half, py - half, px + half, py + half)){
+        collectPowerUp(powerUp);
+        return false;
+      }
+      // only remove orbs of the same type that's already active
+      if((state.shield.active && powerUp.type === 'shield') || (state.gravityFlip.active && powerUp.type === 'gravity')) return false;
+      return pipe.x > -80;
+    });
+
+    // clear any remaining orbs of the collected type (prevent duplicates)
+    if(state.removePowerupType){
+      state.powerUps = state.powerUps.filter(p => p.type !== state.removePowerupType);
+      state.removePowerupType = null;
+    }
+
+    if(!state.gravityFlip.active){
+      if(bird.y + bird.h / 2 >= bottomLimit){
+        bird.y = bottomLimit - bird.h / 2;
+        bird.vy = 0;
+        if(!state.shield.active && state.transitionSafety <= 0 && !state.respawn.active){
+          if(state.madness.active && state.madness.revives > 0){ startMadnessRespawn(); return; }
+          endGame();
+          return;
+        }
+      }
+      if(bird.y - bird.h / 2 < topLimit){ bird.y = bird.h / 2; bird.vy = 0; }
+    } else {
+      if(bird.y - bird.h / 2 <= topLimit){
+        bird.y = bird.h / 2;
+        bird.vy = 0;
+        if(!state.shield.active && state.transitionSafety <= 0 && !state.respawn.active){
+          if(state.madness.active && state.madness.revives > 0){ startMadnessRespawn(); return; }
+          endGame();
+          return;
+        }
+      }
+      if(bird.y + bird.h / 2 > bottomLimit){ bird.y = bottomLimit - bird.h / 2; bird.vy = 0; }
+    }
+
+    if(bird.y > world.height + 120 || bird.y < -120){
+      if(state.madness.active && state.madness.revives > 0){ startMadnessRespawn(); return; }
+      endGame();
+    }
+  }
+
+  function drawBackground(night){
+    const grad = ctx.createLinearGradient(0, 0, 0, world.height);
+    if(night <= 0){
+      grad.addColorStop(0, '#87CEEB');
+      grad.addColorStop(0.72, '#dff4ff');
+      grad.addColorStop(1, '#eefbf6');
+    } else {
+      const dawn = 1 - night;
+      grad.addColorStop(0, `rgb(${Math.round(135 * dawn + 16 * night)}, ${Math.round(206 * dawn + 24 * night)}, ${Math.round(235 * dawn + 50 * night)})`);
+      grad.addColorStop(0.68, `rgb(${Math.round(223 * dawn + 55 * night)}, ${Math.round(244 * dawn + 65 * night)}, ${Math.round(255 * dawn + 96 * night)})`);
+      grad.addColorStop(1, `rgb(${Math.round(238 * dawn + 15 * night)}, ${Math.round(251 * dawn + 23 * night)}, ${Math.round(246 * dawn + 46 * night)})`);
+    }
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, world.width, world.height);
+  }
+
+  function drawStars(night){
+    if(night <= 0.01) return;
+    ctx.save();
+    ctx.fillStyle = '#ffffff';
+    for(const star of state.stars){
+      const twinkle = 0.65 + 0.35 * Math.sin(state.sceneTime * star.speed + star.twinkle);
+      ctx.globalAlpha = night * twinkle;
+      ctx.beginPath();
+      ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function drawCloud(cloud, night){
+    ctx.save();
+    const cloudColor = night > 0
+      ? `rgba(${Math.round(255 * (1 - night) + 150 * night)},${Math.round(255 * (1 - night) + 160 * night)},${Math.round(255 * (1 - night) + 190 * night)},0.92)`
+      : 'rgba(255,255,255,0.92)';
+    ctx.fillStyle = cloudColor;
+    ctx.translate(cloud.x, cloud.y);
+    ctx.scale(cloud.scale, cloud.scale);
+    const puffR = 16;
+    const offsets = [[0, 8], [18, 0], [36, 8], [56, 6]];
+    ctx.beginPath();
+    for(let i = 0; i < cloud.puffs; i++){
+      const [ox, oy] = offsets[i % offsets.length];
+      ctx.moveTo(ox + puffR, oy);
+      ctx.arc(ox, oy, puffR + (i === 1 ? 4 : 0), 0, Math.PI * 2);
+    }
+    ctx.fill();
+    ctx.restore();
+  }
+  function drawClouds(night){ for(const cloud of state.clouds) drawCloud(cloud, night); }
+
+  function drawGrass(){
+    const y = world.height - config.grassH;
+    ctx.fillStyle = '#2f7d1e';
+    ctx.fillRect(0, y, world.width, config.grassH);
+  }
+
+  function drawPipes(){
+    const bottomLimit = world.height - config.grassH;
+    for(const pipe of state.pipes){
+      updatePipeGeometry(pipe);
+      const isMoving = pipe.behavior.type === 'moving' || pipe.behavior.type === 'wave';
+      const isTight = pipe.behavior.type === 'tight' || pipe.behavior.type === 'tunnel';
+
+      ctx.fillStyle = isTight ? '#0ea371' : '#10b981';
+      ctx.fillRect(pipe.x, 0, config.pipe.w, pipe.top - config.pipe.cap);
+      ctx.fillRect(pipe.x, pipe.bottom + config.pipe.cap, config.pipe.w, bottomLimit - (pipe.bottom + config.pipe.cap));
+
+      ctx.fillStyle = isMoving ? '#0f766e' : '#065f46';
+      ctx.fillRect(pipe.x - 8, pipe.top - config.pipe.cap, config.pipe.w + 16, config.pipe.cap);
+      ctx.fillRect(pipe.x - 8, pipe.bottom, config.pipe.w + 16, config.pipe.cap);
+
+      if(pipe.behavior.type === 'pulsing'){
+        const pulse = 0.5 + 0.5 * Math.sin(state.sceneTime * pipe.behavior.freq + pipe.phase);
+        ctx.save();
+        ctx.globalAlpha = 0.16 + pulse * 0.12;
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(pipe.x - 8, pipe.top - config.pipe.cap, config.pipe.w + 16, pipe.behavior.gap + config.pipe.cap * 2);
+        ctx.restore();
+      }
+
+      if(pipe.behavior.type === 'moving' || pipe.behavior.type === 'wave'){
+        ctx.save();
+        ctx.globalAlpha = 0.16;
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(pipe.x - 8, pipe.top - config.pipe.cap - 2, config.pipe.w + 16, 2);
+        ctx.fillRect(pipe.x - 8, pipe.bottom + config.pipe.cap, config.pipe.w + 16, 2);
+        ctx.restore();
+      }
+
+      if(pipe.behavior.type === 'tunnel'){
+        ctx.save();
+        ctx.globalAlpha = 0.18;
+        ctx.fillStyle = '#052e16';
+        ctx.fillRect(pipe.x - 10, pipe.top - config.pipe.cap - 2, config.pipe.w + 20, 2);
+        ctx.fillRect(pipe.x - 10, pipe.bottom + config.pipe.cap, config.pipe.w + 20, 2);
+        ctx.restore();
+      }
+
+      ctx.fillStyle = '#022c22';
+      const count = Math.ceil((config.pipe.w + 16) / config.pipe.spikeBase);
+      for(let i = 0; i < count; i++){
+        const sx = pipe.x - 8 + i * config.pipe.spikeBase;
+        if(pipe.spikesTop){
+          ctx.beginPath();
+          ctx.moveTo(sx, pipe.top - config.pipe.spikeH * 0.1);
+          ctx.lineTo(sx + config.pipe.spikeBase / 2, pipe.top - config.pipe.spikeH);
+          ctx.lineTo(sx + config.pipe.spikeBase, pipe.top - config.pipe.spikeH * 0.1);
+          ctx.closePath();
+          ctx.fill();
+        }
+        if(pipe.spikesBottom){
+          ctx.beginPath();
+          ctx.moveTo(sx, pipe.bottom + config.pipe.spikeH * 0.1);
+          ctx.lineTo(sx + config.pipe.spikeBase / 2, pipe.bottom + config.pipe.spikeH);
+          ctx.lineTo(sx + config.pipe.spikeBase, pipe.bottom + config.pipe.spikeH * 0.1);
+          ctx.closePath();
+          ctx.fill();
+        }
+      }
+    }
+  }
+
+  function drawPowerUp(powerUp){
+    const pipe = state.pipes.find(p => p.id === powerUp.pipeId);
+    if(!pipe) return;
+    const x = pipe.x + config.pipe.w / 2;
+    const y = pipe.top + pipe.behavior.gap / 2 + Math.sin(state.sceneTime * powerUp.bobSpeed + powerUp.phase) * powerUp.bobAmp;
+    ctx.save();
+    ctx.translate(x, y);
+    if(powerUp.type === 'shield'){
+      ctx.fillStyle = 'rgba(59,130,246,0.92)';
+      ctx.beginPath(); ctx.arc(0, 0, 14, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,0.96)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, 14, 0, Math.PI * 2); ctx.stroke();
+      ctx.fillStyle = '#fff'; ctx.font = '900 12px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('S', 0, 0.5);
+    } else {
+      ctx.fillStyle = 'rgba(168,85,247,0.95)';
+      ctx.beginPath(); ctx.arc(0, 0, 14, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,0.96)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, 14, 0, Math.PI * 2); ctx.stroke();
+      ctx.fillStyle = '#fff'; ctx.font = '900 13px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('↕', 0, 0.5);
+    }
+    ctx.restore();
+  }
+
+  function drawBird(){
+    const shieldBob = state.shield.active ? Math.sin(state.sceneTime * 4.2) * 3.5 : 0;
+    const shieldPulse = state.shield.active ? 1 + Math.sin(state.sceneTime * 6) * 0.04 : 1;
+
+    ctx.save();
+    ctx.translate(bird.x, bird.y + shieldBob);
+    ctx.rotate(clamp(bird.vy / 500, -0.8, 0.8));
+
+    if(state.shield.active){
+      ctx.save();
+      ctx.scale(shieldPulse, shieldPulse);
+      const flash = state.shield.flashTimer > 0;
+      ctx.strokeStyle = flash ? 'rgba(248,113,113,1)' : 'rgba(96,165,250,0.95)';
+      ctx.fillStyle = flash ? 'rgba(248,113,113,0.22)' : 'rgba(147,197,253,0.16)';
+      ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.arc(0, 0, 27, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.globalAlpha = flash ? 0.7 : 0.45;
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(0, 0, 22, 0, Math.PI * 2); ctx.stroke();
+      ctx.restore();
+    }
+
+    if(state.recovery.active || state.respawn.active){
+      const progress = state.recovery.active ? clamp(state.recovery.timer / state.recovery.duration, 0, 1) : clamp(state.respawn.timer / state.respawn.duration, 0, 1);
+      const flashRed = progress > 0.38 && progress < 0.68;
+      ctx.save();
+      ctx.scale(1.05, 1.05);
+      ctx.strokeStyle = flashRed ? 'rgba(248,113,113,1)' : 'rgba(96,165,250,0.95)';
+      ctx.fillStyle = flashRed ? 'rgba(248,113,113,0.24)' : 'rgba(147,197,253,0.18)';
+      ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.arc(0, 0, 30, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      const birdFade = progress < 0.38 ? progress / 0.38 : progress > 0.68 ? (1 - progress) / 0.32 : 1;
+      ctx.globalAlpha = clamp(birdFade, 0.15, 1);
+      ctx.fillStyle = flashRed ? '#ef4444' : '#3b82f6';
+      ctx.fillRect(-bird.w/2, -bird.h/2, bird.w, bird.h);
+      ctx.fillStyle = '#fff'; ctx.fillRect(2, -8, 8, 8);
+      ctx.fillStyle = '#000'; ctx.fillRect(4, -6, 4, 4);
+      ctx.fillStyle = '#f97316';
+      ctx.beginPath(); ctx.moveTo(12, -2); ctx.lineTo(20, 0); ctx.lineTo(12, 2); ctx.closePath(); ctx.fill();
+      ctx.restore();
+      ctx.restore();
+      return;
+    }
+
+    ctx.fillStyle = state.gravityFlip.active ? '#ef4444' : '#3b82f6';
+    ctx.fillRect(-bird.w/2, -bird.h/2, bird.w, bird.h);
+    ctx.fillStyle = '#fff'; ctx.fillRect(2, -8, 8, 8);
+    ctx.fillStyle = '#000'; ctx.fillRect(4, -6, 4, 4);
+    ctx.fillStyle = '#f97316';
+    ctx.beginPath(); ctx.moveTo(12, -2); ctx.lineTo(20, 0); ctx.lineTo(12, 2); ctx.closePath(); ctx.fill();
+    if(state.gravityFlip.active){
+      ctx.fillStyle = '#fff';
+      ctx.font = '900 12px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('↑', -18, -1);
+      ctx.fillText('↓', 18, -1);
+    }
+    ctx.restore();
+  }
+
+  function drawGameOver(){
+    if(state.game !== GameState.OVER) return;
+    ctx.fillStyle = 'rgba(0,0,0,0.35)';
+    ctx.fillRect(0, 0, world.width, world.height);
+    ctx.fillStyle = '#fff';
+    ctx.textAlign = 'center';
+    ctx.font = '800 36px sans-serif';
+    ctx.fillText('Game Over', world.width / 2, world.height / 2 - 10);
+    ctx.font = '500 18px sans-serif';
+    ctx.fillText('Press Space or Tap', world.width / 2, world.height / 2 + 24);
+  }
+
+  function drawMadnessOverlay(){
+    if(!state.madness.active) return;
+    const alpha = 0.08 + Math.sin(state.sceneTime * 6) * 0.03;
+    ctx.save();
+    ctx.fillStyle = `rgba(220,38,38,${Math.max(0.04, alpha)})`;
+    ctx.fillRect(0, 0, world.width, world.height);
+    ctx.restore();
+  }
+
+  function draw(){
+    const night = nightProgress();
+    const shakeX = state.shake.timer > 0 ? (Math.random() - 0.5) * 2 * state.shake.strength : 0;
+    const shakeY = state.shake.timer > 0 ? (Math.random() - 0.5) * 2 * state.shake.strength : 0;
+
+    ctx.save();
+    ctx.translate(shakeX, shakeY);
+    drawBackground(night);
+    drawStars(night);
+    drawClouds(night);
+    drawPipes();
+    state.powerUps.forEach(drawPowerUp);
+    drawGrass();
+    drawBird();
+    drawMadnessOverlay();
+    drawGameOver();
+    ctx.restore();
+  }
+
+  function loop(timestamp){
+    if(!state.lastTime) state.lastTime = timestamp;
+    const dt = Math.min((timestamp - state.lastTime) / 1000, 0.033);
+    state.lastTime = timestamp;
+    update(dt);
+    draw();
+    requestAnimationFrame(loop);
+  }
+
+  document.addEventListener('keydown', (event) => {
+    if(event.repeat) return;
+    if(event.code === 'Space' || event.code === 'ArrowUp' || event.code === 'Enter'){
+      event.preventDefault();
+      flap();
+    }
+  }, { passive: false });
+
+  canvas.addEventListener('pointerdown', (event) => {
+    event.preventDefault();
+    flap();
+  }, { passive: false });
+
+  window.addEventListener('resize', resizeCanvas);
+
+  resizeCanvas();
+  resetClouds();
+  resetStars();
+  updateHUD();
+  draw();
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

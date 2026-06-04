@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Admin Dashboard - CyberBull</title>
+  <style>
+    body{font-family:Arial,sans-serif;margin:0;background:#f5f7fb}
+    header{background:#122; color:#fff;padding:18px 24px;display:flex;justify-content:space-between;align-items:center}
+    main{padding:18px}
+    .tabs{display:flex;gap:8px;margin-bottom:12px}
+    .tab{padding:8px 12px;background:#fff;border-radius:6px;cursor:pointer}
+    .tab.active{background:#0078ff;color:#fff}
+    .panel{background:#fff;padding:14px;border-radius:8px;min-height:240px}
+    .row{display:flex;gap:12px}
+    .col{flex:1}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:8px;border-bottom:1px solid #eee;text-align:left}
+    .small{font-size:13px;color:#666}
+    .btn{padding:6px 8px;border-radius:6px;border:none;cursor:pointer}
+    .danger{background:#d9534f;color:#fff}
+    .muted{background:#6c757d;color:#fff}
+    .primary{background:#0078ff;color:#fff}
+    input,select{padding:8px;border-radius:6px;border:1px solid #ddd}
+  </style>
+  <script src="auth.js"></script>
+</head>
+<body>
+  <script>
+    window.globalAuth.requireAdminAuth();
+  </script>
+  <header>
+    <div>
+      <strong>CyberBull Admin</strong>
+      <div class="small">Admin dashboard</div>
+    </div>
+    <div>
+      <button id="logoutBtn" class="btn muted">Logout</button>
+    </div>
+  </header>
+  <main>
+    <div class="tabs">
+      <div class="tab active" data-tab="accounts">Account Manager</div>
+      <div class="tab" data-tab="stats">Statistics</div>
+      <div class="tab" data-tab="inspector">User Inspector</div>
+      <div class="tab" data-tab="tools">Admin Tools</div>
+    </div>
+
+    <div id="accounts" class="panel">
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <input id="amSearch" placeholder="Search username or domain">
+        <input id="amFilterDomain" placeholder="Filter by domain">
+        <button id="amRefresh" class="btn primary">Refresh</button>
+      </div>
+      <div id="amTable"></div>
+    </div>
+
+    <div id="stats" class="panel" style="display:none">
+      <div id="statsContainer"></div>
+    </div>
+
+    <div id="inspector" class="panel" style="display:none">
+      <div id="inspectorContainer"></div>
+    </div>
+
+    <div id="tools" class="panel" style="display:none">
+      <h3>Announcements</h3>
+      <div style="display:flex;gap:8px;margin-bottom:8px"><input id="announceInput" placeholder="Announcement text"><button id="announceBtn" class="btn primary">Post</button></div>
+      <div id="announcementsList" class="small"></div>
+      <hr>
+      <h3>Challenges</h3>
+      <div style="display:flex;gap:8px;margin-bottom:8px"><input id="challengeInput" placeholder="Challenge title"><button id="challengeBtn" class="btn primary">Add</button></div>
+      <div id="challengesList" class="small"></div>
+      <hr>
+      <h3>Achievements</h3>
+      <div style="display:flex;gap:8px;margin-bottom:8px"><input id="achievementInput" placeholder="Achievement name"><button id="achievementBtn" class="btn primary">Add</button></div>
+      <div id="achievementsList" class="small"></div>
+      <hr>
+      <h3>XP Rewards</h3>
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <input id="xpRewardLabelInput" placeholder="Reward name">
+        <input id="xpRewardValueInput" placeholder="XP value" type="number" style="width:120px;">
+        <button id="xpRewardBtn" class="btn primary">Save</button>
+      </div>
+      <div id="xpRewardsList" class="small"></div>
+      <hr>
+      <h3>Admin Settings</h3>
+      <div style="display:flex;gap:8px;margin-bottom:8px"><input id="adminSecretInput" placeholder="Admin secret (set new)"><button id="adminSecretBtn" class="btn primary">Save</button></div>
+      <div class="small">Change the admin creation secret. New users providing this code become admins.</div>
+    </div>
+  </main>
+
+  <script src="admin.js"></script>
+  <script>
+    // tab switching
+    document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
+      document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+      t.classList.add('active');
+      const tab = t.dataset.tab;
+      ['accounts','stats','inspector','tools'].forEach(id=>document.getElementById(id).style.display = (id===tab)?'block':'none');
+      if (tab==='accounts') renderAccountManager();
+      if (tab==='stats') renderStatsOverview();
+      if (tab==='inspector') document.getElementById('inspectorContainer').innerHTML = '<div class="small">Select a user in Account Manager to inspect.</div>';
+      if (tab==='tools') renderAdminTools();
+    }));
+
+    document.getElementById('amRefresh').addEventListener('click', ()=>renderAccountManager());
+    document.getElementById('amSearch').addEventListener('input', ()=>renderAccountManager());
+    document.getElementById('amFilterDomain').addEventListener('input', ()=>renderAccountManager());
+
+    document.getElementById('logoutBtn').addEventListener('click', ()=>{
+      localStorage.removeItem('currentUser');
+      localStorage.removeItem('currentUserKey');
+      localStorage.removeItem('currentSchool');
+      localStorage.removeItem('isAdmin');
+      window.location.href = 'cyberbull-landing.html';
+    });
+
+    // initial checks
+    requireAdminRedirect();
+    renderAccountManager();
+  </script>
+</body>
+</html>

@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Study Rooms - CyberBull</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      color: white;
+    }
+    
+    .header h1 {
+      font-size: 32px;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+    
+    .header-buttons {
+      display: flex;
+      gap: 15px;
+    }
+    
+    .btn-header {
+      background: white;
+      color: #667eea;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-header:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    
+    .create-room-section {
+      background: white;
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+      margin-bottom: 30px;
+    }
+    
+    .create-room-section h2 {
+      color: #333;
+      margin-bottom: 20px;
+      font-size: 18px;
+    }
+    
+    .create-form {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+    
+    .form-group {
+      flex: 1;
+      min-width: 200px;
+    }
+    
+    .form-group input {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #eee;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+    
+    .form-group input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .btn-create {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      align-self: flex-end;
+    }
+    
+    .btn-create:hover {
+      background: #5568d3;
+      transform: translateY(-2px);
+    }
+    
+    .filters {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 25px;
+    }
+    
+    .filter-btn {
+      background: white;
+      color: #667eea;
+      border: 2px solid #667eea;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .filter-btn:hover, .filter-btn.active {
+      background: #667eea;
+      color: white;
+    }
+    
+    .rooms-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 25px;
+      margin-bottom: 40px;
+    }
+    
+    .room-card {
+      background: white;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+      display: flex;
+      flex-direction: column;
+      transition: all 0.3s ease;
+    }
+    
+    .room-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 15px 50px rgba(0,0,0,0.25);
+    }
+    
+    .room-header {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      padding: 20px;
+    }
+    
+    .room-name {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    
+    .room-owner {
+      font-size: 12px;
+      opacity: 0.9;
+    }
+    
+    .room-body {
+      padding: 20px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .room-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .stat {
+      text-align: center;
+      padding: 12px;
+      background: #f9f9f9;
+      border-radius: 8px;
+    }
+    
+    .stat-label {
+      font-size: 11px;
+      color: #999;
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 5px;
+    }
+    
+    .stat-value {
+      font-size: 20px;
+      font-weight: bold;
+      color: #667eea;
+    }
+    
+    .members-list {
+      margin-bottom: 15px;
+    }
+    
+    .members-label {
+      font-size: 12px;
+      color: #999;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      display: block;
+    }
+    
+    .members {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    
+    .member-tag {
+      background: #f0f5ff;
+      color: #667eea;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    
+    .room-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: auto;
+    }
+    
+    .btn-join {
+      flex: 1;
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-join:hover {
+      background: #5568d3;
+    }
+    
+    .btn-join:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    
+    .empty-state {
+      background: white;
+      border-radius: 15px;
+      padding: 60px 30px;
+      text-align: center;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+    }
+    
+    .empty-state h2 {
+      color: #333;
+      margin-bottom: 15px;
+      font-size: 24px;
+    }
+    
+    .empty-state p {
+      color: #666;
+      margin-bottom: 20px;
+    }
+    
+    .bottom-nav {
+      display: flex;
+      gap: 15px;
+    }
+    
+    .btn-nav {
+      flex: 1;
+      padding: 15px 30px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-session {
+      background: white;
+      color: #667eea;
+    }
+    
+    .btn-session:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    
+    .btn-home {
+      background: rgba(255,255,255,0.2);
+      color: white;
+      backdrop-filter: blur(10px);
+    }
+    
+    .btn-home:hover {
+      background: rgba(255,255,255,0.3);
+    }
+    
+    .success-message {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: white;
+      padding: 20px 30px;
+      border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      animation: slideIn 0.3s ease;
+      z-index: 1000;
+    }
+    
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+  </style>
+  <script src="auth.js"></script>
+</head>
+<body>
+  <script>
+    window.globalAuth.requireAuth();
+  </script>
+
+<div class="container">
+  <div class="header">
+    <h1>👥 Study Rooms</h1>
+    <div class="header-buttons">
+      <button class="btn-header" onclick="goHome()">← Back</button>
+    </div>
+  </div>
+  
+  <div class="create-room-section">
+    <h2>🎪 Create Your Study Room</h2>
+    <div class="create-form">
+      <div class="form-group">
+        <input type="text" id="roomNameInput" placeholder="Enter room name (e.g., 'Math Study Group')" maxlength="50">
+      </div>
+      <button class="btn-create" onclick="createRoom()">Create Room</button>
+    </div>
+  </div>
+  
+  <div class="filters">
+    <button class="filter-btn active" onclick="filterRooms('all')">All Rooms</button>
+    <button class="filter-btn" onclick="filterRooms('available')">🟢 Available Spots</button>
+  </div>
+  
+  <div class="rooms-grid" id="roomsGrid">
+    Loading study rooms...
+  </div>
+  
+  <div class="bottom-nav">
+    <button class="btn-nav btn-session" onclick="goToSession()">📖 Start Study Session</button>
+    <button class="btn-nav btn-home" onclick="goHome()">← Back to Home</button>
+  </div>
+</div>
+
+<script src="admin.js"></script>
+<script src="progression.js"></script>
+
+<script>
+  const currentUser = localStorage.getItem('currentUser');
+  const currentUserKey = localStorage.getItem('currentUserKey');
+  const currentDomain = localStorage.getItem('currentSchool');
+  
+  if (!currentUser || !currentUserKey) {
+    window.location.href = 'cyberbull-landing.html';
+  }
+  
+  let allRooms = [];
+  let currentFilter = 'all';
+  
+  function loadRooms() {
+    allRooms = window.progressionAPI.getAllPublicRooms();
+    renderRooms();
+  }
+  
+  function renderRooms() {
+    let rooms = allRooms;
+    
+    if (currentFilter === 'available') {
+      rooms = rooms.filter(room => room.members.length < room.maxMembers);
+    }
+    
+    if (rooms.length === 0) {
+      document.getElementById('roomsGrid').innerHTML = `
+        <div class="empty-state" style="grid-column: 1 / -1;">
+          <h2>📭 No Rooms Available</h2>
+          <p>Create the first study room to get started!</p>
+        </div>
+      `;
+      return;
+    }
+    
+    let html = '';
+    rooms.forEach(room => {
+      const isFull = room.members.length >= room.maxMembers;
+      const isAlreadyMember = room.members.some(m => m.username === currentUser && m.domain === currentDomain);
+      
+      html += `
+        <div class="room-card">
+          <div class="room-header">
+            <div class="room-name">🎓 ${room.name}</div>
+            <div class="room-owner">by ${room.owner}</div>
+          </div>
+          <div class="room-body">
+            <div class="room-stats">
+              <div class="stat">
+                <span class="stat-label">Members</span>
+                <span class="stat-value">${room.members.length}/${room.maxMembers}</span>
+              </div>
+              <div class="stat">
+                <span class="stat-label">Focus Mode</span>
+                <span class="stat-value">${room.focusMode ? '✓' : '✗'}</span>
+              </div>
+            </div>
+            <div class="members-list">
+              <span class="members-label">Active Members:</span>
+              <div class="members">
+                ${room.members.slice(0, 3).map(m => `<div class="member-tag">👤 ${m.username}</div>`).join('')}
+                ${room.members.length > 3 ? `<div class="member-tag">+${room.members.length - 3} more</div>` : ''}
+              </div>
+            </div>
+            <div class="room-actions">
+              <button 
+                class="btn-join" 
+                onclick="joinRoom('${room.id}')"
+                ${isFull || isAlreadyMember ? 'disabled' : ''}
+              >
+                ${isAlreadyMember ? '✓ In Room' : isFull ? 'Full' : 'Join Room'}
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+    
+    document.getElementById('roomsGrid').innerHTML = html;
+  }
+  
+  function createRoom() {
+    const roomName = document.getElementById('roomNameInput').value.trim();
+    
+    if (!roomName) {
+      alert('Please enter a room name');
+      return;
+    }
+    
+    const newRoom = window.progressionAPI.createPublicRoom(currentUser, currentDomain, roomName);
+    const roomKey = `mroom_${newRoom.id}`;
+    localStorage.setItem(roomKey, JSON.stringify(newRoom));
+    
+    document.getElementById('roomNameInput').value = '';
+    showMessage('✅ Room created! Others can join now.');
+    loadRooms();
+  }
+  
+  function joinRoom(roomId) {
+    const result = window.progressionAPI.joinMultiplayerRoom(roomId, currentUser, currentDomain);
+    if (result.success) {
+      // Update quest progress
+      window.progressionAPI.updateQuestProgress(currentUserKey, 'multiplayer_session', 1);
+      showMessage(result.message);
+      loadRooms();
+    } else {
+      alert('❌ ' + result.message);
+    }
+  }
+  
+  function filterRooms(filter) {
+    currentFilter = filter;
+    document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+    renderRooms();
+  }
+  
+  function showMessage(message) {
+    const msg = document.createElement('div');
+    msg.className = 'success-message';
+    msg.textContent = message;
+    document.body.appendChild(msg);
+    setTimeout(() => msg.remove(), 3000);
+  }
+  
+  function goToSession() {
+    window.location.href = 'cyberbull-study-session.html';
+  }
+  
+  function goHome() {
+    window.location.href = 'cyberbull-student.html';
+  }
+  
+  // Load rooms on page load and refresh every 10 seconds
+  loadRooms();
+  setInterval(loadRooms, 10000);
+</script>
+
+</body>
+</html>

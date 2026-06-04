@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CyberBull Official Website</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Inter, system-ui, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #0f172a 0%, #111827 60%, #0f172a 100%);
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 800px;
+      text-align: center;
+    }
+
+    .header {
+      margin-bottom: 60px;
+    }
+
+    .logo {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .title {
+      font-size: 36px;
+      font-weight: bold;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #60a5fa, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 18px;
+      color: #94a3b8;
+      margin-bottom: 40px;
+    }
+
+    .nav-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    .nav-card {
+      background: rgba(15, 23, 42, 0.8);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 40px 24px;
+      cursor: pointer;
+      transition: all 300ms ease;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .nav-card:hover {
+      border-color: rgba(255, 255, 255, 0.3);
+      background: rgba(15, 23, 42, 0.95);
+      transform: translateY(-4px);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    .nav-card.games {
+      border-color: rgba(168, 85, 247, 0.3);
+    }
+
+    .nav-card.games:hover {
+      border-color: rgba(168, 85, 247, 0.6);
+      background: rgba(168, 85, 247, 0.1);
+    }
+
+    .nav-card.student {
+      border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .nav-card.student:hover {
+      border-color: rgba(59, 130, 246, 0.6);
+      background: rgba(59, 130, 246, 0.1);
+    }
+
+    .nav-card.chat {
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+
+    .nav-card.chat:hover {
+      border-color: rgba(16, 185, 129, 0.6);
+      background: rgba(16, 185, 129, 0.1);
+    }
+
+    .icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .card-title {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .card-description {
+      font-size: 14px;
+      color: #cbd5e1;
+    }
+
+    .footer {
+      margin-top: 40px;
+      padding-top: 40px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      color: #64748b;
+      font-size: 14px;
+    }
+
+    .footer-link {
+      color: #60a5fa;
+      text-decoration: none;
+      transition: color 200ms ease;
+    }
+
+    .footer-link:hover {
+      color: #93c5fd;
+    }
+  </style>
+  <script src="auth.js"></script>
+</head>
+<body>
+  <script>
+    window.globalAuth.requireAuth();
+  </script>
+  <div class="container">
+    <div class="header">
+      <div class="logo">🎮</div>
+      <h1 class="title">CyberBull Official</h1>
+      <p class="subtitle">Your gateway to gaming, learning, and connection</p>
+    </div>
+
+    <div class="nav-grid">
+      <a href="cyberbull-games.html" class="nav-card games">
+        <div class="icon">🕹️</div>
+        <div class="card-title">Games</div>
+        <div class="card-description">Play fun arcade games and multiplayer challenges</div>
+      </a>
+
+      <a href="cyberbull-chat-hub.html" class="nav-card chat">
+        <div class="icon">💬</div>
+        <div class="card-title">Chat</div>
+        <div class="card-description">Connect with friends in global, local, and private chats</div>
+      </a>
+
+      <a href="cyberbull-student.html" class="nav-card student">
+        <div class="icon">📚</div>
+        <div class="card-title">CyberBull Student</div>
+        <div class="card-description">Learning platform for cybersecurity education</div>
+      </a>
+    </div>
+
+    <div class="footer">
+      <p>© 2024 CyberBull Official. All rights reserved.</p>
+    </div>
+  </div>
+</body>
+</html>

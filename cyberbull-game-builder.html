@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Mario Maker Engine</title>
+    <style>
+        :root {
+            --bg-dark: #0a0c16;
+            --panel-bg: #14182d;
+            --accent-neon: #00f3ff;
+            --accent-crimson: #ff2a5f;
+            --accent-green: #00ff87;
+            --text-main: #f0f4fc;
+            --text-muted: #6272a4;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #app-container {
+            width: 1000px;
+            background: var(--panel-bg);
+            border: 2px solid #2a325d;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #2a325d;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 24px;
+            color: var(--accent-neon);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .nav-tab {
+            background: #1d2440;
+            border: 1px solid #3b4784;
+            color: var(--text-muted);
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+
+        .nav-tab.active {
+            background: var(--accent-neon);
+            color: #000;
+            border-color: var(--accent-neon);
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.4);
+        }
+
+        .view-panel {
+            display: none;
+        }
+
+        .view-panel.active {
+            display: block;
+        }
+
+        .workspace {
+            display: flex;
+            gap: 20px;
+        }
+
+        .canvas-container {
+            position: relative;
+            background: #000;
+            border: 2px solid #3b4784;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+            cursor: crosshair;
+        }
+
+        .sidebar {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .panel-box {
+            background: #1c233f;
+            border: 1px solid #3b4784;
+            border-radius: 4px;
+            padding: 15px;
+        }
+
+        .panel-title {
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 14px;
+            text-transform: uppercase;
+            color: var(--accent-neon);
+            letter-spacing: 1px;
+        }
+
+        .palette-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .palette-btn {
+            background: #252f56;
+            border: 1px solid #3b4784;
+            color: var(--text-main);
+            padding: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .palette-btn:hover {
+            background: #2e3a6b;
+        }
+
+        .palette-btn.active {
+            border-color: var(--accent-neon);
+            background: #1f3a60;
+            color: var(--accent-neon);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: background 0.2s;
+        }
+
+        .btn-run {
+            background: var(--accent-green);
+            color: #000;
+        }
+
+        .btn-run:hover {
+            background: #00cc6a;
+        }
+
+        .btn-clear {
+            background: #3b4784;
+            color: #fff;
+            margin-top: 8px;
+        }
+
+        .hud-display {
+            background: #000;
+            border: 1px solid #2a325d;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            color: var(--accent-green);
+            min-height: 16px;
+        }
+
+        /* Level selector pills */
+        .level-pills {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .pill {
+            background: #252f56;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+
+        .pill.active {
+            background: #1f3a60;
+            border-color: var(--accent-neon);
+            color: var(--accent-neon);
+        }
+
+        /* Style toggles */
+        .style-toggles {
+            display: flex;
+            gap: 5px;
+        }
+
+        .style-btn {
+            flex: 1;
+            background: #252f56;
+            border: 1px solid #3b4784;
+            color: #fff;
+            padding: 6px;
+            font-size: 11px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .style-btn.active {
+            background: var(--accent-neon);
+            color: #000;
+        }
+
+        /* Auth Overlay */
+        #auth-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(10, 12, 22, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .auth-modal {
+            background: var(--panel-bg);
+            border: 2px solid var(--accent-neon);
+            padding: 30px;
+            border-radius: 8px;
+            text-align: center;
+            width: 350px;
+        }
+
+        .auth-input {
+            width: 100%;
+            padding: 10px;
+            margin: 15px 0;
+            background: #0a0c16;
+            border: 1px solid #3b4784;
+            color: #fff;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+    </style>
+  <script src="auth.js"></script>
+</head>
+<body>
+  <script>
+    window.globalAuth.requireAuth();
+  </script>
+
+    <div id="auth-overlay">
+        <div class="auth-modal">
+            <h2 style="margin-top:0; color:var(--accent-neon);">INITIALIZE RUNTIME</h2>
+            <p style="font-size:12px; color:var(--text-muted);">Enter username to load profile. Use <strong>developer</strong> to unlock override modes.</p>
+            <input type="text" id="auth-username" class="auth-input" placeholder="Username..." value="Maker">
+            <button class="btn btn-run" onclick="handleAuth()">Access System</button>
+        </div>
+    </div>
+
+    <div id="app-container">
+        <header>
+            <div>
+                <h1>Super Mario Maker 2 Engine</h1>
+                <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
+                    User Session: <span id="user-display-name" style="color: var(--accent-neon);">Guest</span>
+                </div>
+            </div>
+            <div class="style-toggles">
+                <button id="btn-style-modern" class="style-btn active" onclick="setStyleVisual('modern')">MODERN</button>
+                <button id="btn-style-classic" class="style-btn" onclick="setStyleVisual('classic')">RETRO</button>
+            </div>
+            <button class="btn btn-clear" style="margin-left:12px; background:#3b4784; color:#fff;" onclick="window.location.href='cyberbull-games.html'">← Games</button>
+        </header>
+
+        <div class="nav-tabs">
+            <div id="tab-creative" class="nav-tab active" onclick="switchMode('creative')">CREATIVE BUILDER</div>
+            <div id="tab-competitive" class="nav-tab" onclick="switchMode('competitive')">CAMPAIGN SECTORS</div>
+            <div id="tab-tutorial" class="nav-tab" onclick="switchMode('tutorial')">SYSTEM CORE TUTORIAL</div>
+        </div>
+
+        <div id="view-creative" class="view-panel active">
+            <div class="workspace">
+                <div class="canvas-container">
+                    <canvas id="creativeCanvas"></canvas>
+                </div>
+                <div class="sidebar">
+                    <button id="btn-play-creative" class="btn btn-run" onclick="toggleEnginePlay()">▶️ RUN SIMULATION</button>
+                    <div class="panel-box">
+                        <h4 class="panel-title">Element Palette</h4>
+                        <div id="creative-palette" class="palette-grid"></div>
+                    </div>
+                    <div class="panel-box">
+                        <h4 class="panel-title">Grid Settings</h4>
+                        <button class="btn btn-clear" onclick="clearCreativeGrid()">WIPE CANVAS GRID</button>
+                    </div>
+                    <div id="creative-hud" class="hud-display">System Idle | Ready to build or test.</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-competitive" class="view-panel">
+            <div class="workspace">
+                <div class="canvas-container">
+                    <canvas id="compCanvas"></canvas>
+                </div>
+                <div class="sidebar">
+                    <button id="btn-play-comp" class="btn btn-run" onclick="toggleEnginePlay()">▶️ RUN SIMULATION</button>
+                    <div class="panel-box">
+                        <h4 class="panel-title">Sector Selection</h4>
+                        <div id="comp-level-box" class="level-pills"></div>
+                        <h3 id="comp-title" style="margin: 10px 0 5px 0; font-size: 16px;">Sector</h3>
+                        <p id="comp-desc" style="margin: 0; font-size: 12px; color: var(--text-muted);">Loading details...</p>
+                    </div>
+                    <div id="admin-editor" class="panel-box" style="display: none; border-color: var(--accent-crimson);">
+                        <h4 class="panel-title" style="color: var(--accent-crimson);">⚠️ Live Matrix Override</h4>
+                        <p style="font-size: 11px; margin: 0 0 10px 0; color: var(--text-muted);">Real-time level design active. Draw directly on the screen to hack live data.</p>
+                        <div id="admin-palette" class="palette-grid"></div>
+                    </div>
+                    <div id="comp-hud" class="hud-display">Select a Sector Matrix and initiate.</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-tutorial" class="view-panel">
+            <div class="workspace">
+                <div class="canvas-container">
+                    <canvas id="tutorialCanvas"></canvas>
+                </div>
+                <div class="sidebar">
+                    <button id="btn-play-tutorial" class="btn btn-run" onclick="toggleEnginePlay()">▶️ RUN SIMULATION</button>
+                    <div class="panel-box">
+                        <h4 class="panel-title">System Mechanics</h4>
+                        <p style="font-size: 13px; line-height: 1.6; margin: 0;">
+                            <strong>Controls:</strong> Use <kbd>A</kbd>/<kbd>D</kbd> or Left/Right arrows to walk.<br>
+                            Press <kbd>Space</kbd> or <kbd>W</kbd> to jump.<br><br>
+                            <strong>Goal:</strong> Acquire the green <strong>Keycard</strong> to bypass the secure red <strong>Data Door</strong>, then run to the green exit flag.
+                        </p>
+                    </div>
+                    <div id="tutorial-instructions" class="hud-display">Read directions and run core simulation.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- GLOBAL CONSTANTS & SOURCE DATA ---
+        const TILE_SIZE = 32;
+        const MAP_W = 24;
+        const MAP_H = 14;
+
+        // Fluid responsive physics configs
+        const GRAVITY = 0.5;
+        const FRICTION = 0.85;
+        const ACCELERATION = 0.45;
+        const MAX_SPEED = 4.5;
+        const JUMP_FORCE = -9.5;
+
+        let currentUser = "Guest";
+        let activeMode = "creative";
+        let isPlaying = false;
+        let visualStyle = "modern";
+        let activeBrush = 1;
+        let isDrawing = false;
+        let currentLevelIndex = 0;
+        let animationFrameId = null;
+
+        const DATABASE = {
+            0: { name: "Air" },
+            1: { name: "Solid Block" },
+            2: { name: "Data Core (Coin)" },
+            3: { name: "Laser Spike" },
+            4: { name: "Acid Pool" },
+            5: { name: "Repulsor Pad" },
+            6: { name: "Keycard" },
+            7: { name: "Secure Door" },
+            8: { name: "Patrol Mech" },
+            9: { name: "Hover Drone" },
+            11: { name: "Exit Flag" },
+            12: { name: "Spawn Marker" }
+        };
+
+        const TUTORIAL_SOURCE = [
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,0,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,1],
+            [1,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,7,0,0,1],
+            [1,0,0,1,1,0,0,0,0,3,3,3,3,0,0,0,0,0,0,1,1,1,1,1],
+            [1,0,0,0,0,0,0,0,1,1,1,1,1,1,5,0,0,0,0,1,1,1,1,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1],
+            [1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,11,0,1],
+            [1,1,1,1,1,1,1,4,4,4,4,4,4,4,4,4,4,1,1,1,1,1,1,1],
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+        ];
+
+        const CAMPAIGN_SOURCE = {
+            0: {
+                title: "Sector 01: Data Core Extraction",
+                desc: "Infiltrate the secure architecture and recover data elements.",
+                grid: [
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,0,0,1],
+                    [1,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,1],
+                    [1,1,1,1,1,0,0,0,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,1,1,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,1],
+                    [1,0,0,0,1,1,1,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,1],
+                    [1,0,0,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,8,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,0,5,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,11,0,1],
+                    [1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,4,4,1,1,1,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+                ]
+            },
+            1: {
+                title: "Sector 02: Mechanized Fort",
+                desc: "Heavy autonomous guard droids patrol this structural line.",
+                grid: [
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                    [1,0,0,6,0,0,0,0,0,9,0,0,0,0,0,0,9,0,0,0,0,0,0,1],
+                    [1,1,1,1,1,1,0,0,1,1,1,1,0,0,1,1,1,1,0,0,0,0,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1],
+                    [1,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1],
+                    [1,1,1,1,1,0,0,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1],
+                    [1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1],
+                    [1,0,0,0,0,0,0,0,0,8,0,0,8,0,0,0,0,0,0,0,7,0,0,1],
+                    [1,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,1,0,0,1],
+                    [1,0,0,0,1,1,1,1,3,3,3,3,3,3,1,1,1,1,0,0,1,1,0,1],
+                    [1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,11,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+                ]
+            }
+        };
+
+        // --- HELPER UTILITY ---
+        function varColor(name) {
+            return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+        }
+
+        function setupCanvas(id) {
+            let canvas = document.getElementById(id);
+            if(canvas) {
+                canvas.width = MAP_W * TILE_SIZE;
+                canvas.height = MAP_H * TILE_SIZE;
+            }
+        }
+
+        // --- RUNTIME MUTABLE STATES & ENGINE ---
+        let activeMatrix = [];
+        let creativeGrid = [];
+        let campaignLevels = {};
+        
+        let player = { 
+            x: 0, y: 0, vx: 0, vy: 0, 
+            w: 16, h: 26, 
+            grounded: false, hasKey: false, dead: false, won: false,
+            coyoteTimer: 0, jumpBuffer: 0
+        };
+        let entities = [];
+        let ticks = 0;
+
+        // --- INPUT ENGINE ---
+        const keys = { Left: false, Right: false, Up: false };
+        const handler = (e, status) => {
+            if (!isPlaying && activeMode !== 'creative' && currentUser.toLowerCase() !== 'developer') return;
+            const code = e.code.toLowerCase();
+            if (['space', 'arrowup', 'keyw'].includes(code)) { e.preventDefault(); keys.Up = status; }
+            if (['arrowleft', 'keya'].includes(code)) { e.preventDefault(); keys.Left = status; }
+            if (['arrowright', 'keyd'].includes(code)) { e.preventDefault(); keys.Right = status; }
+        };
+        window.addEventListener('keydown', (e) => handler(e, true));
+        window.addEventListener('keyup', (e) => handler(e, false));
+        window.addEventListener('blur', () => { keys.Left = keys.Right = keys.Up = false; });
+
+        // --- AUTH & INIT ---
+        function handleAuth() {
+            const u = document.getElementById('auth-username').value.trim();
+            if(!u) return;
+            currentUser = u;
+            document.getElementById('user-display-name').innerText = u;
+            document.getElementById('auth-overlay').style.display = 'none';
+            
+            if(u.toLowerCase() === 'developer') {
+                document.getElementById('admin-editor').style.display = 'block';
+            }
+            campaignLevels = JSON.parse(JSON.stringify(CAMPAIGN_SOURCE));
+            buildCreativeEmptyMatrix();
+            switchMode('creative');
+        }
+
+        function setStyleVisual(style) {
+            visualStyle = style;
+            document.getElementById('btn-style-modern').classList.toggle('active', style === 'modern');
+            document.getElementById('btn-style-classic').classList.toggle('active', style === 'classic');
+            if (!isPlaying) redrawStatic();
+        }
+
+        // --- RENDERING PIPELINE ---
+        function renderElement(id, ctx, x, y, size, f) {
+            ctx.save();
+            ctx.translate(x, y);
+            
+            if (visualStyle === 'modern') {
+                switch(id) {
+                    case 1: // Solid Block
+                        let g = ctx.createLinearGradient(0, 0, size, size);
+                        g.addColorStop(0, '#2a325d'); g.addColorStop(1, '#14182d');
+                        ctx.fillStyle = g; ctx.fillRect(0, 0, size, size);
+                        ctx.strokeStyle = '#3b4784'; ctx.strokeRect(0, 0, size, size);
+                        break;
+                    case 2: // Data Core (Coin)
+                        let pulse = Math.sin(f * 0.15) * 2;
+                        ctx.fillStyle = '#ffb800'; ctx.shadowBlur = 10; ctx.shadowColor = '#ffb800';
+                        ctx.beginPath(); ctx.arc(size/2, size/2 + pulse, 5, 0, Math.PI*2); ctx.fill();
+                        break;
+                    case 3: // Laser Spike
+                        ctx.strokeStyle = varColor('--accent-crimson'); ctx.lineWidth = 2;
+                        ctx.shadowBlur = 8; ctx.shadowColor = varColor('--accent-crimson');
+                        ctx.beginPath();
+                        for(let i=0; i<size; i+=8) {
+                            ctx.moveTo(i, size); ctx.lineTo(i+4, size - (size-8 + Math.sin(f*0.3+i)*4));
+                        }
+                        ctx.stroke();
+                        break;
+                    case 4: // Acid Pool
+                        ctx.fillStyle = 'rgba(0, 255, 135, 0.2)'; ctx.fillRect(0, size-8, size, 8);
+                        ctx.fillStyle = varColor('--accent-green');
+                        ctx.fillRect(0, size-4 + Math.sin(f*0.2)*2, size, 4);
+                        break;
+                    case 5: // Spring / Repulsor Pad
+                        ctx.fillStyle = '#343a40'; ctx.fillRect(2, size-6, size-4, 6);
+                        ctx.fillStyle = varColor('--accent-neon'); ctx.fillRect(4, size-12 + Math.abs(Math.sin(f*0.1))*3, size-8, 3);
+                        break;
+                    case 6: // Keycard
+                        ctx.translate(size/2, size/2); ctx.rotate(Math.sin(f*0.08)*0.15);
+                        ctx.fillStyle = varColor('--accent-neon'); ctx.fillRect(-6, -4, 12, 8);
+                        ctx.fillStyle = '#000'; ctx.fillRect(2, -2, 2, 4);
+                        break;
+                    case 7: // Key Door
+                        ctx.fillStyle = '#14182d'; ctx.fillRect(0, 0, size, size);
+                        ctx.strokeStyle = varColor('--accent-crimson'); ctx.strokeRect(2, 2, size-4, size-4);
+                        ctx.fillStyle = varColor('--accent-crimson'); ctx.beginPath(); ctx.arc(size/2, size/2, 3, 0, Math.PI*2); ctx.fill();
+                        break;
+                    case 11: // Goal Flag
+                        ctx.fillStyle = varColor('--accent-green'); ctx.beginPath(); ctx.moveTo(6, 4); ctx.lineTo(size-2, 10); ctx.lineTo(6, 16); ctx.fill();
+                        ctx.fillStyle = '#fff'; ctx.fillRect(4, 2, 2, size-2);
+                        break;
+                    case 12: // Player Spawn Marker
+                        ctx.strokeStyle = 'rgba(0, 243, 255, 0.3)'; ctx.setLineDash([2, 2]); ctx.strokeRect(0, 0, size, size);
+                        break;
+                }
+            } else {
+                ctx.fillStyle = ["#000","#718096","#ecc94b","#e53e3e","#38a169","#3182ce","#319795","#9b2c2c","#4a5568","#9b2c2c","","#dd6b20","rgba(255,255,255,0.1)"][id] || "transparent";
+                if(id !== 0) ctx.fillRect(0, 0, size, size);
+            }
+            ctx.restore();
+        }
+
+        function drawActor(ctx, act, type, f) {
+            ctx.save();
+            ctx.translate(act.x, act.y);
+            ctx.shadowBlur = visualStyle === 'modern' ? 8 : 0;
+            
+            if (type === 'player') {
+                ctx.fillStyle = varColor('--accent-neon'); ctx.shadowColor = varColor('--accent-neon');
+                ctx.fillRect(0, 0, act.w, act.h);
+                let eyeX = act.vx >= 0 ? act.w - 5 : 2;
+                ctx.fillStyle = '#000'; ctx.fillRect(eyeX, 4, 3, 4);
+            } else if (type === 8) { 
+                ctx.fillStyle = '#5a67d8'; ctx.shadowColor = '#5a67d8';
+                ctx.fillRect(0, 0, act.w, act.h);
+                ctx.fillStyle = '#ff2a5f'; ctx.fillRect(act.dir > 0 ? act.w-4 : 0, 4, 4, 4);
+            } else if (type === 9) { 
+                let hover = Math.sin(f * 0.1) * 2;
+                ctx.translate(0, hover);
+                ctx.fillStyle = '#ed64a6'; ctx.shadowColor = '#ed64a6';
+                ctx.beginPath(); ctx.arc(act.w/2, act.h/2, act.w/2, 0, Math.PI*2); ctx.fill();
+            }
+            ctx.restore();
+        }
+
+        // --- MATRIX DESIGNER & SELECTION ---
+        function switchMode(target) {
+            isPlaying = false; activeMode = target;
+            if(animationFrameId) cancelAnimationFrame(animationFrameId);
+            
+            document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            
+            ['btn-play-tutorial', 'btn-play-comp', 'btn-play-creative'].forEach(id => {
+                let b = document.getElementById(id); if(b) b.innerText = "▶️ RUN SIMULATION";
+            });
+
+            if (target === 'tutorial') {
+                document.getElementById('view-tutorial').classList.add('active');
+                document.getElementById('tab-tutorial').classList.add('active');
+                activeMatrix = JSON.parse(JSON.stringify(TUTORIAL_SOURCE));
+            } else if (target === 'competitive') {
+                document.getElementById('view-competitive').classList.add('active');
+                document.getElementById('tab-competitive').classList.add('active');
+                buildCampaignSelection();
+                selectCampaignLevel(currentLevelIndex);
+            } else if (target === 'creative') {
+                document.getElementById('view-creative').classList.add('active');
+                document.getElementById('tab-creative').classList.add('active');
+                activeMatrix = creativeGrid;
+                initCreativeListeners();
+            }
+            buildPaletteMatrix(target === 'creative' ? 'creative-palette' : 'admin-palette');
+            setupCanvas(`${activeMode}Canvas`);
+            if (target === 'competitive' && currentUser.toLowerCase() === 'developer') {
+                initCampaignOverrideListeners();
+            }
+            resetSimulationData();
+            redrawStatic();
+        }
+
+        function buildPaletteMatrix(containerId) {
+            const div = document.getElementById(containerId); if(!div) return;
+            div.innerHTML = '';
+            let items = [{id: 0, name: "Eraser ❌"}].concat(Object.keys(DATABASE).filter(k => k != 0).map(k => ({id: parseInt(k), name: DATABASE[k].name})));
+            
+            items.forEach(item => {
+                let btn = document.createElement('div');
+                btn.className = `palette-btn ${activeBrush === item.id ? 'active' : ''}`;
+                btn.onclick = () => {
+                    activeBrush = item.id;
+                    div.querySelectorAll('.palette-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                };
+                let lbl = document.createElement('span'); lbl.innerText = item.name;
+                btn.appendChild(lbl); div.appendChild(btn);
+            });
+        }
+
+        function buildCampaignSelection() {
+            let container = document.getElementById('comp-level-box'); container.innerHTML = '';
+            Object.keys(campaignLevels).forEach(k => {
+                let idx = parseInt(k); let pill = document.createElement('div');
+                pill.className = `pill ${currentLevelIndex === idx ? 'active' : ''}`;
+                pill.innerText = `Sector 0${idx + 1}`;
+                pill.onclick = () => selectCampaignLevel(idx);
+                container.appendChild(pill);
+            });
+        }
+
+        function selectCampaignLevel(idx) {
+            currentLevelIndex = idx;
+            buildCampaignSelection();
+            document.getElementById('comp-title').innerText = campaignLevels[idx].title;
+            document.getElementById('comp-desc').innerText = campaignLevels[idx].desc;
+            activeMatrix = campaignLevels[idx].grid;
+            setupCanvas('compCanvas');
+            if (currentUser.toLowerCase() === 'developer') initCampaignOverrideListeners();
+            resetSimulationData();
+            redrawStatic();
+        }
+
+        function buildCreativeEmptyMatrix() {
+            creativeGrid = Array.from({length: MAP_H}, (_, r) => 
+                Array.from({length: MAP_W}, (_, c) => (r === MAP_H-1 || c === 0 || c === MAP_W-1 || r === 0) ? 1 : 0)
+            );
+            creativeGrid[MAP_H-2][2] = 12; creativeGrid[MAP_H-2][MAP_W-3] = 11;
+        }
+
+        function clearCreativeGrid() { buildCreativeEmptyMatrix(); activeMatrix = creativeGrid; resetSimulationData(); redrawStatic(); }
+
+        // --- REAL-TIME MARIO MAKER DRAWING SYSTEM ---
+        function initCreativeListeners() {
+            let c = document.getElementById('creativeCanvas');
+            setupDrawingHandlers(c);
+        }
+
+        function initCampaignOverrideListeners() {
+            let c = document.getElementById('compCanvas');
+            setupDrawingHandlers(c);
+        }
+
+        function setupDrawingHandlers(canvasElement) {
+            const getPos = (e) => {
+                let rect = canvasElement.getBoundingClientRect();
+                return {
+                    col: Math.floor((e.clientX - rect.left) / TILE_SIZE),
+                    row: Math.floor((e.clientY - rect.top) / TILE_SIZE)
+                };
+            };
+            const draw = (e) => {
+                let pos = getPos(e);
+                if(pos.row > 0 && pos.row < MAP_H-1 && pos.col > 0 && pos.col < MAP_W-1) {
+                    activeMatrix[pos.row][pos.col] = (e.buttons === 2) ? 0 : activeBrush;
+                    if(isPlaying) resetSimulationData(); 
+                    else redrawStatic();
+                }
+            };
+            canvasElement.onmousedown = (e) => { e.preventDefault(); isDrawing = true; draw(e); };
+            canvasElement.onmousemove = (e) => { if(isDrawing) draw(e); };
+            canvasElement.oncontextmenu = (e) => e.preventDefault(); 
+            window.addEventListener('mouseup', () => isDrawing = false);
+        }
+
+        function redrawStatic() {
+            if (isPlaying) return;
+            let canvas = document.getElementById(`${activeMode}Canvas`); if(!canvas) return;
+            let ctx = canvas.getContext('2d'); ctx.clearRect(0,0,canvas.width,canvas.height);
+            for(let r=0; r<MAP_H; r++) {
+                for(let c=0; c<MAP_W; c++) {
+                    if(activeMatrix[r][c] !== 0) renderElement(activeMatrix[r][c], ctx, c*TILE_SIZE, r*TILE_SIZE, TILE_SIZE, 0);
+                }
+            }
+        }
+
+        // --- ADVANCED PHYSICS ENGINE (MARIO-CORE) ---
+        function resetSimulationData() {
+            entities = [];
+            player.vx = 0; player.vy = 0; player.grounded = false;
+            player.hasKey = false; player.dead = false; player.won = false;
+            player.x = TILE_SIZE * 2; player.y = TILE_SIZE * 3;
+
+            for(let r=0; r<MAP_H; r++) {
+                for(let c=0; c<MAP_W; c++) {
+                    let val = activeMatrix[r][c];
+                    if(val === 12) {
+                        player.x = c * TILE_SIZE + (TILE_SIZE - player.w)/2;
+                        player.y = r * TILE_SIZE + (TILE_SIZE - player.h);
+                    } else if([8, 9].includes(val)) {
+                        entities.push({ type: val, x: c*TILE_SIZE, y: r*TILE_SIZE, w: 20, h: 20, dir: 1, startX: c*TILE_SIZE });
+                    }
+                }
+            }
+        }
+
+        function toggleEnginePlay() {
+            isPlaying = !isPlaying;
+            let activeBtnId = `btn-play-${activeMode === 'competitive' ? 'comp' : activeMode}`;
+            let btn = document.getElementById(activeBtnId);
+            
+            if(isPlaying) {
+                btn.innerText = "⏹️ EDIT DESIGN"; btn.style.background = varColor('--accent-crimson');
+                resetSimulationData(); engineLoop();
+            } else {
+                btn.innerText = activeMode === 'tutorial' ? "▶️ RUN SIMULATION" : (activeMode === 'competitive' ? "▶️ RUN SIMULATION" : "▶️ RUN SIMULATION");
+                btn.style.background = varColor('--accent-green');
+                if(animationFrameId) cancelAnimationFrame(animationFrameId);
+                redrawStatic();
+            }
+        }
+
+        function checkCollision(b1, b2) {
+            return b1.x < b2.x + b2.w && b1.x + b1.w > b2.x && b1.y < b2.y + b2.h && b1.y + b1.h > b2.y;
+        }
+
+        function updatePhysics() {
+            if(player.dead || player.won) return;
+
+            if (keys.Left) { player.vx -= ACCELERATION; if(player.vx < -MAX_SPEED) player.vx = -MAX_SPEED; }
+            else if (keys.Right) { player.vx += ACCELERATION; if(player.vx > MAX_SPEED) player.vx = MAX_SPEED; }
+            else { player.vx *= FRICTION; if(Math.abs(player.vx) < 0.05) player.vx = 0; }
+
+            if(player.grounded) player.coyoteTimer = 6; else player.coyoteTimer--;
+            if(keys.Up) player.jumpBuffer = 5; else player.jumpBuffer--;
+
+            if (player.jumpBuffer > 0 && player.coyoteTimer > 0) {
+                player.vy = JUMP_FORCE; player.grounded = false; player.coyoteTimer = 0; player.jumpBuffer = 0;
+            }
+
+            player.vy += GRAVITY;
+            if(player.vy > 12) player.vy = 12; 
+
+            player.x += player.vx; handleCollisions('x');
+            player.y += player.vy; handleCollisions('y');
+
+            entities.forEach(ent => {
+                if(ent.type === 8) {
+                    ent.x += ent.dir * 1.5;
+                    let c = Math.floor((ent.x + (ent.dir > 0 ? ent.w : 0)) / TILE_SIZE);
+                    let r = Math.floor((ent.y + ent.h) / TILE_SIZE);
+                    if(activeMatrix[r] && (activeMatrix[r][c] === 1 || activeMatrix[r-1][c] === 1)) ent.dir *= -1;
+                } else if(ent.type === 9) {
+                    ent.x += ent.dir * 1;
+                    if(Math.abs(ent.x - ent.startX) > TILE_SIZE * 2.5) ent.dir *= -1;
+                }
+                if(checkCollision(player, ent)) {
+                    if(ent.type === 8 && player.vy > 0 && player.y + player.h - player.vy <= ent.y + 4) {
+                        player.vy = JUMP_FORCE * 0.8;
+                        entities = entities.filter(e => e !== ent);
+                    } else {
+                        player.dead = true;
+                    }
+                }
+            });
+        }
+
+        function handleCollisions(axis) {
+            let left = Math.floor(player.x / TILE_SIZE), right = Math.floor((player.x + player.w) / TILE_SIZE);
+            let top = Math.floor(player.y / TILE_SIZE), bottom = Math.floor((player.y + player.h) / TILE_SIZE);
+
+            for(let r = top; r <= bottom; r++) {
+                for(let c = left; c <= right; c++) {
+                    if(!activeMatrix[r] || activeMatrix[r][c] === 0 || [8,9,12].includes(activeMatrix[r][c])) continue;
+                    let tile = activeMatrix[r][c];
+                    let box = { x: c*TILE_SIZE, y: r*TILE_SIZE, w: TILE_SIZE, h: TILE_SIZE };
+
+                    if(!checkCollision(player, box)) continue;
+
+                    if(tile === 1 || (tile === 7 && !player.hasKey)) { 
+                        if(axis === 'x') {
+                            player.x = player.vx > 0 ? box.x - player.w : box.x + box.w; player.vx = 0;
+                        } else {
+                            if(player.vy > 0) { player.y = box.y - player.h; player.grounded = true; }
+                            else { player.y = box.y + box.h; }
+                            player.vy = 0;
+                        }
+                    } else if(axis === 'y') { 
+                        if(tile === 2) { activeMatrix[r][c] = 0; } 
+                        else if(tile === 6) { player.hasKey = true; activeMatrix[r][c] = 0; } 
+                        else if([3,4].includes(tile)) { player.dead = true; } 
+                        else if(tile === 5) { player.vy = JUMP_FORCE * 1.4; player.grounded = false; } 
+                        else if(tile === 11) { player.won = true; } 
+                    }
+                }
+            }
+        }
+
+        function engineLoop() {
+            if(!isPlaying) return;
+            ticks++; updatePhysics();
+
+            let canvas = document.getElementById(`${activeMode}Canvas`);
+            let ctx = canvas.getContext('2d'); ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            for(let r=0; r<MAP_H; r++) {
+                for(let c=0; c<MAP_W; c++) {
+                    let tile = activeMatrix[r][c];
+                    if(tile !== 0 && ![8,9].includes(tile)) renderElement(tile, ctx, c*TILE_SIZE, r*TILE_SIZE, TILE_SIZE, ticks);
+                }
+            }
+
+            entities.forEach(ent => drawActor(ctx, ent, ent.type, ticks));
+            if(!player.dead) drawActor(ctx, player, 'player', ticks);
+
+            let message = `System Runtime Grid | Keycard status: ${player.hasKey ? 'VALIDATED' : 'WAITING'}`;
+            if(player.dead) message = "❌ ENTITY CRASHED. Click 'Edit Design' to modify and patch layout.";
+            if(player.won) message = "🏆 GRID CLEARED! Design integrity successfully approved.";
+            
+            let hud = document.getElementById(`${activeMode === 'competitive' ? 'comp' : activeMode}-hud`) || document.getElementById('tutorial-instructions');
+            if(hud) hud.innerHTML = message;
+
+            animationFrameId = requestAnimationFrame(engineLoop);
+        }
+    </script>
+</body>
+</html>

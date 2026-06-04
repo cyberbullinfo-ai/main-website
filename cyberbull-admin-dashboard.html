@@ -31,19 +31,20 @@
   </script>
   <header>
     <div>
-      <strong>CyberBull Admin</strong>
-      <div class="small">Admin dashboard</div>
+      <strong>CyberBull Admin Panel</strong>
+      <div class="small">Admin control center</div>
     </div>
-    <div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button id="homeBtn" class="btn muted">Home</button>
       <button id="logoutBtn" class="btn muted">Logout</button>
     </div>
   </header>
   <main>
     <div class="tabs">
-      <div class="tab active" data-tab="accounts">Account Manager</div>
-      <div class="tab" data-tab="stats">Statistics</div>
-      <div class="tab" data-tab="inspector">User Inspector</div>
-      <div class="tab" data-tab="tools">Admin Tools</div>
+      <div class="tab active" data-tab="accounts">Users</div>
+      <div class="tab" data-tab="stats">Stats</div>
+      <div class="tab" data-tab="inspector">Inspector</div>
+      <div class="tab" data-tab="tools">Tools</div>
     </div>
 
     <div id="accounts" class="panel">
@@ -107,6 +108,7 @@
     document.getElementById('amRefresh').addEventListener('click', ()=>renderAccountManager());
     document.getElementById('amSearch').addEventListener('input', ()=>renderAccountManager());
     document.getElementById('amFilterDomain').addEventListener('input', ()=>renderAccountManager());
+    document.getElementById('homeBtn').addEventListener('click', ()=> window.location.href = 'cyberbull-landing.html');
 
     document.getElementById('logoutBtn').addEventListener('click', ()=>{
       localStorage.removeItem('currentUser');

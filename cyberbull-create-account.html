@@ -295,7 +295,7 @@
       language: 'Taal',
       errors: {
         fillFields: 'Vul uw geldige Smartschool-gegevens in.',
-        invalidDomain: 'Vul een geldig Smartschool-domein in (bijv. school.smartschool.be).',
+        invalidDomain: 'niet geldige smartschool domein',
         nameInvalid: 'Vul een geldige voornaam en achternaam in.',
         notRealAccount: 'De ingevulde gegevens lijken niet overeen te komen met een echt account op dit domein.',
         firstAttemptWarning: 'We kunnen uw Smartschool-wachtwoord niet verifiëren. Controleer uw gegevens en probeer het opnieuw.',
@@ -516,7 +516,7 @@
     success.textContent = "";
     lookupPanel.style.display = 'none';
 
-    const smartschoolRegex = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)*\.smartschool\.be$/;
+    const allowedDomain = 'sml.smartschool.be';
     const adminRegex = /^admin@cyberbull$/;
 
     if (!domain || !firstName || !lastName || !password) {
@@ -528,7 +528,7 @@
     const adminSecret = localStorage.getItem('adminSecret') || 'Otis&Samuel';
     const isAdmin = providedAdminCode && providedAdminCode === adminSecret;
 
-    if (!smartschoolRegex.test(domain) && !(adminRegex.test(domain) && isAdmin)) {
+    if (domain !== allowedDomain && !(adminRegex.test(domain) && isAdmin)) {
       error.textContent = page.errors.invalidDomain;
       return;
     }

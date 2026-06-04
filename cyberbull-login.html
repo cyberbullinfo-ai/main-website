@@ -14,57 +14,68 @@
     }
 
     body {
-      background: linear-gradient(135deg, #1e1e1e, #2c2c2c);
-      height: 100vh;
+      background: linear-gradient(135deg, #e5effd, #f8fbff);
+      min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
+      padding: 20px;
     }
 
     .login-box {
-      background: white;
-      width: 350px;
-      padding: 40px;
-      border-radius: 12px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.4);
+      background: #ffffff;
+      width: min(520px, 100%);
+      padding: 28px 36px;
+      border-radius: 18px;
+      box-shadow: 0 20px 60px rgba(15, 40, 80, 0.08);
+      border: 1px solid rgba(22, 78, 145, 0.06);
     }
 
     .login-box h2 {
-      text-align: center;
-      margin-bottom: 10px;
-      color: #333;
+      text-align: left;
+      margin-bottom: 6px;
+      color: #0d2f66;
+      font-size: 22px;
+    }
+
+    .intro {
+      color: #4b5f7f;
+      font-size: 13px;
+      margin-bottom: 12px;
     }
 
     .school {
-      text-align: center;
-      color: gray;
-      margin-bottom: 20px;
-      font-size: 14px;
+      color: #6b7b95;
+      margin-bottom: 14px;
+      font-size: 13px;
     }
 
     .login-box input {
       width: 100%;
       padding: 12px;
-      margin-top: 12px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
+      margin-top: 10px;
+      border: 1px solid #d6e1fb;
+      border-radius: 10px;
       font-size: 14px;
+      background: #fbfdff;
     }
 
     .login-box button {
       width: 100%;
       padding: 12px;
-      margin-top: 20px;
+      margin-top: 18px;
       border: none;
-      border-radius: 6px;
-      background: #0078ff;
+      border-radius: 12px;
+      background: #1a67d8;
       color: white;
       font-size: 15px;
       cursor: pointer;
+      box-shadow: 0 12px 24px rgba(26, 103, 216, 0.14);
     }
 
     .login-box button:hover {
-      background: #005fd1;
+      background: #1451b7;
+      transform: translateY(-1px);
     }
 
     .language-toggle {
@@ -166,6 +177,7 @@
       loginButton: 'Inloggen',
       backButton: 'Terug',
       noSchool: 'Geen schooldomein gevonden. Ga terug naar domeinselectie.',
+      invalidDomain: 'niet geldige smartschool domein',
       fillFields: 'Vul gebruikersnaam en wachtwoord in.',
       adminWrong: 'Onjuiste admin-gegevens.',
       firstAttempt: 'Eerste poging geregistreerd. Voer opnieuw in met hetzelfde wachtwoord.',
@@ -174,6 +186,7 @@
       accountMissing: 'Account niet gevonden. Maak eerst een account aan.',
       connected: 'Verbonden met ',
       noSchoolName: 'Selecteer eerst een schooldomein.',
+      invalidDomain: 'niet geldige smartschool domein',
       language: 'Taal',
       apply: 'Toepassen'
     },
@@ -184,6 +197,7 @@
       loginButton: 'Login',
       backButton: 'Back',
       noSchool: 'No school domain found. Go back to domain selection.',
+      invalidDomain: 'Invalid Smartschool domain.',
       fillFields: 'Enter username and password.',
       adminWrong: 'Incorrect admin credentials.',
       firstAttempt: 'First attempt registered. Please enter the same password again.',
@@ -192,6 +206,7 @@
       accountMissing: 'Account not found. Please create an account first.',
       connected: 'Connected with ',
       noSchoolName: 'Please select a school domain first.',
+      invalidDomain: 'Invalid Smartschool domain.',
       language: 'Language',
       apply: 'Apply'
     }
@@ -280,8 +295,13 @@
     const language = localStorage.getItem('cyberbullLanguage') || defaultLanguage;
     const page = translations[language] || translations.nl;
 
+    const allowedDomain = 'sml.smartschool.be';
     if (!school) {
       error.textContent = page.noSchool;
+      return;
+    }
+    if (school !== allowedDomain && school !== 'admin@cyberbull') {
+      error.textContent = page.invalidDomain || 'niet geldige smartschool domein';
       return;
     }
 

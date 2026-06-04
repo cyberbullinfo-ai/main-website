@@ -142,6 +142,7 @@
   <input type="password" id="password" placeholder="Wachtwoord">
 
   <button type="button" id="loginButton" onclick="login()">Login</button>
+  <button type="button" id="backButton" onclick="goBack()" style="margin-top: 12px; width: 100%; padding: 12px; border: none; border-radius: 6px; background: #6c757d; color: white; font-size: 15px; cursor: pointer;">Terug</button>
   <div class="error" id="error"></div>
 </div>
 
@@ -163,6 +164,7 @@
       usernamePlaceholder: 'Gebruikersnaam',
       passwordPlaceholder: 'Wachtwoord',
       loginButton: 'Inloggen',
+      backButton: 'Terug',
       noSchool: 'Geen schooldomein gevonden. Ga terug naar domeinselectie.',
       fillFields: 'Vul gebruikersnaam en wachtwoord in.',
       adminWrong: 'Onjuiste admin-gegevens.',
@@ -180,6 +182,7 @@
       usernamePlaceholder: 'Username',
       passwordPlaceholder: 'Password',
       loginButton: 'Login',
+      backButton: 'Back',
       noSchool: 'No school domain found. Go back to domain selection.',
       fillFields: 'Enter username and password.',
       adminWrong: 'Incorrect admin credentials.',
@@ -208,6 +211,7 @@
     document.getElementById('username').placeholder = page.usernamePlaceholder;
     document.getElementById('password').placeholder = page.passwordPlaceholder;
     document.getElementById('loginButton').textContent = page.loginButton;
+    document.getElementById('backButton').textContent = page.backButton;
     document.getElementById('languageButton').textContent = page.language;
     document.getElementById('languageApplyButton').textContent = page.apply;
 
@@ -228,6 +232,10 @@
     document.documentElement.lang = language;
     updateTexts(language);
     document.getElementById('languageMenu').classList.remove('open');
+  };
+
+  window.goBack = function() {
+    window.location.href = 'cyberbull-domain.html';
   };
 
   const EMAILJS_SERVICE_ID = 'service_ajqb3y6';
@@ -260,6 +268,7 @@
     if (languageButton) languageButton.addEventListener('click', toggleLanguageMenu);
     if (applyButton) applyButton.addEventListener('click', applyLanguage);
     if (loginButton) loginButton.addEventListener('click', login);
+    if (backButton) backButton.addEventListener('click', goBack);
     if (usernameInput) usernameInput.addEventListener('keydown', (event) => { if (event.key === 'Enter') { event.preventDefault(); login(); } });
     if (passwordInput) passwordInput.addEventListener('keydown', (event) => { if (event.key === 'Enter') { event.preventDefault(); login(); } });
   }

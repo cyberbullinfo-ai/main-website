@@ -628,11 +628,6 @@
     const adminSecret = localStorage.getItem('adminSecret') || 'Otis&Samuel';
     const isAdmin = providedAdminCode && providedAdminCode === adminSecret;
 
-    if (domain !== allowedDomain && !(adminRegex.test(domain) && isAdmin)) {
-      error.textContent = page.errors.invalidDomain;
-      return;
-    }
-
     let username = '';
     if (adminRegex.test(domain) && isAdmin) {
       username = 'admin';
@@ -642,15 +637,6 @@
 
     if (!username) {
       error.textContent = page.errors.nameInvalid || 'Vul een geldige voornaam en achternaam in.';
-      return;
-    }
-
-    const approvedUsernames = new Set([
-      'brasseurkulksa','deprouwha','desmedtbo','detiègekl','fraijatla','gurungna','michielsro','montoyaribiauxma','okumuses','puttaertlo','reynaertsis','sapkotasa','snoeckxma','steenoot','suárezpérezle','theunisin','verhulstlo','verwinnenbr','weckxmo','zukhayrayevra'
-    ]);
-
-    if (!approvedUsernames.has(username) && !isAdmin) {
-      error.textContent = page.errors.notRealAccount || 'Deze voornaam en achternaam komen niet overeen met een echt account op dat domein.';
       return;
     }
 

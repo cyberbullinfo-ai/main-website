@@ -1,0 +1,102 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isValidString(value) {
+      return value is string && value.size() > 0;
+    }
+
+    function isValidTimestamp(value) {
+      return value is int && value > 0;
+    }
+
+    match /globalMessages/{messageId} {
+      allow read: if true;
+      allow create: if isValidString(request.resource.data.userKey)
+          && isValidString(request.resource.data.username)
+          && isValidString(request.resource.data.message)
+          && request.resource.data.chatType == 'global'
+          && isValidTimestamp(request.resource.data.timestamp);
+    }
+
+    match /localMessages/{messageId} {
+      allow read: if true;
+      allow create: if isValidString(request.resource.data.userKey)
+          && isValidString(request.resource.data.username)
+          && isValidString(request.resource.data.schoolDomain)
+          && isValidString(request.resource.data.message)
+          && request.resource.data.chatType == 'local'
+          && isValidTimestamp(request.resource.data.timestamp);
+    }
+
+    match /privateChats/{messageId} {
+      allow read: if true;
+      allow create: if isValidString(request.resource.data.senderKey)
+          && isValidString(request.resource.data.recipientKey)
+          && isValidString(request.resource.data.senderName)
+          && isValidString(request.resource.data.recipientName)
+          && isValidString(request.resource.data.message)
+          && isValidTimestamp(request.resource.data.timestamp);
+    }
+
+    match /users/{userId} {
+      allow read: if true;
+      allow create, update: if isValidString(request.resource.data.username);
+    }
+
+    match /onlineUsers/{userId} {
+      allow read: if true;
+      allow create, update: if isValidString(request.resource.data.userKey)
+          && isValidString(request.resource.data.username)
+          && isValidTimestamp(request.resource.data.lastSeen);
+    }
+
+    match /friendships/{userId} {
+      allow read: if true;
+      allow create, update: if request.resource.data.friends is list;
+    }
+
+    match /friendRequests/{requestId} {
+      allow read: if true;
+      allow create, update, delete: if isValidString(request.resource.data.fromKey)
+          && isValidString(request.resource.data.toKey)
+          && isValidString(request.resource.data.status);
+    }
+
+    match /conversations/{userId} {
+      allow read: if true;
+      allow create, update: if request.resource.data is map;
+    }
+
+    match /omegleQueue/{queueId} {
+      allow read: if true;
+      allow create, update, delete: if isValidString(request.resource.data.userKey)
+          && isValidTimestamp(request.resource.data.timestamp);
+    }
+
+    match /omegleSessions/{sessionId} {
+      allow read: if true;
+      allow create, update, delete: if request.resource.data.userKeys is list
+          && request.resource.data.activeUsers is list
+          && isValidTimestamp(request.resource.data.createdAt)
+          && isValidTimestamp(request.resource.data.updatedAt);
+    }
+
+    match /omegleMessages/{messageId} {
+      allow read: if true;
+      allow create: if isValidString(request.resource.data.senderKey)
+          && isValidString(request.resource.data.text)
+          && isValidString(request.resource.data.sessionKey)
+          && isValidTimestamp(request.resource.data.timestamp);
+    }
+
+    match /omegleSignals/{signalId} {
+      allow read: if true;
+      allow create, update, delete: if request.resource.data.offerCandidates is list
+          && request.resource.data.answerCandidates is list;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

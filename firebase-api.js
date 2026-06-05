@@ -3,6 +3,7 @@
 window.FIREBASE_CONFIG = {
   apiKey: "AIzaSyAjayVTJYG02p8ZYpEfpvHf6bt0SXiV9Oc",
   authDomain: "cyberbull-officieel.firebaseapp.com",
+  databaseURL: "https://cyberbull-crosschat-default-rtdb.europe-west1.firebasedatabase.app/",
   projectId: "cyberbull-officieel",
   storageBucket: "cyberbull-officieel.firebasestorage.app",
   messagingSenderId: "1025456152028",
@@ -41,7 +42,8 @@ window.firebaseAPI = {
     }
 
     this.db = firebase.firestore();
-    this.auth = firebase.auth();
+    this.auth = firebase.auth ? firebase.auth() : null;
+    this.rtdb = firebase.database ? firebase.database() : null;
     this.isEnabled = true;
 
     this.subscribeGlobalMessages();
@@ -66,9 +68,10 @@ window.firebaseAPI = {
 
     this.db.collection('friendRequests')
       .where('toKey', '==', userKey)
-      .orderBy('timestamp', 'desc')
       .onSnapshot(snapshot => {
-        this.incomingFriendRequests[userKey] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        this.incomingFriendRequests[userKey] = snapshot.docs
+          .map(doc => ({ id: doc.id, ...doc.data() }))
+          .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
       }, error => {
         console.error('Friend requests snapshot failed', error);
       });
@@ -242,8 +245,13 @@ window.firebaseAPI = {
       timestamp: Date.now(),
       chatType: 'global'
     };
-    const docRef = await this.db.collection('globalMessages').add(messageData);
-    return { id: docRef.id, ...messageData };
+    try {
+      const docRef = await this.db.collection('globalMessages').add(messageData);
+      return { id: docRef.id, ...messageData };
+    } catch (error) {
+      console.error('Firebase sendGlobalMessage failed', error);
+      throw error;
+    }
   },
 
   async sendLocalMessage(userKey, username, schoolDomain, message, avatar) {
@@ -257,8 +265,13 @@ window.firebaseAPI = {
       timestamp: Date.now(),
       chatType: 'local'
     };
-    await this.db.collection('localMessages').add(messageData);
-    return messageData;
+    try {
+      await this.db.collection('localMessages').add(messageData);
+      return messageData;
+    } catch (error) {
+      console.error('Firebase sendLocalMessage failed', error);
+      throw error;
+    }
   },
 
   async sendPrivateMessage(senderKey, senderName, recipientKey, recipientName, message) {
@@ -274,25 +287,35 @@ window.firebaseAPI = {
       timestamp: Date.now(),
       chatType: 'private'
     };
-    await this.db.collection('privateChats').add(messageData);
-    return messageData;
+    try {
+      await this.db.collection('privateChats').add(messageData);
+      return messageData;
+    } catch (error) {
+      console.error('Firebase sendPrivateMessage failed', error);
+      throw error;
+    }
   },
 
   async setUserOnline(userKey, username, schoolDomain, avatar) {
     if (!this.isEnabled) return;
-    await this.db.collection('onlineUsers').doc(userKey).set({
-      userKey,
-      username,
-      schoolDomain,
-      avatar,
-      lastSeen: Date.now()
-    });
-    await this.saveUserProfile(userKey, {
-      username,
-      schoolDomain,
-      avatar,
-      updatedAt: Date.now()
-    });
+    try {
+      await this.db.collection('onlineUsers').doc(userKey).set({
+        userKey,
+        username,
+        schoolDomain,
+        avatar,
+        lastSeen: Date.now()
+      });
+      await this.saveUserProfile(userKey, {
+        username,
+        schoolDomain,
+        avatar,
+        updatedAt: Date.now()
+      });
+    } catch (error) {
+      console.error('Firebase setUserOnline failed', error);
+      throw error;
+    }
   },
 
   getOnlineUsers() {
@@ -307,7 +330,12 @@ window.firebaseAPI = {
 
   async saveUserProfile(userKey, profile) {
     if (!this.isEnabled || !userKey) return;
-    await this.db.collection('users').doc(userKey).set(profile, { merge: true });
+    try {
+      await this.db.collection('users').doc(userKey).set(profile, { merge: true });
+    } catch (error) {
+      console.error('Firebase saveUserProfile failed', error);
+      throw error;
+    }
   },
 
   async fetchUserProfile(userKey) {

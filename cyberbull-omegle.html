@@ -6,45 +6,60 @@
   <title>Omegle Chat - CyberBull</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { min-height: 100vh; font-family: Inter, system-ui, sans-serif; background: radial-gradient(circle at top, #0f172a 0%, #111827 40%, #0f172a 100%); color: #e2e8f0; }
+    body { min-height: 100vh; font-family: Inter, system-ui, sans-serif; background: #f3f4f6; color: #111827; }
     .page { width: min(1180px, 100%); margin: 0 auto; padding: 24px; }
     .topbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
     .title-row { display: flex; align-items: center; gap: 16px; }
-    .title-icon { width: 64px; height: 64px; border-radius: 22px; background: linear-gradient(135deg, #fb7185, #f97316); display: grid; place-items: center; font-size: 32px; }
-    .topbar h1 { font-size: clamp(1.9rem, 2.7vw, 2.5rem); }
-    .topbar p { color: #94a3b8; max-width: 720px; line-height: 1.6; }
+    .title-icon { width: 64px; height: 64px; border-radius: 18px; background: linear-gradient(135deg, #2563eb, #60a5fa); display: grid; place-items: center; font-size: 32px; color: #ffffff; }
+    .topbar h1 { font-size: clamp(1.9rem, 2.7vw, 2.5rem); color: #111827; }
+    .topbar p { color: #4b5563; max-width: 720px; line-height: 1.6; }
     .nav-links { display: flex; gap: 12px; flex-wrap: wrap; }
-    .nav-button { border: none; border-radius: 999px; padding: 12px 18px; background: rgba(255,255,255,0.08); color: #e2e8f0; cursor: pointer; transition: transform 180ms ease, background 180ms ease; }
-    .nav-button:hover { transform: translateY(-2px); background: rgba(255,255,255,0.16); }
-    .grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 20px; }
-    .panel { background: rgba(15,23,42,0.95); border: 1px solid rgba(255,255,255,0.08); border-radius: 28px; padding: 24px; box-shadow: 0 30px 60px rgba(0,0,0,0.25); }
-    .panel h2 { margin-bottom: 18px; font-size: 1.2rem; }
-    .status-card { display: grid; gap: 8px; padding: 18px; border-radius: 20px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); }
-    .status-card span { display: block; color: #94a3b8; }
-    .status-card strong { font-size: 1.8rem; line-height: 1.1; }
+    .nav-button { border: none; border-radius: 999px; padding: 12px 18px; background: #e5e7eb; color: #111827; cursor: pointer; transition: transform 180ms ease, background 180ms ease; }
+    .nav-button:hover { transform: translateY(-2px); background: #d1d5db; }
+    .grid { display: grid; grid-template-columns: 1fr 1.25fr; gap: 20px; }
+    .panel { background: #ffffff; border: 1px solid #d1d5db; border-radius: 28px; padding: 24px; box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08); }
+    .panel h2 { margin-bottom: 18px; font-size: 1.2rem; color: #111827; }
+    .status-card { display: grid; gap: 8px; padding: 18px; border-radius: 20px; background: #f8fafc; border: 1px solid #e5e7eb; }
+    .status-card span { display: block; color: #6b7280; }
+    .status-card strong { font-size: 1.8rem; line-height: 1.1; color: #111827; }
     .button-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 18px; }
-    .main-action { border: none; border-radius: 999px; padding: 16px 24px; background: linear-gradient(135deg, #fb7185, #f43f5e); color: #fff; font-weight: 700; cursor: pointer; transition: opacity 180ms ease; }
-    .main-action:hover { opacity: 0.95; }
-    .secondary-action { border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.04); color: #e2e8f0; }
-    .main-action:disabled, .secondary-action:disabled { opacity: 0.4; cursor: not-allowed; }
-    .hint { color: #94a3b8; font-size: 0.92rem; margin-top: 10px; }
+    .main-action { border: none; border-radius: 999px; padding: 16px 24px; background: linear-gradient(135deg, #2563eb, #3b82f6); color: #fff; font-weight: 700; cursor: pointer; transition: opacity 180ms ease, transform 180ms ease; }
+    .main-action:hover { opacity: 0.95; transform: translateY(-1px); }
+    .secondary-action { border: 1px solid #d1d5db; background: #f8fafc; color: #111827; }
+    .main-action:disabled, .secondary-action:disabled { opacity: 0.5; cursor: not-allowed; }
+    .hint { color: #6b7280; font-size: 0.92rem; margin-top: 10px; }
     .chat-panel { display: grid; gap: 18px; min-height: 72vh; }
-    .chat-box { display: grid; gap: 16px; padding: 20px; overflow: hidden; min-height: 460px; }
+    .chat-box { display: grid; gap: 16px; padding: 20px; overflow: hidden; min-height: 560px; }
     .chat-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-    .chat-header h2 { font-size: 1.25rem; }
-    .chat-status { color: #94a3b8; font-size: 0.95rem; }
+    .chat-header h2 { font-size: 1.28rem; color: #111827; }
+    .chat-status { color: #6b7280; font-size: 0.95rem; }
+    .video-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .video-card { display: grid; gap: 12px; padding: 18px; border-radius: 22px; background: #f8fafc; border: 1px solid #d1d5db; }
+    .video-card-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 0.95rem; color: #4b5563; }
+    .video-label { color: #6b7280; }
+    .video-card video { width: 100%; aspect-ratio: 16 / 9; border-radius: 18px; background: #111827; }
+    .video-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; align-items: center; margin-bottom: 12px; }
+    .device-select { display: grid; gap: 6px; }
+    .device-select label { color: #4b5563; font-size: 0.9rem; }
+    .device-select select { width: 100%; padding: 10px 12px; border-radius: 14px; border: 1px solid #d1d5db; background: #ffffff; color: #111827; }
+    .chat-header small, .video-actions .note { color: #6b7280; }
     .message-list { flex: 1; overflow-y: auto; display: grid; gap: 14px; padding-right: 4px; }
-    .message-bubble { max-width: 82%; padding: 14px 18px; border-radius: 20px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); line-height: 1.75; }
-    .message-bubble.you { justify-self: end; background: rgba(251,113,133,0.14); }
-    .message-bubble .meta { display: block; margin-top: 8px; color: #94a3b8; font-size: 0.85rem; }
-    .message-empty { padding: 28px; border-radius: 22px; background: rgba(255,255,255,0.04); color: #94a3b8; text-align: center; }
+    .message-bubble { max-width: 82%; padding: 14px 18px; border-radius: 20px; background: #f1f5f9; border: 1px solid #e2e8f0; line-height: 1.75; color: #111827; }
+    .message-bubble.you { justify-self: end; background: #dbeafe; border-color: #bfdbfe; }
+    .message-bubble .meta { display: block; margin-top: 8px; color: #6b7280; font-size: 0.85rem; }
+    .message-empty { padding: 28px; border-radius: 22px; background: #f8fafc; color: #6b7280; text-align: center; }
     .chat-form { display: grid; gap: 12px; }
-    .chat-input { width: 100%; min-height: 80px; padding: 18px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.12); background: rgba(15,23,42,0.9); color: #e2e8f0; resize: vertical; font-size: 1rem; }
+    .chat-input { width: 100%; min-height: 80px; padding: 18px; border-radius: 20px; border: 1px solid #d1d5db; background: #ffffff; color: #111827; resize: vertical; font-size: 1rem; }
+    .chat-input:focus { outline: 2px solid #93c5fd; }
     .chat-footer { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
-    .note { color: #94a3b8; font-size: 0.92rem; }
-    @media (max-width: 960px) { .grid { grid-template-columns: 1fr; } }
+    .note { color: #6b7280; font-size: 0.92rem; }
+    @media (max-width: 960px) { .grid { grid-template-columns: 1fr; } .video-grid { grid-template-columns: 1fr; } }
   </style>
   <script src="auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="firebase-api.js"></script>
   <script src="chat.js"></script>
 </head>
 <body>
@@ -83,21 +98,55 @@
           <button id="findButton" class="main-action">Find Stranger</button>
           <button id="leaveButton" class="secondary-action" disabled>Leave</button>
         </div>
-        <p class="hint">Random matching uses active players in the CyberBull session. Once connected, your messages are displayed anonymously.</p>
+        <p class="hint">Random matching uses active CyberBull users. Click Find Stranger to start, then use Leave or Next Stranger to disconnect.</p>
       </aside>
 
       <section class="chat-panel">
         <div class="panel chat-box">
           <div class="chat-header">
             <div>
-              <h2>Random conversation</h2>
+              <h2>Anonymous stranger chat</h2>
               <div class="chat-status" id="partnerStatus">No stranger matched yet.</div>
             </div>
-            <div class="note" id="sessionNote">Your identity will remain hidden in this chat window.</div>
+            <div class="note" id="sessionNote">Your identity and school are hidden in this session.</div>
+          </div>
+
+          <div class="video-actions">
+            <div class="device-select">
+              <label for="cameraSelect">Camera</label>
+              <select id="cameraSelect"><option>Loading cameras...</option></select>
+            </div>
+            <div class="device-select">
+              <label for="microphoneSelect">Microphone</label>
+              <select id="microphoneSelect"><option>Loading microphones...</option></select>
+            </div>
+            <div class="device-select" style="align-self: end;">
+              <button id="refreshDevicesButton" class="secondary-action" type="button">Refresh devices</button>
+            </div>
+            <button id="startVideoButton" class="secondary-action" type="button">Start Video</button>
+            <button id="toggleAudioButton" class="secondary-action" type="button" disabled>Mute</button>
+            <span class="note" id="videoNote">Video can be enabled after matching with a stranger.</span>
+          </div>
+
+          <div class="video-grid">
+            <div class="video-card">
+              <div class="video-card-header">
+                <span>You</span>
+                <span class="video-label" id="localLabel">Camera ready</span>
+              </div>
+              <video id="localVideo" autoplay muted playsinline></video>
+            </div>
+            <div class="video-card">
+              <div class="video-card-header">
+                <span>Stranger</span>
+                <span class="video-label" id="remoteLabel">Waiting for connection</span>
+              </div>
+              <video id="remoteVideo" autoplay playsinline></video>
+            </div>
           </div>
 
           <div class="message-list" id="messageList">
-            <div class="message-empty">Click find to connect with a random player.</div>
+            <div class="message-empty">Find a stranger to start an anonymous chat.</div>
           </div>
 
           <form id="omegleForm" class="chat-form">
@@ -129,7 +178,34 @@
     const WAIT_KEY = 'omegleWaiting';
     const ACTIVE_KEY_PREFIX = 'omegleActive_';
     const SESSION_KEY_PREFIX = 'omegleSession_';
+    const useFirebaseOmegle = window.firebaseAPI?.isEnabled;
+    const omegleDb = useFirebaseOmegle ? firebase.firestore() : null;
+    const omegleQueueCol = useFirebaseOmegle ? omegleDb.collection('omegleQueue') : null;
+    const omegleSessionsCol = useFirebaseOmegle ? omegleDb.collection('omegleSessions') : null;
+    const omegleMessagesCol = useFirebaseOmegle ? omegleDb.collection('omegleMessages') : null;
+    const omegleSignalsCol = useFirebaseOmegle ? omegleDb.collection('omegleSignals') : null;
     let activeSession = null;
+    let firebaseMessages = [];
+    let sessionListener = null;
+    let messagesListener = null;
+    let signalListener = null;
+    let signalDocRef = null;
+    let localStream = null;
+    let peerConnection = null;
+    let videoRequested = false;
+    let remoteCandidatesProcessed = new Set();
+    const ICE_SERVERS = [{ urls: 'stun:stun.l.google.com:19302' }];
+    const localVideo = document.getElementById('localVideo');
+    const remoteVideo = document.getElementById('remoteVideo');
+    const cameraSelect = document.getElementById('cameraSelect');
+    const microphoneSelect = document.getElementById('microphoneSelect');
+    const refreshDevicesButton = document.getElementById('refreshDevicesButton');
+    const startVideoButton = document.getElementById('startVideoButton');
+    const toggleAudioButton = document.getElementById('toggleAudioButton');
+    const remoteLabel = document.getElementById('remoteLabel');
+    const videoNote = document.getElementById('videoNote');
+    let selectedVideoDeviceId = null;
+    let selectedAudioDeviceId = null;
 
     function getQueue() {
       try { return JSON.parse(localStorage.getItem(WAIT_KEY) || '[]'); } catch { return []; }
@@ -142,6 +218,23 @@
     function cleanupQueue(queue) {
       const cutoff = Date.now() - 70000;
       return queue.filter(entry => entry.userKey && entry.timestamp >= cutoff);
+    }
+
+    async function getFirebaseQueue() {
+      const cutoff = Date.now() - 70000;
+      const snapshot = await omegleQueueCol
+        .where('timestamp', '>=', cutoff)
+        .orderBy('timestamp')
+        .get();
+      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).filter(item => item.userKey !== currentUserKey);
+    }
+
+    async function removeFirebaseQueueEntry(userKey) {
+      try {
+        await omegleQueueCol.doc(userKey).delete();
+      } catch (error) {
+        // ignore missing queue entry
+      }
     }
 
     function getActive() {
@@ -195,7 +288,11 @@
       localStorage.setItem(getConversationKey(sessionKey), JSON.stringify(messages));
     }
 
-    function addMessage(sessionKey, message) {
+    async function addMessage(sessionKey, message) {
+      if (useFirebaseOmegle) {
+        await omegleMessagesCol.add({ ...message, sessionKey });
+        return;
+      }
       const messages = getMessages(sessionKey);
       messages.push(message);
       if (messages.length > 200) messages.splice(0, messages.length - 200);
@@ -216,18 +313,34 @@
     function updateButtons(state) {
       currentState.textContent = state;
       const connected = !!activeSession;
-      findButton.disabled = connected;
-      leaveButton.disabled = !connected;
+      const waiting = state === 'Waiting';
+      const disconnected = state === 'Disconnected';
+
+      findButton.textContent = connected ? 'Next Stranger' : 'Find Stranger';
+      findButton.disabled = waiting;
+      leaveButton.disabled = !connected && !waiting;
       omegleInput.disabled = !connected;
       sendButton.disabled = !connected;
+      updateVideoControls();
+    }
+
+    function updateVideoControls() {
+      if (!startVideoButton || !toggleAudioButton) return;
+      const videoActive = !!peerConnection;
+      startVideoButton.textContent = videoActive ? 'Stop Video' : 'Start Video';
+      toggleAudioButton.disabled = !localStream;
+      toggleAudioButton.textContent = localStream?.getAudioTracks().some(track => track.enabled) ? 'Mute' : 'Unmute';
+      if (cameraSelect) cameraSelect.disabled = !!localStream;
+      if (microphoneSelect) microphoneSelect.disabled = !!localStream;
+      if (refreshDevicesButton) refreshDevicesButton.disabled = !!localStream;
     }
 
     function renderMessages() {
       if (!activeSession) {
-        messageList.innerHTML = '<div class="message-empty">Click find stranger to connect with a random player.</div>';
+        messageList.innerHTML = '<div class="message-empty">Find a stranger to start an anonymous chat.</div>';
         return;
       }
-      const messages = getMessages(activeSession.sessionKey);
+      const messages = useFirebaseOmegle ? firebaseMessages : getMessages(activeSession.sessionKey);
       if (messages.length === 0) {
         messageList.innerHTML = '<div class="message-empty">You are now connected. Say hello to your stranger!</div>';
         return;
@@ -253,6 +366,168 @@
       return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
 
+    function updateAudioButton() {
+      if (!toggleAudioButton) return;
+      const enabled = localStream?.getAudioTracks().some(track => track.enabled);
+      toggleAudioButton.textContent = enabled ? 'Mute' : 'Unmute';
+      toggleAudioButton.disabled = !localStream;
+    }
+
+    function setVideoNote(text) {
+      if (videoNote) videoNote.textContent = text;
+    }
+
+    async function ensureLocalMedia() {
+      if (localStream) return localStream;
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setVideoNote('Camera and microphone are not supported in this browser.');
+        throw new Error('Media devices not available');
+      }
+
+      const videoConstraint = selectedVideoDeviceId ? { deviceId: { exact: selectedVideoDeviceId } } : true;
+      const audioConstraint = selectedAudioDeviceId ? { deviceId: { exact: selectedAudioDeviceId } } : true;
+      const stream = await navigator.mediaDevices.getUserMedia({ video: videoConstraint, audio: audioConstraint });
+      localStream = stream;
+      if (localVideo) {
+        localVideo.srcObject = stream;
+      }
+      updateAudioButton();
+      setVideoNote('Video ready. Waiting for stranger connection.');
+      updateVideoControls();
+      return localStream;
+    }
+
+    function cleanupVideo() {
+      if (signalListener) {
+        signalListener();
+        signalListener = null;
+      }
+      if (peerConnection) {
+        peerConnection.close();
+        peerConnection = null;
+      }
+      if (localStream) {
+        localStream.getTracks().forEach(track => track.stop());
+        localStream = null;
+      }
+      if (localVideo) localVideo.srcObject = null;
+      if (remoteVideo) remoteVideo.srcObject = null;
+      if (remoteLabel) remoteLabel.textContent = 'Waiting for connection';
+      if (videoNote) videoNote.textContent = 'Start video once you are connected to a stranger.';
+      if (startVideoButton) startVideoButton.textContent = 'Start Video';
+      if (toggleAudioButton) toggleAudioButton.disabled = true;
+      remoteCandidatesProcessed.clear();
+      signalDocRef = null;
+    }
+
+    async function addRemoteIceCandidates(candidates) {
+      if (!peerConnection || !candidates?.length) return;
+      for (const candidate of candidates) {
+        const key = JSON.stringify(candidate);
+        if (remoteCandidatesProcessed.has(key)) continue;
+        remoteCandidatesProcessed.add(key);
+        try {
+          await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+        } catch (error) {
+          console.warn('Failed to add remote ICE candidate', error);
+        }
+      }
+    }
+
+    async function sendIceCandidate(candidate, type) {
+      if (!signalDocRef || !candidate) return;
+      const field = type === 'offer' ? 'offerCandidates' : 'answerCandidates';
+      await signalDocRef.set({ [field]: firebase.firestore.FieldValue.arrayUnion(candidate) }, { merge: true });
+    }
+
+    async function setupPeerConnection(sessionKey, partnerKey) {
+      if (!useFirebaseOmegle || peerConnection) return;
+      await ensureLocalMedia();
+      signalDocRef = omegleSignalsCol.doc(sessionKey);
+      peerConnection = new RTCPeerConnection({ iceServers: ICE_SERVERS });
+
+      peerConnection.ontrack = event => {
+        if (remoteVideo) {
+          remoteVideo.srcObject = event.streams[0];
+        }
+        if (remoteLabel) {
+          remoteLabel.textContent = 'Connected';
+        }
+      };
+
+      peerConnection.onicecandidate = event => {
+        if (!event.candidate) return;
+        const role = currentUserKey < partnerKey ? 'offer' : 'answer';
+        sendIceCandidate(event.candidate.toJSON(), role).catch(console.error);
+      };
+
+      peerConnection.onconnectionstatechange = () => {
+        if (!peerConnection) return;
+        const state = peerConnection.connectionState;
+        if (state === 'connected') {
+          setVideoNote('Video connected. You can mute/unmute your microphone.');
+        } else if (state === 'disconnected' || state === 'failed' || state === 'closed') {
+          setVideoNote('Video disconnected. Try reconnecting or reloading the page.');
+        }
+      };
+
+      localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+      signalListener = signalDocRef.onSnapshot(async snapshot => {
+        if (!snapshot.exists) return;
+        const data = snapshot.data() || {};
+        const isOfferer = currentUserKey < partnerKey;
+
+        if (isOfferer) {
+          if (!data.offer && !peerConnection.localDescription) {
+            const offer = await peerConnection.createOffer();
+            await peerConnection.setLocalDescription(offer);
+            await signalDocRef.set({ offer: offer.toJSON(), updatedAt: Date.now() }, { merge: true });
+          }
+          if (data.answer && !peerConnection.currentRemoteDescription) {
+            await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
+          }
+          await addRemoteIceCandidates(data.answerCandidates);
+        } else {
+          if (data.offer && !peerConnection.currentRemoteDescription) {
+            await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
+            const answer = await peerConnection.createAnswer();
+            await peerConnection.setLocalDescription(answer);
+            await signalDocRef.set({ answer: answer.toJSON(), updatedAt: Date.now() }, { merge: true });
+          }
+          await addRemoteIceCandidates(data.offerCandidates);
+          await addRemoteIceCandidates(data.answerCandidates);
+        }
+      }, error => {
+        console.error('Signal listener failed', error);
+      });
+
+      const snapshot = await signalDocRef.get();
+      if (!snapshot.exists) {
+        await signalDocRef.set({ createdAt: Date.now(), offerCandidates: [], answerCandidates: [] });
+      }
+    }
+
+    async function startMediaSession() {
+      if (!activeSession) {
+        setVideoNote('You must connect to a stranger before starting video.');
+        videoRequested = true;
+        return;
+      }
+
+      if (peerConnection) {
+        cleanupVideo();
+        setVideoNote('Video stopped. Start Video again to reconnect.');
+        return;
+      }
+
+      videoRequested = true;
+      const partnerKey = activeSession.userKeys.find(key => key !== currentUserKey);
+      if (!partnerKey) return;
+      await setupPeerConnection(activeSession.sessionKey, partnerKey);
+      if (startVideoButton) startVideoButton.textContent = 'Stop Video';
+    }
+
     function setPartnerStatus(text) {
       partnerStatus.textContent = text;
     }
@@ -262,7 +537,101 @@
       saveQueue(queue);
     }
 
-    function endSession(notify = true) {
+    async function clearFirebaseQueueEntry() {
+      if (!useFirebaseOmegle) return;
+      await removeFirebaseQueueEntry(currentUserKey);
+    }
+
+    async function refreshDeviceList() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+        setVideoNote('Device enumeration not supported in this browser.');
+        return;
+      }
+
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const cameras = devices.filter(device => device.kind === 'videoinput');
+      const microphones = devices.filter(device => device.kind === 'audioinput');
+
+      function populate(select, list, selectedId, placeholder) {
+        if (!select) return null;
+        const current = select.value;
+        select.innerHTML = '';
+        if (list.length === 0) {
+          const option = document.createElement('option');
+          option.value = '';
+          option.textContent = `No ${placeholder} found`;
+          select.appendChild(option);
+          return null;
+        }
+        let newValue = selectedId || current;
+        if (!newValue || !list.some(device => device.deviceId === newValue)) {
+          newValue = list[0].deviceId;
+        }
+        list.forEach(device => {
+          const option = document.createElement('option');
+          option.value = device.deviceId;
+          option.textContent = device.label || `${placeholder} ${select.length + 1}`;
+          select.appendChild(option);
+        });
+        select.value = newValue;
+        return newValue;
+      }
+
+      selectedVideoDeviceId = populate(cameraSelect, cameras, selectedVideoDeviceId, 'Camera');
+      selectedAudioDeviceId = populate(microphoneSelect, microphones, selectedAudioDeviceId, 'Microphone');
+      const hasSelectedCamera = !!selectedVideoDeviceId;
+      const hasSelectedMicrophone = !!selectedAudioDeviceId;
+      if (startVideoButton) {
+        startVideoButton.disabled = !hasSelectedCamera || !hasSelectedMicrophone;
+      }
+      if (!hasSelectedCamera || !hasSelectedMicrophone) {
+        setVideoNote('No camera or microphone found. Connect a device and refresh the list.');
+      } else {
+        setVideoNote('Select your camera and microphone before starting video.');
+      }
+      updateVideoControls();
+    }
+
+    async function unsubscribeFirebaseListeners() {
+      if (sessionListener) {
+        sessionListener();
+        sessionListener = null;
+      }
+      if (messagesListener) {
+        messagesListener();
+        messagesListener = null;
+      }
+      firebaseMessages = [];
+    }
+
+    async function endSession(notify = true) {
+      if (useFirebaseOmegle) {
+        const active = getActive();
+        if (active) {
+          const ref = omegleSessionsCol.doc(active.sessionKey);
+          const doc = await ref.get();
+          if (doc.exists) {
+            const session = doc.data();
+            const remaining = (session.activeUsers || []).filter(key => key !== currentUserKey);
+            if (remaining.length === 0) {
+              await ref.delete();
+            } else {
+              await ref.set({ activeUsers: remaining, updatedAt: Date.now() }, { merge: true });
+            }
+          }
+          await removeFirebaseQueueEntry(currentUserKey);
+          removeActive();
+        }
+        await unsubscribeFirebaseListeners();
+        cleanupVideo();
+        activeSession = null;
+        if (notify) dispatchLocalStorageEvent();
+        setPartnerStatus('No stranger matched yet.');
+        updateButtons('Idle');
+        renderMessages();
+        return;
+      }
+
       const active = getActive();
       if (active) {
         const session = getSession(active.sessionKey);
@@ -273,6 +642,7 @@
         }
         removeActive();
       }
+      cleanupVideo();
       activeSession = null;
       if (notify) dispatchLocalStorageEvent();
       setPartnerStatus('No stranger matched yet.');
@@ -288,8 +658,44 @@
       }
     }
 
-    function matchStranger() {
+    async function matchStranger() {
+      if (activeSession) {
+        await endSession(false);
+      }
       clearQueueEntry();
+      if (useFirebaseOmegle) {
+        await clearFirebaseQueueEntry();
+        const queue = await getFirebaseQueue();
+        if (queue.length > 0) {
+          const partner = queue[Math.floor(Math.random() * queue.length)];
+          const partnerKey = partner.userKey;
+          const sessionKey = getSessionKey(currentUserKey, partnerKey);
+          const session = {
+            sessionKey,
+            userKeys: [currentUserKey, partnerKey],
+            activeUsers: [currentUserKey, partnerKey],
+            createdAt: Date.now(),
+            updatedAt: Date.now()
+          };
+          await omegleSessionsCol.doc(sessionKey).set(session);
+          await omegleSignalsCol.doc(sessionKey).set({ createdAt: Date.now(), offerCandidates: [], answerCandidates: [] });
+          await removeFirebaseQueueEntry(partnerKey);
+          await removeFirebaseQueueEntry(currentUserKey);
+          setActive({ sessionKey, partnerKey, connectedAt: Date.now() });
+          activeSession = session;
+          subscribeOmegleSession(sessionKey);
+          setPartnerStatus('Connected to a stranger. Chat now.');
+          updateButtons('Connected');
+          renderMessages();
+          dispatchLocalStorageEvent();
+          return;
+        }
+        await omegleQueueCol.doc(currentUserKey).set({ userKey: currentUserKey, timestamp: Date.now() });
+        setPartnerStatus('Waiting for a stranger...');
+        updateButtons('Waiting');
+        return;
+      }
+
       const queue = cleanupQueue(getQueue());
       const partnerCandidates = queue.filter(entry => entry.userKey !== currentUserKey);
       if (partnerCandidates.length > 0) {
@@ -310,9 +716,64 @@
       updateButtons('Waiting');
     }
 
-    function syncState() {
+    async function subscribeOmegleSession(sessionKey) {
+      if (!useFirebaseOmegle) return;
+      await unsubscribeFirebaseListeners();
+      sessionListener = omegleSessionsCol.doc(sessionKey).onSnapshot(doc => {
+        if (!doc.exists) {
+          endSession(false);
+          return;
+        }
+        const session = doc.data();
+        if (!session.activeUsers || !session.activeUsers.includes(currentUserKey)) {
+          endSession(false);
+          return;
+        }
+        activeSession = session;
+        const partnerKey = session.userKeys.find(key => key !== currentUserKey);
+        const partnerConnected = session.activeUsers.includes(partnerKey);
+        setPartnerStatus(partnerConnected ? 'Connected to a stranger. Chat now.' : 'Stranger disconnected. Find another match.');
+        updateButtons(partnerConnected ? 'Connected' : 'Disconnected');
+        if (partnerConnected && videoRequested) {
+          startMediaSession().catch(console.error);
+        }
+      }, error => {
+        console.error('Omegle session snapshot failed', error);
+      });
+
+      messagesListener = omegleMessagesCol
+        .where('sessionKey', '==', sessionKey)
+        .orderBy('timestamp')
+        .onSnapshot(snapshot => {
+          firebaseMessages = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          renderMessages();
+        }, error => {
+          console.error('Omegle message snapshot failed', error);
+        });
+    }
+
+    async function syncState() {
       updatePresence();
       updateOnlineCount();
+      if (useFirebaseOmegle) {
+        if (activeSession) return;
+        const snapshot = await omegleSessionsCol.where('activeUsers', 'array-contains', currentUserKey).get();
+        if (!snapshot.empty) {
+          const doc = snapshot.docs[0];
+          activeSession = doc.data();
+          subscribeOmegleSession(doc.id);
+          return;
+        }
+        const queueDoc = await omegleQueueCol.doc(currentUserKey).get();
+        if (queueDoc.exists) {
+          setPartnerStatus('Waiting for a stranger...');
+          updateButtons('Waiting');
+          return;
+        }
+        setPartnerStatus('No stranger matched yet.');
+        updateButtons('Idle');
+        return;
+      }
       const active = getActive();
       if (!active) {
         clearQueueEntry();
@@ -337,21 +798,63 @@
       renderMessages();
     }
 
-    findButton.addEventListener('click', () => {
-      matchStranger();
+    findButton.addEventListener('click', async () => {
+      await matchStranger();
       renderMessages();
+      if (videoRequested) {
+        startMediaSession().catch(console.error);
+      }
     });
 
-    leaveButton.addEventListener('click', () => {
-      endSession();
+    leaveButton.addEventListener('click', async () => {
+      await endSession();
     });
 
-    omegleForm.addEventListener('submit', event => {
+    if (refreshDevicesButton) {
+      refreshDevicesButton.addEventListener('click', async () => {
+        await refreshDeviceList();
+      });
+    }
+
+    if (cameraSelect) {
+      cameraSelect.addEventListener('change', () => {
+        selectedVideoDeviceId = cameraSelect.value;
+        setVideoNote('Camera selected. Start video to apply the new camera.');
+      });
+    }
+
+    if (microphoneSelect) {
+      microphoneSelect.addEventListener('change', () => {
+        selectedAudioDeviceId = microphoneSelect.value;
+        setVideoNote('Microphone selected. Start video to apply the new mic.');
+      });
+    }
+
+    if (startVideoButton) {
+      startVideoButton.addEventListener('click', async () => {
+        try {
+          await startMediaSession();
+        } catch (error) {
+          console.error('Video start failed', error);
+        }
+      });
+    }
+
+    if (toggleAudioButton) {
+      toggleAudioButton.addEventListener('click', () => {
+        if (!localStream) return;
+        const enabled = !localStream.getAudioTracks().some(track => track.enabled);
+        localStream.getAudioTracks().forEach(track => track.enabled = enabled);
+        updateAudioButton();
+      });
+    }
+
+    omegleForm.addEventListener('submit', async event => {
       event.preventDefault();
       if (!activeSession) return;
       const text = omegleInput.value.trim();
       if (!text) return;
-      addMessage(activeSession.sessionKey, {
+      await addMessage(activeSession.sessionKey, {
         id: `msg-${Date.now()}-${Math.random()}`,
         senderKey: currentUserKey,
         text,
@@ -374,6 +877,14 @@
       updatePresence();
       updateOnlineCount();
       syncState();
+      refreshDeviceList().catch(() => {
+        setVideoNote('Device list unavailable. Grant camera/microphone access or refresh the page.');
+      });
+      updateAudioButton();
+      setVideoNote('Start video once you are connected to a stranger.');
+      if (navigator.mediaDevices && navigator.mediaDevices.ondevicechange !== undefined) {
+        navigator.mediaDevices.ondevicechange = refreshDeviceList;
+      }
       setInterval(() => {
         updatePresence();
         updateOnlineCount();

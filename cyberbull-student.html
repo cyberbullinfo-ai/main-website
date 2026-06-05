@@ -1032,7 +1032,6 @@
       <tr>
         <td>${account.username}</td>
         <td>${account.school}</td>
-        <td>${account.password}</td>
         <td>
           <button class="account-action-btn" onclick="resetAccountPassword(${JSON.stringify(account.school)}, ${JSON.stringify(account.username)})">${ui.adminResetButton || 'Reset'}</button>
           <button class="account-action-btn delete" onclick="deleteAccount(${JSON.stringify(account.school)}, ${JSON.stringify(account.username)})">${ui.adminDeleteButton || 'Delete'}</button>
@@ -1046,7 +1045,6 @@
           <tr>
             <th>${ui.adminUsername || 'Username'}</th>
             <th>${ui.adminDomain || 'Domain'}</th>
-            <th>${ui.adminPassword || 'Password'}</th>
             <th>${ui.adminActions || 'Actions'}</th>
           </tr>
         </thead>

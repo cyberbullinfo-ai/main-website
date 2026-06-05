@@ -318,8 +318,19 @@
           }
 
           const serverUser = await loginResponse.json();
-          if (serverUser.password !== password) {
-            updateStatus('Ongeldig wachtwoord voor STIERS.', 'error');
+          // Verify password without exposing it
+          try {
+            const verify = await fetch('/api/checkPassword', {
+              method: 'POST', headers: {'Content-Type':'application/json'},
+              body: JSON.stringify({ userKey: userKey, password })
+            });
+            if (!verify.ok) {
+              updateStatus('Ongeldig wachtwoord voor STIERS.', 'error');
+              return;
+            }
+          } catch (err) {
+            console.error('Password verification failed', err);
+            updateStatus('Unable to verify password with global server.', 'error');
             return;
           }
 

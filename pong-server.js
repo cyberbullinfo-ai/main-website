@@ -148,7 +148,21 @@ app.get('/api/getUser/:userKey', (req, res) => {
   if (!user) {
     return res.status(404).json({ error: 'User not found' });
   }
-  res.json(user);
+  // Do not expose sensitive fields such as password
+  const safeUser = Object.assign({}, user);
+  if (safeUser.password) delete safeUser.password;
+  res.json(safeUser);
+});
+
+// Check password without exposing it
+app.post('/api/checkPassword', (req, res) => {
+  const { userKey, password } = req.body;
+  if (!userKey || typeof password === 'undefined') return res.status(400).json({ error: 'missing fields' });
+  const db = readDB();
+  const user = (db.users && db.users[userKey]) || null;
+  if (!user) return res.status(404).json({ error: 'User not found' });
+  if (user.password === password) return res.json({ ok: true });
+  return res.status(401).json({ error: 'invalid' });
 });
 
 // Delete a single user globally

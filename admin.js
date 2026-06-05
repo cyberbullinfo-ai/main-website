@@ -449,6 +449,13 @@ function saveXpReward(){
   renderAdminTools();
 }
 
+function removeXpReward(index){
+  const list = getGlobalList('xpRewards');
+  list.splice(index, 1);
+  saveGlobalList('xpRewards', list);
+  renderAdminTools();
+}
+
 function loadAdminTools(){
   document.getElementById('announceBtn').addEventListener('click', addAnnouncement);
   document.getElementById('challengeBtn').addEventListener('click', addChallenge);
@@ -477,4 +484,5 @@ window.inspectUser = inspectUser;
 window.deleteUser = deleteUser;
 window.toggleSuspend = toggleSuspend;
 window.resetPassword = resetPassword;
+window.removeXpReward = removeXpReward;
 window.renderAdminTools = renderAdminTools;

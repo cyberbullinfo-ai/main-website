@@ -141,18 +141,32 @@ function getAllUsers(){
 async function adminLogin(domain, username, password){
   const key = getUserKey(domain, username);
   let user = getUserByKey(key);
-  if (!user && window.fetch) {
+  let verified = false;
+  // If we have a local user object with password, verify locally
+  if (user && user.password) {
+    if (user.password === password) verified = true;
+  }
+  // Otherwise try verifying with the global server without exposing passwords
+  if (!verified && window.fetch) {
     try {
-      const response = await fetch(`/api/getUser/${encodeURIComponent(key)}`);
-      if (response.ok) {
-        user = await response.json();
+      const verifyResp = await fetch('/api/checkPassword', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ userKey: key, password })
+      });
+      if (verifyResp.ok) {
+        verified = true;
+        // fetch non-sensitive user profile data
+        try {
+          const response = await fetch(`/api/getUser/${encodeURIComponent(key)}`);
+          if (response.ok) user = await response.json();
+        } catch (err) { /* ignore profile fetch errors */ }
       }
     } catch (err) {
       console.warn('Admin login fetch failed', err);
     }
   }
+  if (!verified) return {success:false,message:'Invalid credentials'};
   if(!user) return {success:false,message:'User not found'};
-  if(user.password !== password) return {success:false,message:'Invalid credentials'};
   if(!user.isAdmin) return {success:false,message:'User is not an admin'};
   localStorage.setItem('currentUser', username);
   localStorage.setItem('currentUserKey', key);

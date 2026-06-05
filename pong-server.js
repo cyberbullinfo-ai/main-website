@@ -16,9 +16,16 @@ function writeDB(db) { fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2), 'u
 
 const app = express();
 app.use(cors());
+app.options('*', cors());
 app.use(express.json());
 // Serve static site files from project root so pages and API share origin
 app.use(express.static(path.join(__dirname)));
+
+// Debug logging for API methods
+app.use('/api', (req, res, next) => {
+  console.log(`[API] ${req.method} ${req.originalUrl}`);
+  next();
+});
 
 // Simple ping
 app.get('/api/ping', (req, res) => res.json({ok:true}));
@@ -132,7 +139,9 @@ app.get('/api/chat/private/:userA/:userB', (req, res) => {
 });
 
 // Save/update user profile globally
+app.options('/api/saveUser', cors());
 app.post('/api/saveUser', (req, res) => {
+  console.log('[API] saveUser payload', { userKey: req.body.userKey });
   const { userKey, userObj } = req.body;
   if(!userKey || !userObj) return res.status(400).json({error:'missing fields'});
   

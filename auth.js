@@ -78,9 +78,6 @@ window.globalAuth = (function() {
     }
     const serverUser = getUserFromServerSync(userKey);
     if (serverUser) {
-      try {
-        localStorage.setItem(userKey, JSON.stringify(serverUser));
-      } catch {}
       return serverUser;
     }
     return null;
@@ -100,32 +97,8 @@ window.globalAuth = (function() {
           return false;
         }
       }
-      localStorage.setItem(userKey, JSON.stringify(userObj));
       if (window.firebaseAPI?.isEnabled && window.firebaseAPI.saveUserProfile) {
         await window.firebaseAPI.saveUserProfile(userKey, userObj);
-      }
-      return true;
-    } catch (error) {
-      console.error('saveUserData failed', error);
-      return false;
-    }
-  }
-    if (!userKey || !userObj) return false;
-    try {
-      localStorage.setItem(userKey, JSON.stringify(userObj));
-      if (window.firebaseAPI?.isEnabled && window.firebaseAPI.saveUserProfile) {
-        await window.firebaseAPI.saveUserProfile(userKey, userObj);
-      }
-      if (window.fetch) {
-        try {
-          await fetch('/api/saveUser', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userKey, userObj })
-          });
-        } catch (err) {
-          console.warn('Global saveUser API failed', err);
-        }
       }
       return true;
     } catch (error) {

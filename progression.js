@@ -41,23 +41,33 @@ function getXpProgressInLevel(xp) {
 }
 
 function getUserByKey(userKey) {
-  if (!userKey) return null;
-  const userData = localStorage.getItem(userKey);
-  if (!userData) return null;
+  if (!userKey || typeof XMLHttpRequest !== 'function') return null;
   try {
-    return JSON.parse(userData);
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', `/api/getUser/${encodeURIComponent(userKey)}`, false);
+    xhr.timeout = 3000;
+    xhr.send(null);
+    if (xhr.status === 200 && xhr.responseText) {
+      return JSON.parse(xhr.responseText);
+    }
   } catch (err) {
-    console.warn('Failed to parse user data for key', userKey, err);
-    return null;
+    console.warn('Failed to fetch user data globally for key', userKey, err);
   }
+  return null;
 }
 
 function saveUser(userKey, user) {
-  if (!userKey || !user) return;
+  if (!userKey || !user || typeof XMLHttpRequest !== 'function') return;
   try {
-    localStorage.setItem(userKey, JSON.stringify(user));
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/saveUser', false);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.send(JSON.stringify({ userKey, userObj: user }));
+    if (xhr.status !== 200 && xhr.status !== 204) {
+      console.warn('Global saveUser API returned failure', xhr.status, xhr.responseText);
+    }
   } catch (err) {
-    console.warn('Failed to save user data for key', userKey, err);
+    console.warn('Failed to save user data globally for key', userKey, err);
   }
 }
 

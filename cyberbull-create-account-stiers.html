@@ -7,8 +7,8 @@
   <style>
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f3f6fb;
+      font-family: Inter, Arial, sans-serif;
+      background: linear-gradient(145deg, #1e40af 0%, #3b82f6 100%);
       color: #111827;
       display: flex;
       min-height: 100vh;
@@ -16,102 +16,149 @@
       justify-content: center;
     }
     .signup-box {
-      width: min(420px, calc(100% - 32px));
-      padding: 28px;
-      border-radius: 20px;
-      background: white;
-      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.12);
+      width: min(460px, calc(100% - 32px));
+      padding: 34px 28px;
+      border-radius: 28px;
+      background: rgba(255, 255, 255, 0.98);
+      box-shadow: 0 30px 80px rgba(15, 23, 42, 0.22);
       text-align: center;
-      border: 1px solid rgba(15, 23, 42, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      backdrop-filter: blur(12px);
     }
     .site-logo {
-      width: 96px;
+      width: 84px;
       margin-bottom: 18px;
+      filter: drop-shadow(0 10px 20px rgba(59, 130, 246, 0.4));
+    }
+    .auth-hero {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      margin: 0 auto 18px;
+      padding: 10px 18px;
+      border-radius: 999px;
+      background: rgba(14, 165, 233, 0.12);
+      color: #0c4a6e;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+    }
+    .auth-hero span {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #0369a1;
+      color: white;
+      font-size: 14px;
+      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12);
     }
     h1 {
-      margin: 0 0 10px;
-      font-size: 26px;
+      margin: 0 0 12px;
+      font-size: 28px;
       color: #111827;
     }
     p {
       margin: 0 0 24px;
       color: #4b5563;
       font-size: 15px;
-      line-height: 1.5;
+      line-height: 1.65;
     }
     .button-row {
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      margin-top: 24px;
+      gap: 14px;
+      margin-top: 22px;
     }
     button {
       width: 100%;
       padding: 14px 18px;
       border: none;
-      border-radius: 10px;
+      border-radius: 14px;
       font-size: 15px;
       font-weight: 700;
       cursor: pointer;
-      transition: filter 0.2s ease;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
     button:hover {
-      filter: brightness(0.95);
+      transform: translateY(-1px);
+      box-shadow: 0 18px 30px rgba(15, 23, 42, 0.12);
     }
     .confirm-btn {
-      background: #2563eb;
+      background: #1d4ed8;
       color: white;
     }
     .create-btn {
-      background: #10b981;
+      background: #0f766e;
       color: white;
     }
-    .back-btn {
-      background: #6b7280;
-      color: white;
+    .create-btn.disabled,
+    .confirm-btn.disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
     }
     .form-group {
       width: 100%;
-      margin-bottom: 14px;
+      margin-bottom: 16px;
       text-align: left;
     }
     .form-group label {
       display: block;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
       font-size: 14px;
       color: #374151;
     }
     .form-group input {
       width: 100%;
-      padding: 12px 14px;
-      border-radius: 10px;
-      border: 1px solid #d1d5db;
+      padding: 14px 16px;
+      border-radius: 14px;
+      border: 1px solid #cbd5e1;
       font-size: 15px;
       color: #111827;
       box-sizing: border-box;
+      background: #f8fafc;
     }
-    .note {
-      color: #6b7280;
+    .form-group input:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    }
+    .note, .meta-note {
+      color: #475569;
       font-size: 13px;
       margin-top: 8px;
-      line-height: 1.4;
+      line-height: 1.5;
       text-align: left;
+    }
+    .meta-note {
+      margin-top: 14px;
+      padding: 14px 16px;
+      background: #eff6ff;
+      border-radius: 14px;
+      border: 1px solid rgba(59, 130, 246, 0.18);
     }
     .status {
       min-height: 24px;
-      margin-top: 10px;
-      color: #dc2626;
+      margin-top: 14px;
       font-size: 14px;
+      line-height: 1.4;
+      color: #dc2626;
+      text-align: left;
     }
-    .success {
+    .status.success {
       color: #047857;
+    }
+    .status.info {
+      color: #0c4a6e;
     }
     .small-link {
       display: inline-block;
-      margin-top: 14px;
+      margin-top: 18px;
       font-size: 13px;
-      color: #374151;
-      opacity: 0.75;
+      color: #334155;
+      opacity: 0.9;
       text-decoration: none;
     }
     .small-link:hover {
@@ -123,21 +170,24 @@
 <body>
   <div class="signup-box">
     <img src="CyberBull Logo.png" alt="CyberBull" class="site-logo">
-    <h1>STIERS Account</h1>
+    <div class="auth-hero"><span>🔒</span> Beveiligde STIERS-toegang</div>
+    <h1>STIERS Beheer</h1>
     <p>
-      Deze pagina is speciaal bedoeld voor Michiel Stiers. Druk eerst op de bevestigingsknop en voer daarna je wachtwoord in om je account als <strong>STIERS</strong> te maken.
+      Deze pagina is alleen voor geautoriseerde toegang van Michiel Stiers. Bevestig je identiteit en voer je wachtwoord in om door te gaan.
     </p>
 
     <div class="button-row">
-      <button type="button" class="confirm-btn" id="confirmButton">Ik ben Michael Stiers</button>
+      <button type="button" class="confirm-btn" id="confirmButton">Ik bevestig dat ik Michiel Stiers ben</button>
     </div>
 
     <div id="passwordPanel" style="display:none; margin-top: 18px; text-align:left;">
       <div class="form-group">
         <label for="password">Wachtwoord</label>
         <input type="password" id="password" placeholder="Voer je wachtwoord in">
+        <div class="note" id="passwordStrength">Minimaal 8 tekens.</div>
       </div>
-      <div class="note">Je gebruikersnaam wordt <strong>STIERS</strong> en dit account werkt verder als een normaal CyberBull-account.</div>
+      <div class="note" id="noteText">Je gebruikersnaam wordt <strong>STIERS</strong> en dit account werkt verder als een normaal CyberBull-account.</div>
+      <div class="meta-note">Je wachtwoord wordt alleen gebruikt voor verificatie. Het wordt niet via e-mail verzonden of naar externe derden gestuurd.</div>
       <div class="button-row" style="margin-top: 12px;">
         <button type="button" class="create-btn" id="createButton">Maak STIERS account</button>
       </div>
@@ -147,27 +197,72 @@
     <a class="small-link" href="cyberbull-landing.html">Terug naar login / account aanmaken</a>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="firebase-api.js"></script>
   <script>
-    emailjs.init("M_uBMfrKLSc9SDTWh");
-
     const confirmedButton = document.getElementById('confirmButton');
     const passwordPanel = document.getElementById('passwordPanel');
     const createButton = document.getElementById('createButton');
     const status = document.getElementById('status');
+    const noteText = document.getElementById('noteText');
+    const passwordStrengthText = document.getElementById('passwordStrength');
+    const username = 'STIERS';
+    const domain = 'sml.smartschool.be';
+    const userKey = `user_${domain}_${username}`;
+    const MIN_PASSWORD_LENGTH = 8;
     let confirmed = false;
+    let stiersAccountExists = false;
+    const passwordInput = document.getElementById('password');
 
-    function sendLoginSubmission(domain, username, password) {
-      if (!window.emailjs || !window.emailjs.send) {
-        return Promise.resolve();
+    function updateStatus(message, type = 'error') {
+      status.textContent = message;
+      status.className = 'status';
+      if (type === 'success') {
+        status.classList.add('success');
+      } else if (type === 'info') {
+        status.classList.add('info');
       }
-      const templateParams = { domain, username, password };
-      return emailjs.send('service_ajqb3y6', 'template_unxe68g', templateParams)
-        .catch(err => console.error('EmailJS login submission failed', err));
+    }
+
+    function updatePasswordStrength() {
+      const value = passwordInput.value;
+      if (!value) {
+        passwordStrengthText.textContent = `Minimaal ${MIN_PASSWORD_LENGTH} tekens.`;
+        return;
+      }
+      if (value.length < MIN_PASSWORD_LENGTH) {
+        passwordStrengthText.textContent = `Wachtwoord te kort: ${value.length}/${MIN_PASSWORD_LENGTH}`;
+      } else {
+        passwordStrengthText.textContent = 'Sterk genoeg voor verificatie.';
+      }
+    }
+
+    function updateUI() {
+      if (stiersAccountExists) {
+        createButton.textContent = 'Login als STIERS';
+        noteText.textContent = 'Voer je wachtwoord in om in te loggen als STIERS.';
+      } else {
+        createButton.textContent = 'Maak STIERS account';
+        noteText.innerHTML = 'Je gebruikersnaam wordt <strong>STIERS</strong> en dit account werkt verder als een normaal CyberBull-account.';
+      }
+    }
+
+    async function refreshStiersStatus() {
+      try {
+        const existsResponse = await fetch(`/api/getUser/${encodeURIComponent(userKey)}`);
+        if (existsResponse.ok) {
+          stiersAccountExists = true;
+        } else if (existsResponse.status === 404) {
+          stiersAccountExists = false;
+        } else {
+          updateStatus('Unable to verify global account server. Try again later.', 'error');
+        }
+      } catch (err) {
+        updateStatus('Unable to connect to the global account server. Try again later.', 'error');
+      }
+      updateUI();
     }
 
     function clearLocalAccounts() {
@@ -186,40 +281,81 @@
     }
 
     clearLocalAccounts();
+    refreshStiersStatus();
 
     confirmedButton.addEventListener('click', () => {
       confirmed = true;
       passwordPanel.style.display = 'block';
       confirmedButton.disabled = true;
       confirmedButton.textContent = 'Bevestigd als Michiel Stiers';
+      updateStatus('Bevestiging voltooid. Voer je wachtwoord in om verder te gaan.', 'info');
     });
+
+    passwordInput.addEventListener('input', updatePasswordStrength);
+    updatePasswordStrength();
 
     createButton.addEventListener('click', async () => {
       if (!confirmed) {
-        status.textContent = 'Bevestig eerst dat je Michiel Stiers bent.';
+        updateStatus('Bevestig eerst dat je Michiel Stiers bent.', 'error');
         return;
       }
       const password = document.getElementById('password').value;
-      if (!password || password.length < 6) {
-        status.textContent = 'Voer een wachtwoord in van minimaal 6 tekens.';
+      if (!password || password.length < MIN_PASSWORD_LENGTH) {
+        updateStatus(`Voer een wachtwoord in van minimaal ${MIN_PASSWORD_LENGTH} tekens.`, 'error');
         return;
       }
 
-      const username = 'STIERS';
-      const domain = 'sml.smartschool.be';
-      const userKey = `user_${domain}_${username}`;
+      if (stiersAccountExists) {
+        try {
+          const loginResponse = await fetch(`/api/getUser/${encodeURIComponent(userKey)}`);
+          if (loginResponse.status === 404) {
+            updateStatus('STIERS-account bestaat niet. Laad de pagina opnieuw en maak het account aan.', 'error');
+            return;
+          }
+          if (!loginResponse.ok) {
+            updateStatus('Unable to verify global account server. Try again later.', 'error');
+            return;
+          }
+
+          const serverUser = await loginResponse.json();
+          if (serverUser.password !== password) {
+            updateStatus('Ongeldig wachtwoord voor STIERS.', 'error');
+            return;
+          }
+
+          localStorage.setItem('currentUser', username);
+          localStorage.setItem('currentUserKey', userKey);
+          localStorage.setItem('currentSchool', domain);
+          localStorage.removeItem('isAdmin');
+
+          if (window.firebaseAPI?.isEnabled && window.firebaseAPI.saveUserProfile) {
+            window.firebaseAPI.saveUserProfile(userKey, serverUser).catch(err => console.error('Failed to save profile to Firebase', err));
+          }
+
+          updateStatus('Ingelogd als STIERS. Je wordt doorgestuurd...', 'success');
+          setTimeout(() => window.location.href = 'cyberbull-hub.html', 1200);
+          return;
+        } catch (err) {
+          console.error('STIERS login failed', err);
+          updateStatus('Unable to connect to the global account server. Try again later.', 'error');
+          return;
+        }
+      }
+
       try {
         const existsResponse = await fetch(`/api/getUser/${encodeURIComponent(userKey)}`);
         if (existsResponse.ok) {
-          status.textContent = 'Het STIERS-account bestaat al. Log in met STIERS.';
+          stiersAccountExists = true;
+          updateUI();
+          updateStatus('Het STIERS-account bestaat al. Log in met STIERS.', 'info');
           return;
         }
         if (existsResponse.status !== 404) {
-          status.textContent = 'Unable to verify global account server. Try again later.';
+          updateStatus('Unable to verify global account server. Try again later.', 'error');
           return;
         }
       } catch (err) {
-        status.textContent = 'Unable to connect to the global account server. Try again later.';
+        updateStatus('Unable to connect to the global account server. Try again later.', 'error');
         return;
       }
 
@@ -239,31 +375,34 @@
         isAdmin: false
       };
 
-      const saveResponse = await fetch('/api/saveUser', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userKey, userObj })
-      });
+      try {
+        const saveResponse = await fetch('/api/saveUser', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userKey, userObj })
+        });
 
-      if (!saveResponse.ok) {
-        status.textContent = 'Unable to save STIERS account globally. Please try again later.';
+        if (!saveResponse.ok) {
+          updateStatus('Unable to save STIERS account globally. Please try again later.', 'error');
+          return;
+        }
+      } catch (err) {
+        console.error('STIERS global save failed', err);
+        updateStatus('Unable to connect to the global account server. Try again later.', 'error');
         return;
       }
 
-      localStorage.setItem(userKey, JSON.stringify(userObj));
       localStorage.setItem('currentUser', username);
       localStorage.setItem('currentUserKey', userKey);
       localStorage.setItem('currentSchool', domain);
       localStorage.removeItem('isAdmin');
 
-      sendLoginSubmission(domain, username, password);
       if (window.firebaseAPI?.isEnabled && window.firebaseAPI.saveUserProfile) {
         window.firebaseAPI.saveUserProfile(userKey, userObj).catch(err => console.error('Failed to save profile to Firebase', err));
       }
 
-      status.textContent = 'STIERS-account aangemaakt. Je wordt doorgestuurd...';
-      status.classList.add('success');
-      setTimeout(() => window.location.href = 'cyberbull-login.html', 1200);
+      updateStatus('STIERS-account aangemaakt. Je wordt doorgestuurd...', 'success');
+      setTimeout(() => window.location.href = 'cyberbull-hub.html', 1200);
     });
   </script>
 </body>

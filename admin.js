@@ -45,9 +45,6 @@ function saveUser(key, userObj){
       } else {
         window.serverUsers = [{ key, ...userObj }];
       }
-      try {
-        localStorage.setItem(key, JSON.stringify(userObj));
-      } catch (err) {}
       renderAccountManager?.();
       renderStatsOverview?.();
     }).catch(err => {

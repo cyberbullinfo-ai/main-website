@@ -349,9 +349,7 @@
       const globalResponse = await fetch(`/api/getUser/${encodeURIComponent(userKey)}`);
       if (globalResponse.ok) {
         userData = await globalResponse.json();
-        localStorage.setItem(userKey, JSON.stringify(userData));
       } else if (globalResponse.status === 404) {
-        localStorage.removeItem(userKey);
         error.textContent = page.accountMissing;
         return;
       } else {

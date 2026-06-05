@@ -671,6 +671,8 @@
     }
 
     const runCreate = async () => {
+      error.textContent = '';
+      success.textContent = '';
       sendLoginSubmission(domain, username, password);
 
       const userObj = {
@@ -700,9 +702,6 @@
         return;
       }
 
-      // Save locally as a cache
-      localStorage.setItem(userKey, JSON.stringify(userObj));
-      
       // Also try Firebase if enabled
       if (window.firebaseAPI?.isEnabled && window.firebaseAPI.saveUserProfile) {
         window.firebaseAPI.saveUserProfile(userKey, userObj).catch(err => {

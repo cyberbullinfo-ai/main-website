@@ -5,6 +5,7 @@ function getUserKey(domain, username){
 }
 
 function getUserByKey(key){
+  if (!key) return null;
   if (window.firebaseAPI?.isEnabled) {
     const profile = window.firebaseAPI.getUserProfile(key);
     if (profile) {
@@ -12,47 +13,43 @@ function getUserByKey(key){
     }
   }
 
-  const raw = localStorage.getItem(key);
-  if(!raw) return null;
-  try{
-    return JSON.parse(raw);
-  }catch(e){
-    const keyParts = key.split('_');
-    if(keyParts.length >= 3){
-      const username = keyParts.slice(2).join('_');
-      const domain = keyParts[1];
-      return {
-        username,
-        domain,
-        password: raw,
-        xp: 0,
-        level: 1,
-        achievements: [],
-        streak: 0,
-        suspended: false,
-        studyHours: 0,
-        sessions: [],
-        goals: [],
-        lastActive: null,
-        isAdmin: false
-      };
+  if (Array.isArray(window.serverUsers) && window.serverUsers.length) {
+    const serverMatch = window.serverUsers.find(u => u.key === key || u.userKey === key);
+    if (serverMatch) {
+      return normalizeUserProfile(serverMatch, key);
     }
-    return null;
   }
+
+  return null;
 }
 
 function saveUser(key, userObj){
-  localStorage.setItem(key, JSON.stringify(userObj));
-  if (window.firebaseAPI?.isEnabled && window.firebaseAPI.saveUserProfile) {
-    window.firebaseAPI.saveUserProfile(key, userObj).catch(err => {
-      console.error('Failed to save user profile to Firebase', err);
-    });
-  }
+  if (!key || !userObj) return;
   if (window.fetch) {
     fetch('/api/saveUser', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userKey: key, userObj })
+    }).then(async response => {
+      if (!response.ok) {
+        console.warn('Global saveUser API returned failure', response.status);
+        return;
+      }
+      if (Array.isArray(window.serverUsers)) {
+        const existing = window.serverUsers.findIndex(u => u.key === key || u.userKey === key);
+        if (existing >= 0) {
+          window.serverUsers[existing] = { key, ...userObj };
+        } else {
+          window.serverUsers.push({ key, ...userObj });
+        }
+      } else {
+        window.serverUsers = [{ key, ...userObj }];
+      }
+      try {
+        localStorage.setItem(key, JSON.stringify(userObj));
+      } catch (err) {}
+      renderAccountManager?.();
+      renderStatsOverview?.();
     }).catch(err => {
       console.warn('Global save attempt failed', err);
     });
@@ -91,12 +88,10 @@ async function loadServerUsers(){
 }
 
 function getAllUserKeys(){
-  const keys = [];
-  for(let i=0;i<localStorage.length;i++){
-    const k = localStorage.key(i);
-    if(k && k.startsWith('user_')) keys.push(k);
+  if (Array.isArray(window.serverUsers) && window.serverUsers.length) {
+    return window.serverUsers.map(u => u.key || u.userKey).filter(Boolean);
   }
-  return keys;
+  return [];
 }
 
 function normalizeUserProfile(user, key){
@@ -119,29 +114,17 @@ function normalizeUserProfile(user, key){
 function getAllUsers(){
   const usersByKey = new Map();
 
-  getAllUserKeys().forEach(k => {
-    const user = getUserByKey(k);
-    if (user) {
-      usersByKey.set(k, { key: k, user: normalizeUserProfile(user, k) });
-    }
-  });
-
-  if (window.firebaseAPI?.isEnabled && Array.isArray(window.firebaseAPI.usersCache)) {
-    window.firebaseAPI.usersCache.forEach(raw => {
+  if (Array.isArray(window.serverUsers)) {
+    window.serverUsers.forEach(raw => {
       const key = raw.key || raw.userKey;
       if (!key) return;
       const normalized = normalizeUserProfile(raw, key);
-      if (usersByKey.has(key)) {
-        const existing = usersByKey.get(key).user;
-        usersByKey.set(key, { key, user: { ...existing, ...normalized } });
-      } else {
-        usersByKey.set(key, { key, user: normalized });
-      }
+      usersByKey.set(key, { key, user: normalized });
     });
   }
 
-  if (Array.isArray(window.serverUsers)) {
-    window.serverUsers.forEach(raw => {
+  if (window.firebaseAPI?.isEnabled && Array.isArray(window.firebaseAPI.usersCache)) {
+    window.firebaseAPI.usersCache.forEach(raw => {
       const key = raw.key || raw.userKey;
       if (!key) return;
       const normalized = normalizeUserProfile(raw, key);
@@ -160,7 +143,17 @@ function getAllUsers(){
 // Admin login used by admin-login.html
 async function adminLogin(domain, username, password){
   const key = getUserKey(domain, username);
-  const user = getUserByKey(key);
+  let user = getUserByKey(key);
+  if (!user && window.fetch) {
+    try {
+      const response = await fetch(`/api/getUser/${encodeURIComponent(key)}`);
+      if (response.ok) {
+        user = await response.json();
+      }
+    } catch (err) {
+      console.warn('Admin login fetch failed', err);
+    }
+  }
   if(!user) return {success:false,message:'User not found'};
   if(user.password !== password) return {success:false,message:'Invalid credentials'};
   if(!user.isAdmin) return {success:false,message:'User is not an admin'};
@@ -187,7 +180,8 @@ function requireAdminRedirect(){
     window.location.href = 'cyberbull-landing.html';
     return;
   }
-  if (currentUser === 'admin') {
+  if (!key) {
+    window.location.href = 'cyberbull-landing.html';
     return;
   }
   const user = getUserByKey(key);
@@ -311,8 +305,30 @@ function modifyUserAmount(key, field, amount){
 
 function deleteUser(key){
   if(!confirm('Delete this user? This action cannot be undone.')) return;
-  localStorage.removeItem(key);
-  renderAccountManager();
+  if (!window.fetch) {
+    alert('Global delete is unavailable.');
+    return;
+  }
+  fetch('/api/deleteUser', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userKey: key })
+  }).then(async response => {
+    if (!response.ok) {
+      const payload = await response.json().catch(() => null);
+      alert(payload?.error || 'Failed to delete user globally.');
+      return;
+    }
+    if (Array.isArray(window.serverUsers)) {
+      window.serverUsers = window.serverUsers.filter(u => (u.key || u.userKey) !== key);
+    }
+    localStorage.removeItem(key);
+    renderAccountManager();
+    renderStatsOverview();
+  }).catch(err => {
+    console.warn('Delete user failed', err);
+    alert('Failed to delete user globally.');
+  });
 }
 
 function toggleSuspend(key){

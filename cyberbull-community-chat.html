@@ -6,43 +6,62 @@
   <title>Community Chat - CyberBull</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { min-height: 100vh; font-family: Inter, system-ui, sans-serif; background: linear-gradient(135deg, #0f172a 0%, #111827 60%, #0f172a 100%); color: #e2e8f0; }
-    .page { width: min(1120px, 100%); margin: 0 auto; padding: 24px; }
+    html, body { min-height: 100%; }
+    body { font-family: Inter, system-ui, sans-serif; background: #0d1119; color: #e2e8f0; }
+    .page { width: min(1400px, 100%); margin: 0 auto; padding: 20px; }
     .topbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
     .topbar-left { display: flex; align-items: center; gap: 16px; }
-    .logo { width: 64px; height: 64px; border-radius: 24px; background: linear-gradient(135deg, #14b8a6, #0ea5e9); display: grid; place-items: center; font-size: 32px; }
-    .topbar h1 { font-size: clamp(1.8rem, 2.5vw, 2.4rem); }
-    .topbar p { color: #94a3b8; margin-top: 8px; max-width: 640px; line-height: 1.6; }
+    .logo { width: 56px; height: 56px; border-radius: 16px; background: #2f3136; display: grid; place-items: center; font-size: 30px; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04); }
+    .topbar h1 { font-size: clamp(1.8rem, 2.5vw, 2.4rem); letter-spacing: -0.03em; }
+    .topbar p { color: #8b99ae; margin-top: 8px; max-width: 640px; line-height: 1.6; }
     .nav-links { display: flex; gap: 12px; flex-wrap: wrap; }
     .nav-button { border: none; border-radius: 999px; padding: 12px 18px; background: rgba(255,255,255,0.08); color: #e2e8f0; cursor: pointer; transition: transform 200ms ease, background 200ms ease; }
-    .nav-button:hover { transform: translateY(-2px); background: rgba(255,255,255,0.16); }
-    .grid { display: grid; grid-template-columns: 1.8fr 1fr; gap: 20px; }
-    .status-panel, .chat-panel { background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(255,255,255,0.08); border-radius: 28px; padding: 24px; box-shadow: 0 30px 60px rgba(0,0,0,0.25); }
-    .status-panel { display: grid; gap: 18px; }
-    .stat-card { display: grid; gap: 8px; padding: 20px; border-radius: 22px; background: rgba(30, 41, 59, 0.85); border: 1px solid rgba(255,255,255,0.06); }
-    .stat-label { color: #94a3b8; font-size: 0.9rem; }
-    .stat-value { font-size: 1.9rem; font-weight: 700; }
-    .chat-panel { display: flex; flex-direction: column; min-height: 70vh; }
-    .chat-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
-    .chat-header h2 { font-size: 1.3rem; }
-    .chat-header small { color: #94a3b8; }
-    .messages { flex: 1; overflow-y: auto; display: grid; gap: 16px; padding-right: 4px; }
-    .message { display: grid; gap: 10px; padding: 18px; border-radius: 20px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); }
+    .nav-button:hover { transform: translateY(-1px); background: rgba(255,255,255,0.14); }
+    .grid { display: grid; grid-template-columns: 82px minmax(0, 1fr) 280px; gap: 20px; }
+    .server-sidebar, .member-panel, .chat-panel { background: rgba(18, 21, 28, 0.98); border: 1px solid rgba(255,255,255,0.08); border-radius: 28px; box-shadow: 0 20px 60px rgba(0,0,0,0.25); }
+    .server-sidebar { display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 18px 12px; }
+    .server-icon { width: 52px; height: 52px; border-radius: 16px; display: grid; place-items: center; font-size: 1.35rem; background: #20232a; color: #d2d8e6; cursor: pointer; transition: transform 150ms ease, background 150ms ease; }
+    .server-icon.active, .server-icon:hover { background: #3a3f4d; transform: translateY(-1px); }
+    .server-separator { width: 32px; height: 2px; background: rgba(255,255,255,0.08); margin: 8px 0; }
+    .member-panel { display: grid; gap: 18px; padding: 24px; }
+    .member-panel h3, .channel-header h2 { margin-bottom: 14px; }
+    .panel-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 22px; padding: 18px; }
+    .member-list { display: grid; gap: 12px; }
+    .member-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 14px; background: rgba(255,255,255,0.03); transition: background 200ms ease; }
+    .member-item:hover { background: rgba(255,255,255,0.06); }
+    .member-avatar { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: #2f3136; color: #fff; font-weight: 700; }
+    .member-name { font-size: 0.97rem; color: #f8fafc; }
+    .member-status { color: #8b99ae; font-size: 0.8rem; }
+    .chat-panel { display: grid; grid-template-rows: auto 1fr auto; min-height: 78vh; padding: 0; overflow: hidden; }
+    .channel-header { padding: 24px; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .channel-heading { display: grid; gap: 6px; }
+    .channel-heading h2 { font-size: 1.4rem; margin: 0; }
+    .channel-heading small { color: #8b99ae; }
+    .channel-actions { color: #8b99ae; font-size: 0.92rem; }
+    .messages { padding: 24px 24px 12px; overflow-y: auto; display: grid; gap: 14px; }
+    .message { display: grid; gap: 10px; padding: 18px; border-radius: 20px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); transition: background 200ms ease, transform 200ms ease; }
+    .message:hover { background: rgba(255,255,255,0.07); }
     .message-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
     .message-user { display: flex; align-items: center; gap: 12px; }
-    .avatar { width: 42px; height: 42px; border-radius: 14px; display: grid; place-items: center; background: rgba(30,41,59,0.9); font-size: 1.2rem; }
-    .message-user-name { font-weight: 700; color: #fff; }
-    .message-meta { color: #94a3b8; font-size: 0.84rem; }
-    .message-text { line-height: 1.75; color: #dbeafe; }
-    .chat-form { margin-top: 18px; display: grid; gap: 12px; }
-    .chat-input { width: 100%; min-height: 56px; padding: 16px 18px; border-radius: 18px; border: 1px solid rgba(255,255,255,0.1); background: rgba(15,23,42,0.9); color: #e2e8f0; resize: vertical; font-size: 1rem; }
+    .avatar { width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; background: #0f172a; font-size: 1.1rem; color: #fff; border: 1px solid rgba(255,255,255,0.08); }
+    .message-user-name { font-weight: 700; color: #f8fafc; }
+    .message-meta { color: #8b99ae; font-size: 0.82rem; }
+    .message-text { margin: 0; line-height: 1.75; color: #e2e8f0; white-space: pre-wrap; word-break: break-word; }
+    .chat-form { padding: 22px 24px 24px; display: grid; gap: 14px; border-top: 1px solid rgba(255,255,255,0.06); }
+    .chat-input { width: 100%; min-height: 64px; padding: 16px 18px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); background: rgba(15,23,42,0.95); color: #e2e8f0; resize: none; font-size: 1rem; }
+    .chat-input:focus { outline: none; box-shadow: 0 0 0 3px rgba(56,189,248,0.18); }
     .chat-actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; justify-content: space-between; }
-    .send-button { border: none; border-radius: 999px; padding: 14px 22px; background: linear-gradient(135deg, #22c55e, #14b8a6); color: #0f172a; font-weight: 700; cursor: pointer; transition: opacity 200ms ease; }
-    .send-button:hover { opacity: 0.95; }
-    .hint { color: #94a3b8; font-size: 0.92rem; }
-    @media(max-width: 940px) { .grid { grid-template-columns: 1fr; } }
+    .send-button { border: none; border-radius: 999px; padding: 14px 24px; background: linear-gradient(135deg, #5865f2, #4954c8); color: #fff; font-weight: 700; cursor: pointer; transition: opacity 200ms ease, transform 200ms ease; }
+    .send-button:hover { opacity: 0.95; transform: translateY(-1px); }
+    .hint { color: #8b99ae; font-size: 0.92rem; }
+    @media(max-width: 1200px) { .grid { grid-template-columns: 1fr 280px; } }
+    @media(max-width: 940px) { .grid { grid-template-columns: 1fr; } .server-sidebar { flex-direction: row; justify-content: center; padding: 12px; } .member-panel { padding: 18px; } .chat-panel { min-height: auto; } }
   </style>
   <script src="auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="firebase-api.js"></script>
   <script src="chat.js"></script>
 </head>
 <body>
@@ -65,28 +84,22 @@
     </div>
 
     <div class="grid">
-      <section class="status-panel">
-        <div class="stat-card">
-          <div class="stat-label">Active users</div>
-          <div class="stat-value" id="onlineCount">0</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Recent messages</div>
-          <div class="stat-value" id="messageCount">0</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Signed in as</div>
-          <div class="stat-value" id="userLabel">Guest</div>
-        </div>
-      </section>
+      <aside class="server-sidebar">
+        <div class="server-icon">CB</div>
+        <div class="server-icon active">🌐</div>
+        <div class="server-icon">🎮</div>
+        <div class="server-icon">💬</div>
+        <div class="server-separator"></div>
+        <div class="server-icon">⚙️</div>
+      </aside>
 
       <section class="chat-panel">
-        <div class="chat-header">
-          <div>
-            <h2>Shared room</h2>
-            <small>Every signed-in player can read and send messages here.</small>
+        <div class="channel-header">
+          <div class="channel-heading">
+            <h2># community</h2>
+            <small>Global chat for CyberBull players, updates, and friendly game talk.</small>
           </div>
-          <div class="hint">Tip: Use friendly chat for mission updates and game invites.</div>
+          <div class="channel-actions">All members can read and send messages here.</div>
         </div>
 
         <div class="messages" id="messageList"></div>
@@ -100,6 +113,21 @@
           </div>
         </form>
       </section>
+
+      <aside class="member-panel">
+        <div class="panel-card">
+          <h3>Community Stats</h3>
+          <div class="member-item"><span>Active users</span><strong id="onlineCount">0</strong></div>
+          <div class="member-item"><span>Recent messages</span><strong id="messageCount">0</strong></div>
+          <div class="member-item"><span>Signed in as</span><strong id="userLabel">Guest</strong></div>
+        </div>
+        <div class="panel-card">
+          <h3>Online Members</h3>
+          <div class="member-list">
+            <div class="member-item"><span class="member-avatar">�</span><div><div class="member-name">Live presence updates</div><div class="member-status">Active users appear here</div></div></div>
+          </div>
+        </div>
+      </aside>
     </div>
   </div>
 

@@ -1018,34 +1018,15 @@
   }
 
   function getAllAccounts() {
-    const accounts = [];
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (!key.startsWith('user_')) continue;
-      const parts = key.split('_');
-      if (parts.length < 3) continue;
-      const school = parts[1];
-      const username = parts.slice(2).join('_');
-      const password = localStorage.getItem(key);
-      accounts.push({ school, username, password, key });
-    }
-    return accounts.sort((a, b) => a.school.localeCompare(b.school) || a.username.localeCompare(b.username));
+    return [];
   }
 
   function renderAdminAccounts() {
-    const query = document.getElementById('adminSearchInput').value.trim().toLowerCase();
-    const accounts = getAllAccounts().filter(account => {
-      if (!query) return true;
-      return account.username.toLowerCase().includes(query) || account.school.toLowerCase().includes(query);
-    });
-
     const list = document.getElementById('adminAccountsList');
     const ui = homeTranslations[currentLanguage] || homeTranslations.nl;
-
-    if (!accounts.length) {
-      list.innerHTML = `<div class="account-row-empty">${ui.adminNoAccounts || 'No accounts found.'}</div>`;
-      return;
-    }
+    list.innerHTML = `<div class="account-row-empty">${ui.adminDisabledMessage || 'Student account administration is disabled. All accounts are stored and managed globally.'}</div>`;
+    return;
+  }
 
     const rows = accounts.map(account => `
       <tr>
@@ -1075,20 +1056,17 @@
   }
 
   function deleteAccount(school, username) {
-    localStorage.removeItem(`user_${school}_${username}`);
+    alert('Local account deletion is disabled. All student accounts are managed globally on the server.');
     renderAdminAccounts();
   }
 
   function resetAccountPassword(school, username) {
-    localStorage.setItem(`user_${school}_${username}`, 'password123');
+    alert('Local password reset is disabled. Use the global admin dashboard to manage accounts.');
     renderAdminAccounts();
   }
 
   function resetAllAccounts() {
-    const ui = homeTranslations[currentLanguage] || homeTranslations.nl;
-    if (!confirm(ui.adminResetConfirm || 'Reset all student accounts?')) return;
-    const accounts = getAllAccounts();
-    accounts.forEach(account => localStorage.removeItem(account.key));
+    alert('Local account reset is disabled. Use the global admin dashboard to clear accounts globally.');
     renderAdminAccounts();
   }
 

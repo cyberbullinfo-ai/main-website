@@ -145,7 +145,23 @@ app.post('/api/saveUser', (req, res) => {
 app.get('/api/getUser/:userKey', (req, res) => {
   const db = readDB();
   const user = (db.users && db.users[req.params.userKey]) || null;
+  if (!user) {
+    return res.status(404).json({ error: 'User not found' });
+  }
   res.json(user);
+});
+
+// Delete a single user globally
+app.post('/api/deleteUser', (req, res) => {
+  const { userKey } = req.body;
+  if (!userKey) return res.status(400).json({ error: 'missing userKey' });
+  const db = readDB();
+  if (!db.users || !db.users[userKey]) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+  delete db.users[userKey];
+  writeDB(db);
+  res.json({ success: true, userKey });
 });
 
 // Clear all users

@@ -396,7 +396,24 @@
         if (!saveResponse.ok) {
           let payload = null;
           try { payload = await saveResponse.json(); } catch(e) { /* ignore */ }
-          updateStatus(payload?.error || payload?.detail || (`Unable to save STIERS account globally (code ${saveResponse.status}). Please try again later.`), 'error');
+          const message = payload?.error || payload?.detail || (`Unable to save STIERS account globally (code ${saveResponse.status}).`);
+          if ((saveResponse.status === 405 || saveResponse.status >= 500) && window.firebaseAPI?.isEnabled && window.firebaseAPI.saveUserProfile) {
+            try {
+              await window.firebaseAPI.saveUserProfile(userKey, userObj);
+              localStorage.setItem('currentUser', username);
+              localStorage.setItem('currentUserKey', userKey);
+              localStorage.setItem('currentSchool', domain);
+              localStorage.removeItem('isAdmin');
+              updateStatus('STIERS-account aangemaakt (saved to Firebase). Je wordt doorgestuurd...', 'success');
+              setTimeout(() => window.location.href = 'cyberbull-hub.html', 1200);
+              return;
+            } catch (ferr) {
+              console.error('Firebase fallback save failed', ferr);
+              updateStatus(message + ' Please try again later.', 'error');
+              return;
+            }
+          }
+          updateStatus(message + ' Please try again later.', 'error');
           return;
         }
       } catch (err) {

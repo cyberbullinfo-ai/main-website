@@ -699,7 +699,26 @@
       if (!saveResponse.ok) {
         let payload = null;
         try { payload = await saveResponse.json(); } catch (e) { /* ignore */ }
-        error.textContent = payload?.error || payload?.detail || (`Unable to save account globally (code ${saveResponse.status}). Please try again later.`);
+        const message = payload?.error || payload?.detail || (`Unable to save account globally (code ${saveResponse.status}).`);
+        // If server save failed with 405 or other error, try Firebase as a fallback if available
+        if ((saveResponse.status === 405 || saveResponse.status >= 500) && window.firebaseAPI?.isEnabled && window.firebaseAPI.saveUserProfile) {
+          try {
+            await window.firebaseAPI.saveUserProfile(userKey, userObj);
+            // consider success when firebase save works
+            localStorage.setItem('currentUser', username);
+            localStorage.setItem('currentUserKey', userKey);
+            localStorage.setItem('currentSchool', domain);
+            if (isAdmin) localStorage.setItem('isAdmin', 'true');
+            success.textContent = page.success + ' (saved to Firebase)';
+            setTimeout(() => { window.location.href = isAdmin ? 'cyberbull-admin-dashboard.html' : 'cyberbull-landing.html'; }, 1200);
+            return;
+          } catch (ferr) {
+            console.error('Firebase fallback save failed', ferr);
+            error.textContent = message + ' Please try again later.';
+            return;
+          }
+        }
+        error.textContent = message + ' Please try again later.';
         return;
       }
 

@@ -225,36 +225,5 @@
   initLanguage();
 </script>
 
-  <div id="translateUI">
-    <button id="translateButton" class="translate-btn">🌐</button>
-    <div id="translateMenu" class="translate-menu">
-      <select id="translateSelect">
-        <option value="nl">Nederlands</option>
-        <option value="en">English</option>
-        <option value="es">Español</option>
-        <option value="fr">Français</option>
-        <option value="de">Deutsch</option>
-      </select>
-      <button id="translateApplyButton" type="button">Apply</button>
-    </div>
-  </div>
-  <style>
-    .translate-btn{position:fixed;top:16px;right:16px;z-index:9999;border:none;padding:8px 10px;border-radius:10px;background:#0d2f66;color:#fff}
-    .translate-menu{display:none;position:fixed;top:56px;right:16px;background:#fff;padding:8px;border-radius:8px;box-shadow:0 8px 24px rgba(2,6,23,0.08)}
-    .translate-menu.open{display:block}
-  </style>
-  <script>
-    (function(){
-      const btn=document.getElementById('translateButton');
-      const menu=document.getElementById('translateMenu');
-      const sel=document.getElementById('translateSelect');
-      const apply=document.getElementById('translateApplyButton');
-      if(!btn) return;
-      btn.addEventListener('click',()=>menu.classList.toggle('open'));
-      apply.addEventListener('click',()=>{ localStorage.setItem('cyberbullLanguage',sel.value); menu.classList.remove('open'); if(typeof updateTexts==='function') try{updateTexts(sel.value)}catch(e){} });
-      sel.value = localStorage.getItem('cyberbullLanguage') || 'nl';
-    })();
-  </script>
-
 </body>
 </html>

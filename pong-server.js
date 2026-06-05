@@ -129,6 +129,25 @@ app.get('/api/chat/private/:userA/:userB', (req, res) => {
   const db = readDB(); res.json((db.chat && db.chat.private && db.chat.private[key]) ? db.chat.private[key] : []);
 });
 
+// Save/update user profile globally
+app.post('/api/saveUser', (req, res) => {
+  const { userKey, userObj } = req.body;
+  if(!userKey || !userObj) return res.status(400).json({error:'missing fields'});
+  
+  const db = readDB();
+  db.users = db.users || {};
+  db.users[userKey] = userObj;
+  writeDB(db);
+  res.json({success: true, userKey});
+});
+
+// Get user profile globally
+app.get('/api/getUser/:userKey', (req, res) => {
+  const db = readDB();
+  const user = (db.users && db.users[req.params.userKey]) || null;
+  res.json(user);
+});
+
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 

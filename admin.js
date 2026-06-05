@@ -48,6 +48,46 @@ function saveUser(key, userObj){
       console.error('Failed to save user profile to Firebase', err);
     });
   }
+  if (window.fetch) {
+    fetch('/api/saveUser', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userKey: key, userObj })
+    }).catch(err => {
+      console.warn('Global save attempt failed', err);
+    });
+  }
+}
+
+window.serverUsers = [];
+
+async function loadServerUsers(){
+  if (!window.fetch) return;
+  try {
+    const res = await fetch('/api/users');
+    if (!res.ok) return;
+    const keys = await res.json();
+    if (!Array.isArray(keys)) return;
+    const serverUsers = [];
+    for (const key of keys) {
+      if (!key || typeof key !== 'string') continue;
+      try {
+        const userRes = await fetch(`/api/getUser/${encodeURIComponent(key)}`);
+        if (!userRes.ok) continue;
+        const userData = await userRes.json();
+        if (userData) {
+          serverUsers.push({ key, ...userData });
+        }
+      } catch (err) {
+        console.warn('Failed to fetch remote user', key, err);
+      }
+    }
+    window.serverUsers = serverUsers;
+    renderAccountManager();
+    renderStatsOverview();
+  } catch (error) {
+    console.warn('Failed to load server users', error);
+  }
 }
 
 function getAllUserKeys(){
@@ -88,6 +128,20 @@ function getAllUsers(){
 
   if (window.firebaseAPI?.isEnabled && Array.isArray(window.firebaseAPI.usersCache)) {
     window.firebaseAPI.usersCache.forEach(raw => {
+      const key = raw.key || raw.userKey;
+      if (!key) return;
+      const normalized = normalizeUserProfile(raw, key);
+      if (usersByKey.has(key)) {
+        const existing = usersByKey.get(key).user;
+        usersByKey.set(key, { key, user: { ...existing, ...normalized } });
+      } else {
+        usersByKey.set(key, { key, user: normalized });
+      }
+    });
+  }
+
+  if (Array.isArray(window.serverUsers)) {
+    window.serverUsers.forEach(raw => {
       const key = raw.key || raw.userKey;
       if (!key) return;
       const normalized = normalizeUserProfile(raw, key);

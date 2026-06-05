@@ -42,6 +42,17 @@ window.globalAuth = (function() {
       if (window.firebaseAPI?.isEnabled && window.firebaseAPI.saveUserProfile) {
         await window.firebaseAPI.saveUserProfile(userKey, userObj);
       }
+      if (window.fetch) {
+        try {
+          await fetch('/api/saveUser', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userKey, userObj })
+          });
+        } catch (err) {
+          console.warn('Global saveUser API failed', err);
+        }
+      }
       return true;
     } catch (error) {
       console.error('saveUserData failed', error);

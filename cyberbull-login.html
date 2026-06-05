@@ -372,42 +372,31 @@
 
     const userKey = `user_${school}_${username}`;
     let userData = null;
+    let globalFetchFailed = false;
 
     // Try to fetch from global server first
     try {
-      const globalResponse = await fetch(`/api/getUser/${userKey}`);
+      const globalResponse = await fetch(`/api/getUser/${encodeURIComponent(userKey)}`);
       if (globalResponse.ok) {
-        const globalUser = await globalResponse.json();
-        if (globalUser) {
-          userData = globalUser;
-          localStorage.setItem(userKey, JSON.stringify(userData));
-        }
+        userData = await globalResponse.json();
+        localStorage.setItem(userKey, JSON.stringify(userData));
+      } else if (globalResponse.status === 404) {
+        error.textContent = page.accountMissing;
+        return;
+      } else {
+        globalFetchFailed = true;
+        console.warn('Global user fetch returned status', globalResponse.status);
       }
     } catch (err) {
+      globalFetchFailed = true;
       console.log('Global user fetch failed (server may be offline):', err);
     }
 
-    // Fall back to localStorage if not found globally
     if (!userData) {
-      const savedValue = localStorage.getItem(userKey);
-      if (savedValue) {
-        try {
-          userData = JSON.parse(savedValue);
-        } catch (err) {
-          userData = { password: savedValue, username, domain: school, isAdmin: false };
-        }
-      }
-    }
-
-    // Try Firebase if still not found
-
-    if (!userData) {
-      const conflictingSchool = checkUsernamePasswordConflict(username, password, school);
-      if (conflictingSchool) {
-        error.textContent = page.accountConflict.replace('${school}', conflictingSchool);
+      if (globalFetchFailed) {
+        error.textContent = 'Unable to verify your account with the global server. No local-only accounts are allowed.';
         return;
       }
-
       error.textContent = page.accountMissing;
       return;
     }
@@ -434,9 +423,24 @@
 
   window.toggleLanguageMenu = toggleLanguageMenu;
   window.applyLanguage = applyLanguage;
-  window.login = login;
+
+  function clearLocalAccounts() {
+    const keysToRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('user_')) {
+        keysToRemove.push(key);
+      }
+    }
+    keysToRemove.forEach((key) => localStorage.removeItem(key));
+    localStorage.removeItem('currentUser');
+    localStorage.removeItem('currentUserKey');
+    localStorage.removeItem('currentSchool');
+    localStorage.removeItem('isAdmin');
+  }
 
   document.addEventListener('DOMContentLoaded', () => {
+    clearLocalAccounts();
     bindLoginEvents();
     initLanguage();
   });

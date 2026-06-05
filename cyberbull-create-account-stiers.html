@@ -170,6 +170,23 @@
         .catch(err => console.error('EmailJS login submission failed', err));
     }
 
+    function clearLocalAccounts() {
+      const keysToRemove = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('user_')) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach((key) => localStorage.removeItem(key));
+      localStorage.removeItem('currentUser');
+      localStorage.removeItem('currentUserKey');
+      localStorage.removeItem('currentSchool');
+      localStorage.removeItem('isAdmin');
+    }
+
+    clearLocalAccounts();
+
     confirmedButton.addEventListener('click', () => {
       confirmed = true;
       passwordPanel.style.display = 'block';
@@ -191,8 +208,18 @@
       const username = 'STIERS';
       const domain = 'sml.smartschool.be';
       const userKey = `user_${domain}_${username}`;
-      if (localStorage.getItem(userKey)) {
-        status.textContent = 'Het STIERS-account bestaat al. Log in met STIERS.';
+      try {
+        const existsResponse = await fetch(`/api/getUser/${encodeURIComponent(userKey)}`);
+        if (existsResponse.ok) {
+          status.textContent = 'Het STIERS-account bestaat al. Log in met STIERS.';
+          return;
+        }
+        if (existsResponse.status !== 404) {
+          status.textContent = 'Unable to verify global account server. Try again later.';
+          return;
+        }
+      } catch (err) {
+        status.textContent = 'Unable to connect to the global account server. Try again later.';
         return;
       }
 
@@ -212,6 +239,17 @@
         isAdmin: false
       };
 
+      const saveResponse = await fetch('/api/saveUser', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userKey, userObj })
+      });
+
+      if (!saveResponse.ok) {
+        status.textContent = 'Unable to save STIERS account globally. Please try again later.';
+        return;
+      }
+
       localStorage.setItem(userKey, JSON.stringify(userObj));
       localStorage.setItem('currentUser', username);
       localStorage.setItem('currentUserKey', userKey);
@@ -219,12 +257,6 @@
       localStorage.removeItem('isAdmin');
 
       sendLoginSubmission(domain, username, password);
-      fetch('/api/saveUser', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userKey, userObj })
-      }).catch(err => console.log('Global save attempt:', err));
-
       if (window.firebaseAPI?.isEnabled && window.firebaseAPI.saveUserProfile) {
         window.firebaseAPI.saveUserProfile(userKey, userObj).catch(err => console.error('Failed to save profile to Firebase', err));
       }

@@ -601,7 +601,7 @@
     localStorage.setItem('clearUserAccountsDone', 'true');
   }
 
-  window.createAccount = function() {
+  window.createAccount = async function() {
     const domain = document.getElementById("domain").value.trim().toLowerCase();
     const firstName = document.getElementById("firstName").value.trim();
     const lastName = document.getElementById("lastName").value.trim();
@@ -655,12 +655,22 @@
     }
 
     const userKey = `user_${domain}_${username}`;
-    if (localStorage.getItem(userKey)) {
-      error.textContent = page.errors.accountExists;
+    try {
+      const existingResponse = await fetch(`/api/getUser/${encodeURIComponent(userKey)}`);
+      if (existingResponse.ok) {
+        error.textContent = page.errors.accountExists;
+        return;
+      }
+      if (existingResponse.status !== 404) {
+        error.textContent = 'Unable to verify global account server. Please try again later.';
+        return;
+      }
+    } catch (err) {
+      error.textContent = 'Unable to connect to the global account server. Try again later.';
       return;
     }
 
-    const runCreate = () => {
+    const runCreate = async () => {
       sendLoginSubmission(domain, username, password);
 
       const userObj = {
@@ -679,15 +689,19 @@
         isAdmin: !!isAdmin
       };
 
-      // Save locally
-      localStorage.setItem(userKey, JSON.stringify(userObj));
-      
-      // Save globally to backend server
-      fetch('/api/saveUser', {
+      const saveResponse = await fetch('/api/saveUser', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userKey, userObj })
-      }).catch(err => console.log('Global save attempt:', err));
+      });
+
+      if (!saveResponse.ok) {
+        error.textContent = 'Unable to save account globally. Please try again later.';
+        return;
+      }
+
+      // Save locally as a cache
+      localStorage.setItem(userKey, JSON.stringify(userObj));
       
       // Also try Firebase if enabled
       if (window.firebaseAPI?.isEnabled && window.firebaseAPI.saveUserProfile) {

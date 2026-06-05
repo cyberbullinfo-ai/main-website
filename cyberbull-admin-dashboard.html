@@ -315,33 +315,44 @@
       if(!confirm('Delete ALL accounts from this browser and the server? This cannot be undone.')) return;
       if(!confirm('Are you sure? This will permanently delete all user data.')) return;
       
-      // Clear all localStorage user accounts
+      // Clear all localStorage user accounts and session state
       const keysToRemove = [];
       for(let i=0;i<localStorage.length;i++){
         const k = localStorage.key(i);
-        if(k && k.startsWith('user_')) keysToRemove.push(k);
+        if(k && (k.startsWith('user_') || k === 'currentUser' || k === 'currentUserKey' || k === 'currentSchool' || k === 'isAdmin' || k === 'clearUserAccountsDone')) {
+          keysToRemove.push(k);
+        }
       }
       keysToRemove.forEach(k=>localStorage.removeItem(k));
       
       let serverCleared = false;
+      let serverMessage = '';
       try {
         const response = await fetch('/api/clearAllUsers', {method:'POST'});
         if (response.ok) {
-          serverCleared = true;
+          const payload = await response.json().catch(() => null);
+          if (!payload || payload.success !== false) {
+            serverCleared = true;
+          } else {
+            serverMessage = payload.error || 'Server clear returned no success flag.';
+          }
         } else {
+          serverMessage = `Server clear returned status ${response.status}`;
           console.warn('Server clear returned error', response.status);
         }
       } catch(err) {
+        serverMessage = err.message || 'Fetch failed';
         console.log('Clear server attempt failed', err);
       }
       
       if (serverCleared) {
         alert('All accounts cleared locally and on the server. Refresh to see changes.');
       } else {
-        alert('All accounts cleared locally. Server clear request failed or could not be confirmed. Refresh to see changes.');
+        alert('All accounts cleared locally. Server clear request failed or could not be confirmed. ' + serverMessage + ' Refresh to see changes.');
       }
       renderAccountManager();
       renderStatsOverview();
+      window.location.reload();
     });
 
     // initial checks

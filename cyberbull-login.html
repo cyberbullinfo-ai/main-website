@@ -305,6 +305,7 @@
     const languageButton = document.getElementById('languageButton');
     const applyButton = document.getElementById('languageApplyButton');
     const loginButton = document.getElementById('loginButton');
+    const backButton = document.getElementById('backButton');
     const usernameInput = document.getElementById('username');
     const passwordInput = document.getElementById('password');
 
@@ -381,6 +382,7 @@
         userData = await globalResponse.json();
         localStorage.setItem(userKey, JSON.stringify(userData));
       } else if (globalResponse.status === 404) {
+        localStorage.removeItem(userKey);
         error.textContent = page.accountMissing;
         return;
       } else {
@@ -428,15 +430,11 @@
     const keysToRemove = [];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (key && key.startsWith('user_')) {
+      if (key && (key.startsWith('user_') || key === 'currentUser' || key === 'currentUserKey' || key === 'currentSchool' || key === 'isAdmin' || key === 'clearUserAccountsDone')) {
         keysToRemove.push(key);
       }
     }
     keysToRemove.forEach((key) => localStorage.removeItem(key));
-    localStorage.removeItem('currentUser');
-    localStorage.removeItem('currentUserKey');
-    localStorage.removeItem('currentSchool');
-    localStorage.removeItem('isAdmin');
   }
 
   document.addEventListener('DOMContentLoaded', () => {

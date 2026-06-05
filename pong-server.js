@@ -153,7 +153,13 @@ app.get('/api/chat/private/:userA/:userB', (req, res) => {
 });
 
 // Save/update user profile globally
-app.options('/api/saveUser', cors(corsOptions));
+// Ensure preflight OPTIONS for /api/saveUser responds with CORS headers and 204
+app.options('/api/saveUser', (req, res) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Methods', 'GET,POST,OPTIONS,PUT,DELETE');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  return res.sendStatus(204);
+});
 app.post('/api/saveUser', (req, res) => {
   console.log('[API] saveUser payload', { userKey: req.body.userKey, method: req.method });
   const { userKey, userObj } = req.body;

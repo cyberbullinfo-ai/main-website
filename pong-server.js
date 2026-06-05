@@ -148,6 +148,14 @@ app.get('/api/getUser/:userKey', (req, res) => {
   res.json(user);
 });
 
+// Clear all users
+app.post('/api/clearAllUsers', (req, res) => {
+  const db = readDB();
+  db.users = {};
+  writeDB(db);
+  res.json({success: true});
+});
+
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 

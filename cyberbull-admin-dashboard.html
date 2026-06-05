@@ -248,6 +248,12 @@
     </div>
 
     <div id="tools" class="panel" style="display:none">
+      <h3>Danger Zone</h3>
+      <div style="display:flex;gap:8px;margin-bottom:16px">
+        <button id="clearAllAccountsBtn" class="btn danger">Clear All Accounts</button>
+        <div class="small" style="flex:1">Delete all user accounts from this browser and the server. This cannot be undone.</div>
+      </div>
+      <hr>
       <h3>Announcements</h3>
       <div style="display:flex;gap:8px;margin-bottom:8px"><input id="announceInput" placeholder="Announcement text"><button id="announceBtn" class="btn primary">Post</button></div>
       <div id="announcementsList" class="small"></div>
@@ -303,6 +309,26 @@
       localStorage.removeItem('currentSchool');
       localStorage.removeItem('isAdmin');
       window.location.href = 'cyberbull-landing.html';
+    });
+
+    document.getElementById('clearAllAccountsBtn').addEventListener('click', ()=>{
+      if(!confirm('Delete ALL accounts from this browser and the server? This cannot be undone.')) return;
+      if(!confirm('Are you sure? This will permanently delete all user data.')) return;
+      
+      // Clear all localStorage user accounts
+      const keysToRemove = [];
+      for(let i=0;i<localStorage.length;i++){
+        const k = localStorage.key(i);
+        if(k && k.startsWith('user_')) keysToRemove.push(k);
+      }
+      keysToRemove.forEach(k=>localStorage.removeItem(k));
+      
+      // Clear server via API
+      fetch('/api/clearAllUsers', {method:'POST'}).catch(err=>console.log('Clear server attempt',err));
+      
+      alert('All accounts cleared locally. Refresh to see changes.');
+      renderAccountManager();
+      renderStatsOverview();
     });
 
     // initial checks

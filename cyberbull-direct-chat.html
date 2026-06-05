@@ -145,8 +145,8 @@
         <div class="user-info">
           <span class="avatar">${getAvatarFor(username)}</span>
           <div>
-            <div class="user-name">${username}</div>
-            <div class="small">${userKey}</div>
+            <div class="user-name">${escapeHtml(username)}</div>
+            <div class="small">${escapeHtml(userKey)}</div>
           </div>
         </div>
         <span class="active-badge">Message</span>
@@ -182,8 +182,8 @@
           <div class="user-info">
             <span class="avatar">${getAvatarFor(conv.name)}</span>
             <div>
-              <div class="user-name">${conv.name}</div>
-              <div class="small">${conv.lastMessage}</div>
+              <div class="user-name">${escapeHtml(conv.name)}</div>
+              <div class="small">${escapeHtml(conv.lastMessage)}</div>
             </div>
           </div>
           <div class="small">${new Date(conv.lastMessageTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>

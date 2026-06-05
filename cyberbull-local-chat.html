@@ -524,13 +524,13 @@
             <div class="message-avatar">${msg.avatar || '😊'}</div>
             <div class="message-content">
               <div class="message-header">
-                <span class="message-username">${msg.username}</span>
+                <span class="message-username">${escapeHtml(msg.username)}</span>
                 <span class="message-time">${formatTime(msg.timestamp)}</span>
               </div>
               <div class="message-text">${escapeHtml(msg.message)}</div>
               <div class="message-actions">
-                ${isOwn ? `<span class="message-action" onclick="deleteMessage('${msg.id}')">Delete</span>` : ''}
-                <span class="message-action" onclick="blockUser('${msg.userKey}', '${msg.username}')">Block</span>
+                ${isOwn ? `<span class="message-action" onclick="deleteMessage('${escapeAttr(msg.id)}')">Delete</span>` : ''}
+                <span class="message-action" onclick="blockUser('${escapeAttr(msg.userKey)}', '${escapeAttr(msg.username)}')">Block</span>
               </div>
             </div>
           </div>
@@ -556,10 +556,10 @@
       }
 
       listContainer.innerHTML = users.map(([key, user]) => `
-        <div class="user-item" onclick="startPrivateChat('${key}', '${user.username}')">
-          <div class="user-avatar">${user.avatar || '😊'}</div>
+        <div class="user-item" onclick="startPrivateChat('${escapeAttr(key)}', '${escapeAttr(user.username)}')">
+          <div class="user-avatar">${escapeHtml(user.avatar || '😊')}</div>
           <div class="user-info">
-            <div class="user-name">${user.username}</div>
+            <div class="user-name">${escapeHtml(user.username)}</div>
             <div class="user-status">Online</div>
           </div>
         </div>
@@ -591,7 +591,7 @@
       if (confirm(`Block ${username}? You won't see their messages.`)) {
         window.chatAPI.blockUser(currentUserKey, userKey);
         renderMessages();
-        alert(`${username} blocked`);
+        showAlert(`${username} blocked`);
       }
     }
 

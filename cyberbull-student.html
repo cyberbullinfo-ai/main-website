@@ -1687,7 +1687,7 @@
       const friend = allUsers.find(u => u.key === friendKey) || { username: friendKey, avatar: '😊' };
       const el = document.createElement('div');
       el.style.display = 'flex'; el.style.justifyContent = 'space-between'; el.style.alignItems = 'center';
-      el.innerHTML = `<div style="display:flex;gap:8px;align-items:center;"><span>${friend.avatar}</span><span>${friend.username}</span></div>`;
+      el.innerHTML = `<div style="display:flex;gap:8px;align-items:center;"><span>${escapeHtml(friend.avatar)}</span><span>${escapeHtml(friend.username)}</span></div>`;
       const btns = document.createElement('div');
       const inviteBtn = document.createElement('button'); inviteBtn.textContent = 'Invite';
       inviteBtn.onclick = () => { sendInviteToFriend(friend.username) };
@@ -1704,14 +1704,14 @@
     const username = input.value.trim(); if (!username) return;
     const currentUser = localStorage.getItem('currentUser');
     const currentUserKey = localStorage.getItem('currentUserKey');
-    if (!currentUser || !currentUserKey) { alert('Not logged in'); return; }
+    if (!currentUser || !currentUserKey) { showAlert('Not logged in'); return; }
 
     const user = window.chatAPI.getAllUsers().find(u => u.username.toLowerCase() === username.toLowerCase());
-    if (!user) { alert('User not found'); return; }
-    if (window.chatAPI.isFriend(currentUserKey, user.key)) { alert('Already a friend'); input.value = ''; return; }
+    if (!user) { showAlert('User not found'); return; }
+    if (window.chatAPI.isFriend(currentUserKey, user.key)) { showAlert('Already a friend'); input.value = ''; return; }
 
     window.chatAPI.sendFriendRequest(currentUserKey, currentUser, user.key, user.username);
-    alert(`Friend request sent to ${user.username}`);
+    showAlert(`Friend request sent to ${escapeHtml(user.username)}`);
     input.value = '';
     renderFriendRequests();
   }
@@ -1735,11 +1735,11 @@
     box.innerHTML = requests.map(req => `
       <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.08);">
         <div>
-          <strong>${req.fromName}</strong> wants to be your friend.
+          <strong>${escapeHtml(req.fromName)}</strong> wants to be your friend.
         </div>
         <div style="display:flex;gap:8px;">
-          <button onclick="acceptFriendRequest('${req.id}', '${req.fromKey}', '${req.fromName}')">Accept</button>
-          <button style="background:#dc2626;" onclick="rejectFriendRequest('${req.id}', '${req.fromKey}')">Decline</button>
+          <button onclick="acceptFriendRequest('${escapeAttr(req.id)}', '${escapeAttr(req.fromKey)}', '${escapeAttr(req.fromName)}')">Accept</button>
+          <button style="background:#dc2626;" onclick="rejectFriendRequest('${escapeAttr(req.id)}', '${escapeAttr(req.fromKey)}')">Decline</button>
         </div>
       </div>
     `).join('');
@@ -1760,12 +1760,12 @@
     renderFriendRequests();
   }
 
-  function sendInviteToFriend(friend) {
+  async function sendInviteToFriend(friend) {
     const from = localStorage.getItem('currentUser') || 'guest';
-    const game = prompt('Which game to invite for?', 'pong') || 'pong';
+    const game = await showPrompt('Which game to invite for?', 'pong') || 'pong';
     const roomId = 'room_' + Math.random().toString(36).slice(2,10);
     localStorage.setItem(`invite_${friend}`, JSON.stringify({from, roomId, game, ts: Date.now()}));
-    alert('Invite sent to ' + friend);
+    showAlert('Invite sent to ' + escapeHtml(friend));
   }
 
   function checkInvites() {

@@ -219,11 +219,11 @@ function renderAccountManager(){
   let html = '<table><thead><tr><th>Username</th><th>Domain</th><th>Admin</th><th>XP</th><th>Level</th><th>Streak</th><th>Actions</th></tr></thead><tbody>';
   rows.forEach(r=>{
     const u = r.user;
-    html += `<tr><td>${u.username}</td><td class="small">${u.domain || 'unknown'}</td><td>${u.isAdmin ? 'Yes' : 'No'}</td><td>${u.xp||0}</td><td>${u.level||1}</td><td>${u.streak||0}</td><td class="table-actions">`+
-      `<button class="btn primary" onclick="inspectUser('${r.key}')">Inspect</button> `+
-      `<button class="btn muted" onclick="toggleAdmin('${r.key}', ${u.isAdmin})">${u.isAdmin ? 'Revoke' : 'Grant'} Admin</button> `+
-      `<button class="btn muted" onclick="resetPassword('${r.key}')">Reset PW</button> `+
-      `<button class="btn danger" onclick="deleteUser('${r.key}')">Delete</button>`+
+    html += `<tr><td>${escapeHtml(u.username)}</td><td class="small">${escapeHtml(u.domain || 'unknown')}</td><td>${u.isAdmin ? 'Yes' : 'No'}</td><td>${u.xp||0}</td><td>${u.level||1}</td><td>${u.streak||0}</td><td class="table-actions">`+
+      `<button class="btn primary" onclick="inspectUser('${escapeAttr(r.key)}')">Inspect</button> `+
+      `<button class="btn muted" onclick="toggleAdmin('${escapeAttr(r.key)}', ${u.isAdmin})">${u.isAdmin ? 'Revoke' : 'Grant'} Admin</button> `+
+      `<button class="btn muted" onclick="resetPassword('${escapeAttr(r.key)}')">Reset PW</button> `+
+      `<button class="btn danger" onclick="deleteUser('${escapeAttr(r.key)}')">Delete</button>`+
       `</td></tr>`;
   });
   html += '</tbody></table>';
@@ -253,13 +253,13 @@ function inspectUser(key){
   if(!data){ container.innerHTML = '<div class="small">User not found</div>'; return; }
   window.currentInspectKey = key;
 
-  let html = `<h3>${data.username} @ ${data.domain}</h3>`;
+  let html = `<h3>${escapeHtml(data.username)} @ ${escapeHtml(data.domain)}</h3>`;
   html += `<div class="small">XP: ${data.xp||0} — Level: ${data.level||1} — Achievements: ${(data.achievements||[]).length} — Streak: ${data.streak||0} — Coins: ${data.coins||0}</div>`;
   html += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0;">';
-  html += `<div><label>XP</label><input id="inspectXpInput" type="number" value="${data.xp||0}" style="width:100px"></div>`;
-  html += `<div><label>Level</label><input id="inspectLevelInput" type="number" value="${data.level||1}" style="width:100px"></div>`;
-  html += `<div><label>Streak</label><input id="inspectStreakInput" type="number" value="${data.streak||0}" style="width:100px"></div>`;
-  html += `<div><label>Coins</label><input id="inspectCoinsInput" type="number" value="${data.coins||0}" style="width:100px"></div>`;
+  html += `<div><label>XP</label><input id="inspectXpInput" type="number" value="${escapeAttr(data.xp||0)}" style="width:100px"></div>`;
+  html += `<div><label>Level</label><input id="inspectLevelInput" type="number" value="${escapeAttr(data.level||1)}" style="width:100px"></div>`;
+  html += `<div><label>Streak</label><input id="inspectStreakInput" type="number" value="${escapeAttr(data.streak||0)}" style="width:100px"></div>`;
+  html += `<div><label>Coins</label><input id="inspectCoinsInput" type="number" value="${escapeAttr(data.coins||0)}" style="width:100px"></div>`;
   html += '</div>';
   html += `<button class="btn primary" onclick="saveUserAdminChanges('${key}')">Save changes</button> `;
   html += `<button class="btn" onclick="modifyUserAmount('${key}','xp',100)">+100 XP</button> `;
@@ -268,14 +268,14 @@ function inspectUser(key){
   html += `<button class="btn" onclick="modifyUserAmount('${key}','coins',50)">+50 Coins</button>`;
 
   html += '<h4 style="margin-top:18px;">Study Sessions</h4>';
-  if((data.sessions||[]).length===0) html += '<div class="small">No sessions recorded</div>'; else html += '<ul>'+(data.sessions.map(s=>`<li>${s.date||s.start}: ${s.duration||0} mins</li>`).join(''))+'</ul>';
+  if((data.sessions||[]).length===0) html += '<div class="small">No sessions recorded</div>'; else html += '<ul>'+(data.sessions.map(s=>`<li>${escapeHtml(s.date||s.start)}: ${escapeHtml(s.duration||0)} mins</li>`).join(''))+'</ul>';
   html += '<h4>Weekly Progress (last 7 days)</h4>';
   const last7 = (data.sessions||[]).slice(-7);
   html += '<div class="small">Sessions last 7: '+last7.length+'</div>';
   html += '<h4>Goals</h4>';
-  if((data.goals||[]).length===0) html += '<div class="small">No goals</div>'; else html += '<ul>'+(data.goals.map(g=>`<li>${g}</li>`).join(''))+'</ul>';
+  if((data.goals||[]).length===0) html += '<div class="small">No goals</div>'; else html += '<ul>'+(data.goals.map(g=>`<li>${escapeHtml(g)}</li>`).join(''))+'</ul>';
   html += '<h4>XP History</h4>';
-  if((data.xpHistory||[]).length===0) html += '<div class="small">No XP history</div>'; else html += '<ul>'+(data.xpHistory.map(x=>`<li>${x.date}: ${x.delta} XP</li>`).join(''))+'</ul>';
+  if((data.xpHistory||[]).length===0) html += '<div class="small">No XP history</div>'; else html += '<ul>'+(data.xpHistory.map(x=>`<li>${escapeHtml(x.date)}: ${escapeHtml(x.delta)} XP</li>`).join(''))+'</ul>';
   container.innerHTML = html;
   document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
   document.querySelector('[data-tab="inspector"]').classList.add('active');
@@ -317,7 +317,7 @@ function modifyUserAmount(key, field, amount){
 function deleteUser(key){
   if(!confirm('Delete this user? This action cannot be undone.')) return;
   if (!window.fetch) {
-    alert('Global delete is unavailable.');
+    showAlert('Global delete is unavailable.');
     return;
   }
   fetch('/api/deleteUser', {
@@ -325,9 +325,9 @@ function deleteUser(key){
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ userKey: key })
   }).then(async response => {
-    if (!response.ok) {
+      if (!response.ok) {
       const payload = await response.json().catch(() => null);
-      alert(payload?.error || 'Failed to delete user globally.');
+      showAlert(payload?.error || 'Failed to delete user globally.');
       return;
     }
     if (Array.isArray(window.serverUsers)) {
@@ -338,7 +338,7 @@ function deleteUser(key){
     renderStatsOverview();
   }).catch(err => {
     console.warn('Delete user failed', err);
-    alert('Failed to delete user globally.');
+    showAlert('Failed to delete user globally.');
   });
 }
 
@@ -350,13 +350,13 @@ function toggleSuspend(key){
   renderAccountManager();
 }
 
-function resetPassword(key){
+async function resetPassword(key){
   const u = getUserByKey(key);
   if(!u) return;
-  const newPw = prompt('Enter new password for user (or leave blank to set default):','password123');
+  const newPw = await showPrompt('Enter new password for user (or leave blank to set default):', 'password123');
   u.password = newPw || 'password123';
   saveUser(key,u);
-  alert('Password reset');
+  showAlert('Password reset');
 }
 
 // Stats
@@ -475,11 +475,11 @@ function loadAdminTools(){
   document.getElementById('challengeBtn').addEventListener('click', addChallenge);
   document.getElementById('achievementBtn').addEventListener('click', addAchievement);
   document.getElementById('xpRewardBtn').addEventListener('click', saveXpReward);
-  document.getElementById('adminSecretBtn').addEventListener('click', ()=>{
+    document.getElementById('adminSecretBtn').addEventListener('click', ()=>{
     const v = document.getElementById('adminSecretInput').value.trim();
     if(!v) return;
     localStorage.setItem('adminSecret', v);
-    alert('Admin secret updated');
+    showAlert('Admin secret updated');
     document.getElementById('adminSecretInput').value='';
   });
   renderAdminTools();

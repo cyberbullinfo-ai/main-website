@@ -714,16 +714,16 @@
             <div class="message-avatar">${cosmetics.emojiPicture || '😊'}</div>
             <div class="message-content">
               <div class="message-header">
-                <span class="message-username" ${usernameStyle}>${msg.username}</span>
+                <span class="message-username" ${usernameStyle}>${escapeHtml(msg.username)}</span>
                 ${cosmeticBadge}
                 <span class="message-time">${formatTime(msg.timestamp)}</span>
               </div>
               <div class="message-text">${escapeHtml(msg.message)}</div>
               <div class="message-actions">
-                ${isOwn ? `<span class="message-action" onclick="deleteMessage('${msg.id}')">Delete</span>` : ''}
-                ${!isOwn && !isFriend ? `<span class="message-action" onclick="addFriendFromChat('${msg.userKey}', '${msg.username}')">Add Friend</span>` : ''}
+                ${isOwn ? `<span class="message-action" onclick="deleteMessage('${escapeAttr(msg.id)}')">Delete</span>` : ''}
+                ${!isOwn && !isFriend ? `<span class="message-action" onclick="addFriendFromChat('${escapeAttr(msg.userKey)}', '${escapeAttr(msg.username)}')">Add Friend</span>` : ''}
                 ${!isOwn && isFriend ? `<span class="message-action friend-status">Friend</span>` : ''}
-                <span class="message-action" onclick="blockUser('${msg.userKey}', '${msg.username}')">Block</span>
+                <span class="message-action" onclick="blockUser('${escapeAttr(msg.userKey)}', '${escapeAttr(msg.username)}')">Block</span>
               </div>
             </div>
           </div>
@@ -767,7 +767,7 @@
           <div class="user-item" title="Click to message">
             <div class="user-avatar">${cosmetics.emojiPicture || '😊'}</div>
             <div class="user-info">
-              <div class="user-name" ${usernameStyle}>${user.username}</div>
+              <div class="user-name" ${usernameStyle}>${escapeHtml(user.username)}</div>
               <div class="user-status">Online</div>
             </div>
           </div>
@@ -793,8 +793,8 @@
           <div class="user-item" style="background: rgba(255, 59, 48, 0.1); border-left: 3px solid #ff3b30;">
             <div class="user-avatar">${cosmetics.emojiPicture || '😊'}</div>
             <div class="user-info">
-              <div class="user-name" ${usernameStyle}>${user.username}</div>
-              <div style="font-size: 11px; color: #ff6b6b; cursor: pointer;" onclick="unblockUserConfirm('${user.key}', '${user.username}')">🔓 Unblock</div>
+              <div class="user-name" ${usernameStyle}>${escapeHtml(user.username)}</div>
+              <div style="font-size: 11px; color: #ff6b6b; cursor: pointer;" onclick="unblockUserConfirm('${escapeAttr(user.key)}', '${escapeAttr(user.username)}')">🔓 Unblock</div>
             </div>
           </div>
         `;

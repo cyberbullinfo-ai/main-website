@@ -875,11 +875,11 @@
       }
 
       listContainer.innerHTML = allUsers.map(user => `
-        <div class="user-list-item" onclick="startChatWithUser('${user.key}', '${user.username}')">
-          <div class="avatar">${user.avatar}</div>
+        <div class="user-list-item" onclick="startChatWithUser('${escapeAttr(user.key)}', '${escapeAttr(user.username)}')">
+          <div class="avatar">${escapeHtml(user.avatar)}</div>
           <div class="info">
-            <div class="name">${user.username}</div>
-            <div class="school">${user.schoolDomain}</div>
+            <div class="name">${escapeHtml(user.username)}</div>
+            <div class="school">${escapeHtml(user.schoolDomain)}</div>
           </div>
         </div>
       `).join('');
@@ -933,11 +933,11 @@
       }
 
       listContainer.innerHTML = allUsers.map(user => `
-        <div class="user-list-item" onclick="startChatWithUser('${user.key}', '${user.username}')">
-          <div class="avatar">${user.avatar}</div>
+        <div class="user-list-item" onclick="startChatWithUser('${escapeAttr(user.key)}', '${escapeAttr(user.username)}')">
+          <div class="avatar">${escapeHtml(user.avatar)}</div>
           <div class="info">
-            <div class="name">${user.username}</div>
-            <div class="school">${user.schoolDomain}</div>
+            <div class="name">${escapeHtml(user.username)}</div>
+            <div class="school">${escapeHtml(user.schoolDomain)}</div>
           </div>
         </div>
       `).join('');

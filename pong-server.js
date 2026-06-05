@@ -17,6 +17,8 @@ function writeDB(db) { fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2), 'u
 const app = express();
 app.use(cors());
 app.use(express.json());
+// Serve static site files from project root so pages and API share origin
+app.use(express.static(path.join(__dirname)));
 
 // Simple ping
 app.get('/api/ping', (req, res) => res.json({ok:true}));

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Smartschool</title>
+  <title>Smartschool - CyberBull</title>
 
   <style>
     * {
@@ -14,20 +14,52 @@
     }
 
     body {
-      background: #f6f8fa;
-      height: 100vh;
+      background: linear-gradient(180deg, #f8fafc, #e2e8f0);
+      min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      color: #111;
+      padding: 24px;
+      color: #0f172a;
     }
 
     .box {
+      position: relative;
       background: white;
-      width: 350px;
+      width: min(420px, 100%);
       padding: 40px;
-      border-radius: 12px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.4);
+      border-radius: 22px;
+      box-shadow: 0 24px 65px rgba(15,23,42,0.12);
+      border: 1px solid rgba(148,163,184,0.24);
+    }
+
+    .site-logo {
+      font-size: 2.1rem;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      margin-bottom: 16px;
+      display: inline-block;
+      background: linear-gradient(135deg, #2563eb, #8b5cf6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .lang-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      border: 1px solid rgba(15,23,42,0.08);
+      background: #ffffff;
+      color: #0f172a;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 10px 22px rgba(15,23,42,0.08);
+    }
+
+    .lang-btn:hover {
+      background: #f8fafc;
     }
 
     h2 {
@@ -102,9 +134,7 @@
 <body>
 
 <div class="box">
-  <div style="text-align:center;margin-bottom:12px;">
-    <img src="images/cyberbull-logo.png" alt="CyberBull" style="width:120px;max-width:36%;display:block;margin:0 auto 8px;">
-  </div>
+  <div class="site-logo">CyberBull</div>
   <div class="language-toggle">
     <button class="lang-btn" id="languageButton">🌐 Taal</button>
     <div class="language-menu" id="languageMenu">
@@ -204,7 +234,7 @@
     document.getElementById('domain').placeholder = page.placeholder;
     document.getElementById('nextButton').textContent = page.next;
     document.getElementById('backButton').textContent = page.back;
-    document.getElementById('languageButton').textContent = page.language;
+    document.getElementById('languageButton').textContent = '🌐 ' + page.language;
     document.getElementById('languageSelect').value = language;
     document.querySelector('#languageMenu button').textContent = page.apply;
   }

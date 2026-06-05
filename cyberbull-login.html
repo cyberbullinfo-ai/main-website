@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login</title>
+  <title>Login - CyberBull</title>
 
   <style>
     * {
@@ -14,21 +14,52 @@
     }
 
     body {
-      background: linear-gradient(135deg, #e5effd, #f8fbff);
+      background: linear-gradient(180deg, #f8fafc, #e2e8f0);
       min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 20px;
+      padding: 24px;
+      color: #0f172a;
     }
 
     .login-box {
       background: #ffffff;
       width: min(520px, 100%);
-      padding: 28px 36px;
-      border-radius: 18px;
-      box-shadow: 0 20px 60px rgba(15, 40, 80, 0.08);
-      border: 1px solid rgba(22, 78, 145, 0.06);
+      padding: 34px 36px;
+      border-radius: 22px;
+      box-shadow: 0 24px 65px rgba(15, 23, 42, 0.12);
+      border: 1px solid rgba(148,163,184,0.24);
+      position: relative;
+    }
+
+    .site-logo {
+      font-size: 2.1rem;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      margin-bottom: 14px;
+      display: inline-block;
+      background: linear-gradient(135deg, #2563eb, #8b5cf6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .lang-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      border: 1px solid rgba(15,23,42,0.08);
+      background: #ffffff;
+      color: #0f172a;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 10px 22px rgba(15,23,42,0.08);
+    }
+
+    .lang-btn:hover {
+      background: #f8fafc;
     }
 
     .login-box h2 {
@@ -130,6 +161,7 @@
 <body>
 
 <div class="login-box">
+  <div class="site-logo">CyberBull</div>
   <div class="language-toggle">
     <button class="lang-btn" id="languageButton">🌐 Taal</button>
     <div class="language-menu" id="languageMenu">
@@ -227,7 +259,7 @@
     document.getElementById('password').placeholder = page.passwordPlaceholder;
     document.getElementById('loginButton').textContent = page.loginButton;
     document.getElementById('backButton').textContent = page.backButton;
-    document.getElementById('languageButton').textContent = page.language;
+    document.getElementById('languageButton').textContent = '🌐 ' + page.language;
     document.getElementById('languageApplyButton').textContent = page.apply;
 
     if (school) {

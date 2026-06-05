@@ -15,8 +15,14 @@ function readDB() {
 function writeDB(db) { fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2), 'utf8'); }
 
 const app = express();
-app.use(cors());
-app.options('*', cors());
+const corsOptions = {
+  origin: true,
+  methods: ['GET','POST','OPTIONS','PUT','DELETE'],
+  allowedHeaders: ['Content-Type'],
+  credentials: true,
+};
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 app.use(express.json());
 // Serve static site files from project root so pages and API share origin
 app.use(express.static(path.join(__dirname)));
@@ -24,6 +30,14 @@ app.use(express.static(path.join(__dirname)));
 // Debug logging for API methods
 app.use('/api', (req, res, next) => {
   console.log(`[API] ${req.method} ${req.originalUrl}`);
+  next();
+});
+app.use('/api', (req, res, next) => {
+  if (req.method === 'OPTIONS') {
+    res.header('Access-Control-Allow-Methods', 'GET,POST,OPTIONS,PUT,DELETE');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    return res.sendStatus(204);
+  }
   next();
 });
 
@@ -139,9 +153,9 @@ app.get('/api/chat/private/:userA/:userB', (req, res) => {
 });
 
 // Save/update user profile globally
-app.options('/api/saveUser', cors());
+app.options('/api/saveUser', cors(corsOptions));
 app.post('/api/saveUser', (req, res) => {
-  console.log('[API] saveUser payload', { userKey: req.body.userKey });
+  console.log('[API] saveUser payload', { userKey: req.body.userKey, method: req.method });
   const { userKey, userObj } = req.body;
   if(!userKey || !userObj) return res.status(400).json({error:'missing fields'});
   
@@ -155,6 +169,13 @@ app.post('/api/saveUser', (req, res) => {
     console.error('Failed to write DB in /api/saveUser', err);
     return res.status(500).json({ error: 'failed to persist user', detail: String(err && err.message ? err.message : err) });
   }
+});
+app.all('/api/saveUser', (req, res) => {
+  if (req.method !== 'POST' && req.method !== 'OPTIONS') {
+    console.warn('[API] saveUser wrong method', req.method);
+    return res.status(405).json({ error: 'method not allowed', method: req.method });
+  }
+  res.status(404).json({ error: 'not found' });
 });
 
 // Get user profile globally

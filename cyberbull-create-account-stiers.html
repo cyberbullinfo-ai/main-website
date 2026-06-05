@@ -394,7 +394,9 @@
         });
 
         if (!saveResponse.ok) {
-          updateStatus('Unable to save STIERS account globally. Please try again later.', 'error');
+          let payload = null;
+          try { payload = await saveResponse.json(); } catch(e) { /* ignore */ }
+          updateStatus(payload?.error || payload?.detail || (`Unable to save STIERS account globally (code ${saveResponse.status}). Please try again later.`), 'error');
           return;
         }
       } catch (err) {

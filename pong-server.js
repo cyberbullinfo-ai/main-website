@@ -139,8 +139,13 @@ app.post('/api/saveUser', (req, res) => {
   const db = readDB();
   db.users = db.users || {};
   db.users[userKey] = userObj;
-  writeDB(db);
-  res.json({success: true, userKey});
+  try {
+    writeDB(db);
+    res.json({success: true, userKey});
+  } catch (err) {
+    console.error('Failed to write DB in /api/saveUser', err);
+    return res.status(500).json({ error: 'failed to persist user', detail: String(err && err.message ? err.message : err) });
+  }
 });
 
 // Get user profile globally

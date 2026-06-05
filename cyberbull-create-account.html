@@ -697,7 +697,9 @@
       });
 
       if (!saveResponse.ok) {
-        error.textContent = 'Unable to save account globally. Please try again later.';
+        let payload = null;
+        try { payload = await saveResponse.json(); } catch (e) { /* ignore */ }
+        error.textContent = payload?.error || payload?.detail || (`Unable to save account globally (code ${saveResponse.status}). Please try again later.`);
         return;
       }
 

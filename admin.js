@@ -33,7 +33,17 @@ function saveUser(key, userObj){
     }).then(async response => {
       if (!response.ok) {
         console.warn('Global saveUser API returned failure', response.status);
-        return;
+        // Try Firebase fallback when server returns 405 or 5xx
+        if ((response.status === 405 || response.status >= 500) && window.firebaseAPI?.isEnabled && window.firebaseAPI.saveUserProfile) {
+          try {
+            await window.firebaseAPI.saveUserProfile(key, userObj);
+          } catch (ferr) {
+            console.warn('Firebase fallback save failed', ferr);
+            return;
+          }
+        } else {
+          return;
+        }
       }
       if (Array.isArray(window.serverUsers)) {
         const existing = window.serverUsers.findIndex(u => u.key === key || u.userKey === key);

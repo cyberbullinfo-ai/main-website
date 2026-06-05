@@ -200,6 +200,16 @@ window.globalAuth = (function() {
         });
         if (!response.ok) {
           console.warn('Global saveUser API returned failure', response.status);
+          // try Firebase fallback when server returns 405 or 5xx
+          if ((response.status === 405 || response.status >= 500) && window.firebaseAPI?.isEnabled && window.firebaseAPI.saveUserProfile) {
+            try {
+              await window.firebaseAPI.saveUserProfile(userKey, userObj);
+              return true;
+            } catch (ferr) {
+              console.error('Firebase fallback save failed', ferr);
+              return false;
+            }
+          }
           return false;
         }
       }

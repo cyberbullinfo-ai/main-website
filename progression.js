@@ -57,17 +57,49 @@ function getUserByKey(userKey) {
 }
 
 function saveUser(userKey, user) {
-  if (!userKey || !user || typeof XMLHttpRequest !== 'function') return;
-  try {
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', '/api/saveUser', false);
-    xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.send(JSON.stringify({ userKey, userObj: user }));
-    if (xhr.status !== 200 && xhr.status !== 204) {
-      console.warn('Global saveUser API returned failure', xhr.status, xhr.responseText);
+  if (!userKey || !user) return;
+  // Prefer fetch (async). If not available, fall back to synchronous XHR for legacy callers.
+  if (window.fetch) {
+    fetch('/api/saveUser', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userKey, userObj: user })
+    }).then(async response => {
+      if (!response.ok) {
+        console.warn('Global saveUser API returned failure', response.status);
+        if ((response.status === 405 || response.status >= 500) && window.firebaseAPI?.isEnabled && window.firebaseAPI.saveUserProfile) {
+          try {
+            await window.firebaseAPI.saveUserProfile(userKey, user);
+          } catch (ferr) {
+            console.warn('Firebase fallback save failed', ferr);
+          }
+        }
+      }
+    }).catch(err => {
+      console.warn('Failed to save user data globally for key (fetch)', userKey, err);
+      if (window.firebaseAPI?.isEnabled && window.firebaseAPI.saveUserProfile) {
+        window.firebaseAPI.saveUserProfile(userKey, user).catch(e => console.warn('Firebase fallback save failed', e));
+      }
+    });
+    return;
+  }
+
+  // Legacy sync XHR path
+  if (typeof XMLHttpRequest === 'function') {
+    try {
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/api/saveUser', false);
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.send(JSON.stringify({ userKey, userObj: user }));
+      if (xhr.status !== 200 && xhr.status !== 204) {
+        console.warn('Global saveUser API returned failure', xhr.status, xhr.responseText);
+        if ((xhr.status === 405 || xhr.status >= 500) && window.firebaseAPI?.isEnabled && window.firebaseAPI.saveUserProfile) {
+          try { window.firebaseAPI.saveUserProfile(userKey, user).catch(e => console.warn('Firebase fallback save failed', e)); } catch(e){}
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to save user data globally for key', userKey, err);
     }
-  } catch (err) {
-    console.warn('Failed to save user data globally for key', userKey, err);
   }
 }
 

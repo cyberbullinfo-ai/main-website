@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Direct Chat - CyberBull</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { min-height: 100vh; font-family: Inter, system-ui, sans-serif; background: radial-gradient(circle at top, #0f172a 0%, #111827 38%, #0f172a 100%); color: #e2e8f0; }
+    .page { width: min(1180px, 100%); margin: 0 auto; padding: 24px; }
+    .topbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+    .topbar-left { display: flex; align-items: center; gap: 16px; }
+    .logo { width: 64px; height: 64px; border-radius: 24px; background: linear-gradient(135deg, #f59e0b, #facc15); display: grid; place-items: center; font-size: 32px; }
+    .topbar h1 { font-size: clamp(1.8rem, 2.5vw, 2.4rem); }
+    .topbar p { color: #94a3b8; margin-top: 8px; max-width: 640px; line-height: 1.6; }
+    .nav-links { display: flex; gap: 12px; flex-wrap: wrap; }
+    .nav-button { border: none; border-radius: 999px; padding: 12px 18px; background: rgba(255,255,255,0.08); color: #e2e8f0; cursor: pointer; transition: transform 200ms ease, background 200ms ease; }
+    .nav-button:hover { transform: translateY(-2px); background: rgba(255,255,255,0.16); }
+    .grid { display: grid; grid-template-columns: 320px 1fr; gap: 20px; }
+    .panel { background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(255,255,255,0.08); border-radius: 28px; padding: 24px; box-shadow: 0 30px 60px rgba(0,0,0,0.25); }
+    .panel h2 { margin-bottom: 18px; font-size: 1.2rem; }
+    .section { margin-bottom: 24px; }
+    .section:last-child { margin-bottom: 0; }
+    .user-list, .conversation-list { display: grid; gap: 14px; }
+    .user-card, .conversation-card { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 18px; cursor: pointer; transition: transform 200ms ease, background 200ms ease; }
+    .user-card:hover, .conversation-card:hover { transform: translateY(-1px); background: rgba(255,255,255,0.08); }
+    .user-info { display: flex; align-items: center; gap: 12px; }
+    .avatar { width: 42px; height: 42px; border-radius: 14px; display: grid; place-items: center; background: rgba(30,41,59,0.9); font-size: 1.2rem; }
+    .user-name { font-weight: 700; }
+    .small { color: #94a3b8; font-size: 0.9rem; }
+    .active-badge { padding: 6px 10px; border-radius: 999px; background: rgba(34,197,94,0.18); color: #a7f3d0; font-size: 0.82rem; }
+    .chat-window { display: grid; gap: 18px; min-height: 72vh; }
+    .chat-card { display: flex; flex-direction: column; gap: 14px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; padding: 20px; min-height: 360px; }
+    .chat-status { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .chat-status h3 { font-size: 1.1rem; }
+    .message-list { display: grid; gap: 14px; overflow-y: auto; padding-right: 4px; max-height: 44vh; }
+    .bubble { max-width: 92%; padding: 14px 16px; border-radius: 18px; background: rgba(15,23,42,0.95); border: 1px solid rgba(255,255,255,0.08); line-height: 1.7; }
+    .bubble.you { align-self: flex-end; background: linear-gradient(135deg, rgba(34,197,94,0.16), rgba(34,197,94,0.08)); }
+    .bubble .meta { display: block; margin-top: 6px; color: #94a3b8; font-size: 0.82rem; }
+    .message-empty { color: #94a3b8; padding: 24px; text-align: center; border-radius: 18px; background: rgba(255,255,255,0.04); }
+    .chat-form { display: grid; gap: 12px; }
+    .chat-input, .recipient-input { width: 100%; padding: 14px 16px; border-radius: 18px; border: 1px solid rgba(255,255,255,0.12); background: rgba(15,23,42,0.9); color: #e2e8f0; font-size: 1rem; }
+    .send-row { display: flex; gap: 12px; flex-wrap: wrap; justify-content: space-between; align-items: center; }
+    .send-button { border: none; border-radius: 999px; padding: 14px 22px; background: linear-gradient(135deg, #f59e0b, #ea580c); color: #0f172a; font-weight: 700; cursor: pointer; transition: opacity 200ms ease; }
+    .send-button:hover { opacity: 0.95; }
+    .form-note { color: #94a3b8; font-size: 0.92rem; }
+    @media(max-width: 980px) { .grid { grid-template-columns: 1fr; } .chat-window { min-height: auto; } }
+  </style>
+  <script src="auth.js"></script>
+  <script src="chat.js"></script>
+</head>
+<body>
+  <script>
+    window.globalAuth.requireAuth();
+  </script>
+  <div class="page">
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="logo">💬</div>
+        <div>
+          <h1>Direct Chat</h1>
+          <p>Send personal messages to another CyberBull user. Pick someone online or enter their user details to begin.</p>
+        </div>
+      </div>
+      <div class="nav-links">
+        <button class="nav-button" onclick="window.location.href='cyberbull-hub.html'">← Home</button>
+        <button class="nav-button" onclick="window.location.href='cyberbull-community-chat.html'">Community Chat →</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <aside class="panel">
+        <div class="section">
+          <h2>Online players</h2>
+          <div class="user-list" id="onlineUsers"></div>
+        </div>
+
+        <div class="section">
+          <h2>Quick start</h2>
+          <p class="form-note">If the player is not listed, enter their user key and name below to start a one-to-one chat.</p>
+          <input id="recipientKey" class="recipient-input" placeholder="Recipient key" spellcheck="false">
+          <input id="recipientName" class="recipient-input" placeholder="Recipient name" spellcheck="false">
+          <button class="send-button" id="startChatButton" type="button">Start chat</button>
+        </div>
+
+        <div class="section">
+          <h2>Recent conversations</h2>
+          <div class="conversation-list" id="conversationList"></div>
+        </div>
+      </aside>
+
+      <section class="chat-window">
+        <div class="panel">
+          <div class="chat-status">
+            <div>
+              <h3 id="partnerTitle">No conversation selected</h3>
+              <div class="small" id="partnerSubtitle">Choose a player or enter details to begin a private chat.</div>
+            </div>
+            <span class="active-badge" id="conversationStatus">Idle</span>
+          </div>
+          <div class="message-list" id="privateMessageList"></div>
+        </div>
+
+        <form class="panel chat-form" id="privateChatForm">
+          <textarea id="privateMessageInput" class="chat-input" rows="4" placeholder="Write a personal message..." maxlength="500"></textarea>
+          <div class="send-row">
+            <span class="form-note">Messages are stored locally and kept between this device and the recipient.</span>
+            <button class="send-button" type="submit">Send message</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const currentUserKey = localStorage.getItem('currentUserKey');
+    const currentUser = window.globalAuth.getUserData(currentUserKey) || { username: 'Player', avatar: '👤', schoolDomain: 'cyberbull' };
+    const onlineUsersContainer = document.getElementById('onlineUsers');
+    const conversationList = document.getElementById('conversationList');
+    const partnerTitle = document.getElementById('partnerTitle');
+    const partnerSubtitle = document.getElementById('partnerSubtitle');
+    const conversationStatus = document.getElementById('conversationStatus');
+    const privateMessageList = document.getElementById('privateMessageList');
+    const privateChatForm = document.getElementById('privateChatForm');
+    const privateMessageInput = document.getElementById('privateMessageInput');
+    const recipientKeyInput = document.getElementById('recipientKey');
+    const recipientNameInput = document.getElementById('recipientName');
+    const startChatButton = document.getElementById('startChatButton');
+
+    let activePartner = null;
+
+    function formatTime(timestamp) {
+      const date = new Date(timestamp);
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function getAvatarFor(name) {
+      return name ? name.charAt(0).toUpperCase() : '👾';
+    }
+
+    function buildUserCard(userKey, username) {
+      const card = document.createElement('div');
+      card.className = 'user-card';
+      card.innerHTML = `
+        <div class="user-info">
+          <span class="avatar">${getAvatarFor(username)}</span>
+          <div>
+            <div class="user-name">${username}</div>
+            <div class="small">${userKey}</div>
+          </div>
+        </div>
+        <span class="active-badge">Message</span>
+      `;
+      card.addEventListener('click', () => selectPartner({ userKey, username }));
+      return card;
+    }
+
+    function renderOnlineUsers() {
+      const users = chatAPI.getOnlineUsers ? Object.entries(chatAPI.getOnlineUsers()) : [];
+      onlineUsersContainer.innerHTML = '';
+      users.filter(([key]) => key !== currentUserKey).sort((a,b) => a[1].username.localeCompare(b[1].username)).forEach(([key, value]) => {
+        onlineUsersContainer.appendChild(buildUserCard(key, value.username || 'Unknown'));
+      });
+      if (!onlineUsersContainer.children.length) {
+        onlineUsersContainer.innerHTML = '<div class="message-empty">No other players are online right now. Enter a recipient key to start a message.</div>';
+      }
+    }
+
+    function getConversations() {
+      return chatAPI.getUserConversations(currentUserKey) || {};
+    }
+
+    function renderConversations() {
+      const conversations = getConversations();
+      conversationList.innerHTML = '';
+      const keys = Object.keys(conversations).sort((a, b) => (conversations[b].lastMessageTime || 0) - (conversations[a].lastMessageTime || 0));
+      keys.forEach(key => {
+        const conv = conversations[key];
+        const card = document.createElement('div');
+        card.className = 'conversation-card';
+        card.innerHTML = `
+          <div class="user-info">
+            <span class="avatar">${getAvatarFor(conv.name)}</span>
+            <div>
+              <div class="user-name">${conv.name}</div>
+              <div class="small">${conv.lastMessage}</div>
+            </div>
+          </div>
+          <div class="small">${new Date(conv.lastMessageTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+        `;
+        card.addEventListener('click', () => selectPartner({ userKey: key, username: conv.name }));
+        conversationList.appendChild(card);
+      });
+      if (!conversationList.children.length) {
+        conversationList.innerHTML = '<div class="message-empty">No private conversations yet. Start one by selecting an online player or entering a key.</div>';
+      }
+    }
+
+    function selectPartner(partner) {
+      activePartner = partner;
+      partnerTitle.textContent = partner.username;
+      partnerSubtitle.textContent = `Chatting with ${partner.username}`;
+      conversationStatus.textContent = 'Connected';
+      recipientKeyInput.value = partner.userKey;
+      recipientNameInput.value = partner.username;
+      renderConversation();
+    }
+
+    function renderConversation() {
+      privateMessageList.innerHTML = '';
+      if (!activePartner) {
+        privateMessageList.innerHTML = '<div class="message-empty">Choose a player or enter a recipient to see your personal messages.</div>';
+        conversationStatus.textContent = 'Idle';
+        return;
+      }
+      const messages = chatAPI.getPrivateMessages(currentUserKey, activePartner.userKey) || [];
+      if (!messages.length) {
+        privateMessageList.innerHTML = '<div class="message-empty">No messages yet. Send the first message to open the conversation.</div>';
+        return;
+      }
+      messages.forEach(msg => {
+        const bubble = document.createElement('div');
+        bubble.className = `bubble ${msg.senderKey === currentUserKey ? 'you' : ''}`;
+        const text = document.createElement('div');
+        text.textContent = msg.message;
+        const meta = document.createElement('span');
+        meta.className = 'meta';
+        meta.textContent = `${msg.senderKey === currentUserKey ? 'You' : activePartner.username} · ${formatTime(msg.timestamp)}`;
+        bubble.appendChild(text);
+        bubble.appendChild(meta);
+        privateMessageList.appendChild(bubble);
+      });
+      privateMessageList.scrollTop = privateMessageList.scrollHeight;
+      chatAPI.markConversationAsRead && chatAPI.markConversationAsRead(currentUserKey, activePartner.userKey);
+    }
+
+    document.getElementById('startChatButton').addEventListener('click', () => {
+      const key = recipientKeyInput.value.trim();
+      const name = recipientNameInput.value.trim();
+      if (!key || !name) return;
+      selectPartner({ userKey: key, username: name });
+    });
+
+    privateChatForm.addEventListener('submit', event => {
+      event.preventDefault();
+      if (!activePartner) return;
+      const message = privateMessageInput.value.trim();
+      if (!message) return;
+      chatAPI.sendPrivateMessage(currentUserKey, currentUser.username, activePartner.userKey, activePartner.username, message);
+      privateMessageInput.value = '';
+      renderConversation();
+      renderConversations();
+    });
+
+    function refreshOnline() {
+      if (chatAPI.setUserOnline) {
+        chatAPI.setUserOnline(currentUserKey, currentUser.username, currentUser.schoolDomain, getAvatarFor(currentUser.username));
+      }
+      renderOnlineUsers();
+    }
+
+    function refreshAll() {
+      refreshOnline();
+      renderConversations();
+      renderConversation();
+    }
+
+    window.addEventListener('storage', refreshAll);
+
+    refreshAll();
+    setInterval(refreshAll, 5000);
+  </script>
+</body>
+</html>

@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Omegle Chat - CyberBull</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { min-height: 100vh; font-family: Inter, system-ui, sans-serif; background: radial-gradient(circle at top, #0f172a 0%, #111827 40%, #0f172a 100%); color: #e2e8f0; }
+    .page { width: min(1180px, 100%); margin: 0 auto; padding: 24px; }
+    .topbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+    .title-row { display: flex; align-items: center; gap: 16px; }
+    .title-icon { width: 64px; height: 64px; border-radius: 22px; background: linear-gradient(135deg, #fb7185, #f97316); display: grid; place-items: center; font-size: 32px; }
+    .topbar h1 { font-size: clamp(1.9rem, 2.7vw, 2.5rem); }
+    .topbar p { color: #94a3b8; max-width: 720px; line-height: 1.6; }
+    .nav-links { display: flex; gap: 12px; flex-wrap: wrap; }
+    .nav-button { border: none; border-radius: 999px; padding: 12px 18px; background: rgba(255,255,255,0.08); color: #e2e8f0; cursor: pointer; transition: transform 180ms ease, background 180ms ease; }
+    .nav-button:hover { transform: translateY(-2px); background: rgba(255,255,255,0.16); }
+    .grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 20px; }
+    .panel { background: rgba(15,23,42,0.95); border: 1px solid rgba(255,255,255,0.08); border-radius: 28px; padding: 24px; box-shadow: 0 30px 60px rgba(0,0,0,0.25); }
+    .panel h2 { margin-bottom: 18px; font-size: 1.2rem; }
+    .status-card { display: grid; gap: 8px; padding: 18px; border-radius: 20px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); }
+    .status-card span { display: block; color: #94a3b8; }
+    .status-card strong { font-size: 1.8rem; line-height: 1.1; }
+    .button-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 18px; }
+    .main-action { border: none; border-radius: 999px; padding: 16px 24px; background: linear-gradient(135deg, #fb7185, #f43f5e); color: #fff; font-weight: 700; cursor: pointer; transition: opacity 180ms ease; }
+    .main-action:hover { opacity: 0.95; }
+    .secondary-action { border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.04); color: #e2e8f0; }
+    .main-action:disabled, .secondary-action:disabled { opacity: 0.4; cursor: not-allowed; }
+    .hint { color: #94a3b8; font-size: 0.92rem; margin-top: 10px; }
+    .chat-panel { display: grid; gap: 18px; min-height: 72vh; }
+    .chat-box { display: grid; gap: 16px; padding: 20px; overflow: hidden; min-height: 460px; }
+    .chat-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .chat-header h2 { font-size: 1.25rem; }
+    .chat-status { color: #94a3b8; font-size: 0.95rem; }
+    .message-list { flex: 1; overflow-y: auto; display: grid; gap: 14px; padding-right: 4px; }
+    .message-bubble { max-width: 82%; padding: 14px 18px; border-radius: 20px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); line-height: 1.75; }
+    .message-bubble.you { justify-self: end; background: rgba(251,113,133,0.14); }
+    .message-bubble .meta { display: block; margin-top: 8px; color: #94a3b8; font-size: 0.85rem; }
+    .message-empty { padding: 28px; border-radius: 22px; background: rgba(255,255,255,0.04); color: #94a3b8; text-align: center; }
+    .chat-form { display: grid; gap: 12px; }
+    .chat-input { width: 100%; min-height: 80px; padding: 18px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.12); background: rgba(15,23,42,0.9); color: #e2e8f0; resize: vertical; font-size: 1rem; }
+    .chat-footer { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .note { color: #94a3b8; font-size: 0.92rem; }
+    @media (max-width: 960px) { .grid { grid-template-columns: 1fr; } }
+  </style>
+  <script src="auth.js"></script>
+  <script src="chat.js"></script>
+</head>
+<body>
+  <script>window.globalAuth.requireAuth();</script>
+  <div class="page">
+    <div class="topbar">
+      <div class="title-row">
+        <div class="title-icon">🔀</div>
+        <div>
+          <h1>Omegle Chat</h1>
+          <p>Connect with a random CyberBull stranger for an anonymous chat. Stay safe, stay kind, and leave anytime.</p>
+        </div>
+      </div>
+      <div class="nav-links">
+        <button class="nav-button" onclick="window.location.href='cyberbull-hub.html'">← Home</button>
+        <button class="nav-button" onclick="window.location.href='cyberbull-community-chat.html'">Community Chat</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <aside class="panel">
+        <h2>Quick match</h2>
+        <div class="status-card">
+          <span>Signed in as</span>
+          <strong id="userLabel">Player</strong>
+        </div>
+        <div class="status-card">
+          <span>Players online</span>
+          <strong id="onlineCount">0</strong>
+        </div>
+        <div class="status-card">
+          <span>Current mode</span>
+          <strong id="currentState">Idle</strong>
+        </div>
+        <div class="button-row">
+          <button id="findButton" class="main-action">Find Stranger</button>
+          <button id="leaveButton" class="secondary-action" disabled>Leave</button>
+        </div>
+        <p class="hint">Random matching uses active players in the CyberBull session. Once connected, your messages are displayed anonymously.</p>
+      </aside>
+
+      <section class="chat-panel">
+        <div class="panel chat-box">
+          <div class="chat-header">
+            <div>
+              <h2>Random conversation</h2>
+              <div class="chat-status" id="partnerStatus">No stranger matched yet.</div>
+            </div>
+            <div class="note" id="sessionNote">Your identity will remain hidden in this chat window.</div>
+          </div>
+
+          <div class="message-list" id="messageList">
+            <div class="message-empty">Click find to connect with a random player.</div>
+          </div>
+
+          <form id="omegleForm" class="chat-form">
+            <textarea id="omegleInput" class="chat-input" rows="4" placeholder="Type your message here..." maxlength="400" disabled></textarea>
+            <div class="chat-footer">
+              <span class="note">Messages are kept within the CyberBull chat session.</span>
+              <button id="sendButton" class="main-action" type="submit" disabled>Send</button>
+            </div>
+          </form>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const currentUserKey = localStorage.getItem('currentUserKey');
+    const currentUser = window.globalAuth.getUserData(currentUserKey) || { username: 'Player', avatar: '👤', schoolDomain: 'cyberbull' };
+    const userLabel = document.getElementById('userLabel');
+    const onlineCount = document.getElementById('onlineCount');
+    const currentState = document.getElementById('currentState');
+    const partnerStatus = document.getElementById('partnerStatus');
+    const findButton = document.getElementById('findButton');
+    const leaveButton = document.getElementById('leaveButton');
+    const messageList = document.getElementById('messageList');
+    const omegleInput = document.getElementById('omegleInput');
+    const sendButton = document.getElementById('sendButton');
+    const omegleForm = document.getElementById('omegleForm');
+
+    const WAIT_KEY = 'omegleWaiting';
+    const ACTIVE_KEY_PREFIX = 'omegleActive_';
+    const SESSION_KEY_PREFIX = 'omegleSession_';
+    let activeSession = null;
+
+    function getQueue() {
+      try { return JSON.parse(localStorage.getItem(WAIT_KEY) || '[]'); } catch { return []; }
+    }
+
+    function saveQueue(queue) {
+      localStorage.setItem(WAIT_KEY, JSON.stringify(queue));
+    }
+
+    function cleanupQueue(queue) {
+      const cutoff = Date.now() - 70000;
+      return queue.filter(entry => entry.userKey && entry.timestamp >= cutoff);
+    }
+
+    function getActive() {
+      try { return JSON.parse(localStorage.getItem(ACTIVE_KEY_PREFIX + currentUserKey)); } catch { return null; }
+    }
+
+    function setActive(active) {
+      localStorage.setItem(ACTIVE_KEY_PREFIX + currentUserKey, JSON.stringify(active));
+    }
+
+    function removeActive() {
+      localStorage.removeItem(ACTIVE_KEY_PREFIX + currentUserKey);
+    }
+
+    function getSession(sessionKey) {
+      try { return JSON.parse(localStorage.getItem(SESSION_KEY_PREFIX + sessionKey)); } catch { return null; }
+    }
+
+    function saveSession(session) {
+      localStorage.setItem(SESSION_KEY_PREFIX + session.sessionKey, JSON.stringify(session));
+    }
+
+    function createSession(partnerKey) {
+      const sessionKey = getSessionKey(currentUserKey, partnerKey);
+      const session = {
+        sessionKey,
+        userKeys: [currentUserKey, partnerKey],
+        activeUsers: [currentUserKey, partnerKey],
+        createdAt: Date.now(),
+        lastUpdate: Date.now()
+      };
+      saveSession(session);
+      setActive({ sessionKey, partnerKey, connectedAt: Date.now() });
+      localStorage.setItem(ACTIVE_KEY_PREFIX + partnerKey, JSON.stringify({ sessionKey, partnerKey: currentUserKey, connectedAt: Date.now() }));
+      activeSession = session;
+    }
+
+    function getSessionKey(a, b) {
+      return [a, b].sort().join('_');
+    }
+
+    function getConversationKey(sessionKey) {
+      return `omegleChat_${sessionKey}`;
+    }
+
+    function getMessages(sessionKey) {
+      try { return JSON.parse(localStorage.getItem(getConversationKey(sessionKey)) || '[]'); } catch { return []; }
+    }
+
+    function saveMessages(sessionKey, messages) {
+      localStorage.setItem(getConversationKey(sessionKey), JSON.stringify(messages));
+    }
+
+    function addMessage(sessionKey, message) {
+      const messages = getMessages(sessionKey);
+      messages.push(message);
+      if (messages.length > 200) messages.splice(0, messages.length - 200);
+      saveMessages(sessionKey, messages);
+    }
+
+    function updatePresence() {
+      if (chatAPI.setUserOnline) {
+        chatAPI.setUserOnline(currentUserKey, currentUser.username, currentUser.schoolDomain, currentUser.avatar || currentUser.username.charAt(0).toUpperCase());
+      }
+    }
+
+    function updateOnlineCount() {
+      const users = chatAPI.getOnlineUsers ? Object.values(chatAPI.getOnlineUsers()) : [];
+      onlineCount.textContent = String(users.length || 0);
+    }
+
+    function updateButtons(state) {
+      currentState.textContent = state;
+      const connected = !!activeSession;
+      findButton.disabled = connected;
+      leaveButton.disabled = !connected;
+      omegleInput.disabled = !connected;
+      sendButton.disabled = !connected;
+    }
+
+    function renderMessages() {
+      if (!activeSession) {
+        messageList.innerHTML = '<div class="message-empty">Click find stranger to connect with a random player.</div>';
+        return;
+      }
+      const messages = getMessages(activeSession.sessionKey);
+      if (messages.length === 0) {
+        messageList.innerHTML = '<div class="message-empty">You are now connected. Say hello to your stranger!</div>';
+        return;
+      }
+      messageList.innerHTML = messages.map(msg => {
+        const isYou = msg.senderKey === currentUserKey;
+        const label = isYou ? 'You' : 'Stranger';
+        return `
+          <div class="message-bubble ${isYou ? 'you' : ''}">
+            <div>${escapeHtml(msg.text)}</div>
+            <span class="meta">${label} · ${formatTime(msg.timestamp)}</span>
+          </div>`;
+      }).join('');
+      messageList.scrollTop = messageList.scrollHeight;
+    }
+
+    function formatTime(timestamp) {
+      const date = new Date(timestamp);
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function escapeHtml(text) {
+      return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function setPartnerStatus(text) {
+      partnerStatus.textContent = text;
+    }
+
+    function clearQueueEntry() {
+      const queue = cleanupQueue(getQueue()).filter(entry => entry.userKey !== currentUserKey);
+      saveQueue(queue);
+    }
+
+    function endSession(notify = true) {
+      const active = getActive();
+      if (active) {
+        const session = getSession(active.sessionKey);
+        if (session) {
+          session.activeUsers = session.activeUsers.filter(key => key !== currentUserKey);
+          session.lastUpdate = Date.now();
+          saveSession(session);
+        }
+        removeActive();
+      }
+      activeSession = null;
+      if (notify) dispatchLocalStorageEvent();
+      setPartnerStatus('No stranger matched yet.');
+      updateButtons('Idle');
+      renderMessages();
+    }
+
+    function dispatchLocalStorageEvent() {
+      try {
+        localStorage.setItem('omeglePing', String(Date.now()));
+      } catch (error) {
+        console.warn('Storage event failed', error);
+      }
+    }
+
+    function matchStranger() {
+      clearQueueEntry();
+      const queue = cleanupQueue(getQueue());
+      const partnerCandidates = queue.filter(entry => entry.userKey !== currentUserKey);
+      if (partnerCandidates.length > 0) {
+        const partner = partnerCandidates[Math.floor(Math.random() * partnerCandidates.length)];
+        const nextQueue = queue.filter(entry => entry.userKey !== partner.userKey && entry.userKey !== currentUserKey);
+        saveQueue(nextQueue);
+        createSession(partner.userKey);
+        activeSession = getSession(getSessionKey(currentUserKey, partner.userKey));
+        setPartnerStatus('Connected to a stranger. Chat now.');
+        updateButtons('Connected');
+        renderMessages();
+        dispatchLocalStorageEvent();
+        return;
+      }
+      queue.push({ userKey: currentUserKey, timestamp: Date.now() });
+      saveQueue(queue);
+      setPartnerStatus('Waiting for a stranger...');
+      updateButtons('Waiting');
+    }
+
+    function syncState() {
+      updatePresence();
+      updateOnlineCount();
+      const active = getActive();
+      if (!active) {
+        clearQueueEntry();
+        endSession(false);
+        return;
+      }
+      const session = getSession(active.sessionKey);
+      if (!session) {
+        endSession(false);
+        return;
+      }
+      activeSession = session;
+      const partnerConnected = session.activeUsers.includes(active.partnerKey);
+      if (!partnerConnected) {
+        setPartnerStatus('Stranger disconnected. Find another match.');
+        updateButtons('Disconnected');
+        renderMessages();
+        return;
+      }
+      setPartnerStatus('Connected to a stranger. Chat now.');
+      updateButtons('Connected');
+      renderMessages();
+    }
+
+    findButton.addEventListener('click', () => {
+      matchStranger();
+      renderMessages();
+    });
+
+    leaveButton.addEventListener('click', () => {
+      endSession();
+    });
+
+    omegleForm.addEventListener('submit', event => {
+      event.preventDefault();
+      if (!activeSession) return;
+      const text = omegleInput.value.trim();
+      if (!text) return;
+      addMessage(activeSession.sessionKey, {
+        id: `msg-${Date.now()}-${Math.random()}`,
+        senderKey: currentUserKey,
+        text,
+        timestamp: Date.now()
+      });
+      omegleInput.value = '';
+      renderMessages();
+      dispatchLocalStorageEvent();
+    });
+
+    window.addEventListener('storage', event => {
+      if (!event.key) return;
+      if (event.key.startsWith(ACTIVE_KEY_PREFIX + currentUserKey) || event.key.startsWith(SESSION_KEY_PREFIX) || event.key === WAIT_KEY || event.key === 'omeglePing') {
+        syncState();
+      }
+    });
+
+    function init() {
+      userLabel.textContent = `${currentUser.username} @ ${currentUser.schoolDomain || 'cyberbull'}`;
+      updatePresence();
+      updateOnlineCount();
+      syncState();
+      setInterval(() => {
+        updatePresence();
+        updateOnlineCount();
+        syncState();
+      }, 4000);
+    }
+
+    init();
+  </script>
+</body>
+</html>

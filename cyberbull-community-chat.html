@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Community Chat - CyberBull</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { min-height: 100vh; font-family: Inter, system-ui, sans-serif; background: linear-gradient(135deg, #0f172a 0%, #111827 60%, #0f172a 100%); color: #e2e8f0; }
+    .page { width: min(1120px, 100%); margin: 0 auto; padding: 24px; }
+    .topbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+    .topbar-left { display: flex; align-items: center; gap: 16px; }
+    .logo { width: 64px; height: 64px; border-radius: 24px; background: linear-gradient(135deg, #14b8a6, #0ea5e9); display: grid; place-items: center; font-size: 32px; }
+    .topbar h1 { font-size: clamp(1.8rem, 2.5vw, 2.4rem); }
+    .topbar p { color: #94a3b8; margin-top: 8px; max-width: 640px; line-height: 1.6; }
+    .nav-links { display: flex; gap: 12px; flex-wrap: wrap; }
+    .nav-button { border: none; border-radius: 999px; padding: 12px 18px; background: rgba(255,255,255,0.08); color: #e2e8f0; cursor: pointer; transition: transform 200ms ease, background 200ms ease; }
+    .nav-button:hover { transform: translateY(-2px); background: rgba(255,255,255,0.16); }
+    .grid { display: grid; grid-template-columns: 1.8fr 1fr; gap: 20px; }
+    .status-panel, .chat-panel { background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(255,255,255,0.08); border-radius: 28px; padding: 24px; box-shadow: 0 30px 60px rgba(0,0,0,0.25); }
+    .status-panel { display: grid; gap: 18px; }
+    .stat-card { display: grid; gap: 8px; padding: 20px; border-radius: 22px; background: rgba(30, 41, 59, 0.85); border: 1px solid rgba(255,255,255,0.06); }
+    .stat-label { color: #94a3b8; font-size: 0.9rem; }
+    .stat-value { font-size: 1.9rem; font-weight: 700; }
+    .chat-panel { display: flex; flex-direction: column; min-height: 70vh; }
+    .chat-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+    .chat-header h2 { font-size: 1.3rem; }
+    .chat-header small { color: #94a3b8; }
+    .messages { flex: 1; overflow-y: auto; display: grid; gap: 16px; padding-right: 4px; }
+    .message { display: grid; gap: 10px; padding: 18px; border-radius: 20px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); }
+    .message-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .message-user { display: flex; align-items: center; gap: 12px; }
+    .avatar { width: 42px; height: 42px; border-radius: 14px; display: grid; place-items: center; background: rgba(30,41,59,0.9); font-size: 1.2rem; }
+    .message-user-name { font-weight: 700; color: #fff; }
+    .message-meta { color: #94a3b8; font-size: 0.84rem; }
+    .message-text { line-height: 1.75; color: #dbeafe; }
+    .chat-form { margin-top: 18px; display: grid; gap: 12px; }
+    .chat-input { width: 100%; min-height: 56px; padding: 16px 18px; border-radius: 18px; border: 1px solid rgba(255,255,255,0.1); background: rgba(15,23,42,0.9); color: #e2e8f0; resize: vertical; font-size: 1rem; }
+    .chat-actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; justify-content: space-between; }
+    .send-button { border: none; border-radius: 999px; padding: 14px 22px; background: linear-gradient(135deg, #22c55e, #14b8a6); color: #0f172a; font-weight: 700; cursor: pointer; transition: opacity 200ms ease; }
+    .send-button:hover { opacity: 0.95; }
+    .hint { color: #94a3b8; font-size: 0.92rem; }
+    @media(max-width: 940px) { .grid { grid-template-columns: 1fr; } }
+  </style>
+  <script src="auth.js"></script>
+  <script src="chat.js"></script>
+</head>
+<body>
+  <script>
+    window.globalAuth.requireAuth();
+  </script>
+  <div class="page">
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="logo">🌍</div>
+        <div>
+          <h1>Community Chat</h1>
+          <p>Talk with every CyberBull user in a shared, themed room. New messages appear automatically while you stay connected.</p>
+        </div>
+      </div>
+      <div class="nav-links">
+        <button class="nav-button" onclick="window.location.href='cyberbull-hub.html'">← Home</button>
+        <button class="nav-button" onclick="window.location.href='cyberbull-direct-chat.html'">Private Chat →</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <section class="status-panel">
+        <div class="stat-card">
+          <div class="stat-label">Active users</div>
+          <div class="stat-value" id="onlineCount">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Recent messages</div>
+          <div class="stat-value" id="messageCount">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Signed in as</div>
+          <div class="stat-value" id="userLabel">Guest</div>
+        </div>
+      </section>
+
+      <section class="chat-panel">
+        <div class="chat-header">
+          <div>
+            <h2>Shared room</h2>
+            <small>Every signed-in player can read and send messages here.</small>
+          </div>
+          <div class="hint">Tip: Use friendly chat for mission updates and game invites.</div>
+        </div>
+
+        <div class="messages" id="messageList"></div>
+
+        <form id="chatForm" class="chat-form">
+          <label for="messageInput" class="hint">Write your message to the community</label>
+          <textarea id="messageInput" class="chat-input" rows="4" placeholder="Type something positive..." maxlength="500"></textarea>
+          <div class="chat-actions">
+            <span class="hint">Messages refresh automatically.</span>
+            <button type="submit" class="send-button">Send Message</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const currentUserKey = localStorage.getItem('currentUserKey');
+    const currentUser = window.globalAuth.getUserData(currentUserKey) || { username: 'Player', avatar: '👤', schoolDomain: 'cyberbull' };
+    const userLabel = document.getElementById('userLabel');
+    const onlineCount = document.getElementById('onlineCount');
+    const messageCount = document.getElementById('messageCount');
+    const messageList = document.getElementById('messageList');
+    const messageInput = document.getElementById('messageInput');
+    const chatForm = document.getElementById('chatForm');
+
+    function getDisplayAvatar() {
+      if (currentUser.avatar) return currentUser.avatar;
+      return currentUser.username ? currentUser.username.charAt(0).toUpperCase() : '👾';
+    }
+
+    function formatTime(timestamp) {
+      const date = new Date(timestamp);
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function updateStatus() {
+      const onlineUsers = chatAPI.getOnlineUsers ? Object.values(chatAPI.getOnlineUsers()) : [];
+      onlineCount.textContent = String(onlineUsers.length || 0);
+      messageCount.textContent = String(chatAPI.getGlobalMessages().length);
+      userLabel.textContent = `${currentUser.username || 'Player'} @ ${currentUser.schoolDomain || 'cyberbull'}`;
+    }
+
+    function renderMessages() {
+      const messages = chatAPI.getGlobalMessages().slice(-120);
+      messageList.innerHTML = messages.map(msg => {
+        const avatar = msg.avatar || msg.username?.charAt(0).toUpperCase() || '👾';
+        const author = msg.username || 'Unknown';
+        const when = formatTime(msg.timestamp || Date.now());
+        return `
+          <article class="message">
+            <div class="message-header">
+              <div class="message-user">
+                <span class="avatar">${avatar}</span>
+                <div>
+                  <div class="message-user-name">${author}</div>
+                  <div class="message-meta">${when}</div>
+                </div>
+              </div>
+              <div class="message-meta">${msg.chatType === 'global' ? 'Community' : msg.chatType}</div>
+            </div>
+            <p class="message-text">${String(msg.message).replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>
+          </article>
+        `;
+      }).join('');
+      updateStatus();
+      messageList.scrollTop = messageList.scrollHeight;
+    }
+
+    function refreshPresence() {
+      if (chatAPI.setUserOnline) {
+        chatAPI.setUserOnline(currentUserKey, currentUser.username, currentUser.schoolDomain, getDisplayAvatar());
+      }
+    }
+
+    function loadChat() {
+      refreshPresence();
+      renderMessages();
+    }
+
+    chatForm.addEventListener('submit', event => {
+      event.preventDefault();
+      const message = messageInput.value.trim();
+      if (!message) return;
+      chatAPI.sendGlobalMessage(currentUserKey, currentUser.username, message, getDisplayAvatar());
+      messageInput.value = '';
+      renderMessages();
+    });
+
+    window.addEventListener('storage', () => {
+      renderMessages();
+    });
+
+    loadChat();
+    setInterval(loadChat, 4000);
+  </script>
+</body>
+</html>

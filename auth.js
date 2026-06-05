@@ -76,23 +76,40 @@ window.globalAuth = (function() {
       const profile = window.firebaseAPI.getUserProfile(userKey);
       if (profile) return profile;
     }
-    const raw = localStorage.getItem(userKey);
-    if (raw) {
-      try {
-        return JSON.parse(raw);
-      } catch {
-        // ignore malformed local cache
-      }
-    }
     const serverUser = getUserFromServerSync(userKey);
     if (serverUser) {
-      localStorage.setItem(userKey, JSON.stringify(serverUser));
+      try {
+        localStorage.setItem(userKey, JSON.stringify(serverUser));
+      } catch {}
       return serverUser;
     }
     return null;
   }
 
   async function saveUserData(userKey, userObj) {
+    if (!userKey || !userObj) return false;
+    try {
+      if (window.fetch) {
+        const response = await fetch('/api/saveUser', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userKey, userObj })
+        });
+        if (!response.ok) {
+          console.warn('Global saveUser API returned failure', response.status);
+          return false;
+        }
+      }
+      localStorage.setItem(userKey, JSON.stringify(userObj));
+      if (window.firebaseAPI?.isEnabled && window.firebaseAPI.saveUserProfile) {
+        await window.firebaseAPI.saveUserProfile(userKey, userObj);
+      }
+      return true;
+    } catch (error) {
+      console.error('saveUserData failed', error);
+      return false;
+    }
+  }
     if (!userKey || !userObj) return false;
     try {
       localStorage.setItem(userKey, JSON.stringify(userObj));

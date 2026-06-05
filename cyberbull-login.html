@@ -455,5 +455,12 @@
 
 </script>
 
+<script>
+  // Initialize Firebase after scripts load
+  if (window.firebaseAPI && typeof window.firebaseAPI.init === 'function') {
+    window.firebaseAPI.init();
+  }
+</script>
+
 </body>
 </html>

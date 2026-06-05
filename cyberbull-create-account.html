@@ -750,5 +750,11 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="firebase-api.js"></script>
 <script src="auth.js"></script>
+<script>
+  // Initialize Firebase after scripts load
+  if (window.firebaseAPI && typeof window.firebaseAPI.init === 'function') {
+    window.firebaseAPI.init();
+  }
+</script>
 </body>
 </html>

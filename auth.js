@@ -1,22 +1,72 @@
 window.globalAuth = (function() {
+  function clearAuthState() {
+    const keysToRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && (key.startsWith('user_') || key === 'currentUser' || key === 'currentUserKey' || key === 'currentSchool' || key === 'isAdmin' || key === 'clearUserAccountsDone')) {
+        keysToRemove.push(key);
+      }
+    }
+    keysToRemove.forEach((key) => localStorage.removeItem(key));
+  }
+
+  function getUserFromServerSync(userKey) {
+    if (!userKey || typeof XMLHttpRequest !== 'function') return null;
+    try {
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', `/api/getUser/${encodeURIComponent(userKey)}`, false);
+      xhr.timeout = 3000;
+      xhr.send(null);
+      if (xhr.status === 200) {
+        const body = xhr.responseText;
+        if (body) {
+          return JSON.parse(body);
+        }
+      }
+    } catch (error) {
+      console.warn('Sync auth server check failed', error);
+    }
+    return null;
+  }
+
   function requireAuth() {
     const currentUser = localStorage.getItem('currentUser');
     const currentUserKey = localStorage.getItem('currentUserKey');
     if (!currentUser || !currentUserKey) {
+      clearAuthState();
       window.location.href = 'cyberbull-landing.html';
       return false;
     }
+
+    const serverUser = getUserFromServerSync(currentUserKey);
+    if (!serverUser) {
+      clearAuthState();
+      window.location.href = 'cyberbull-landing.html';
+      return false;
+    }
+
+    localStorage.setItem(currentUserKey, JSON.stringify(serverUser));
     return true;
   }
 
   function requireAdminAuth() {
     const currentUser = localStorage.getItem('currentUser');
     const currentUserKey = localStorage.getItem('currentUserKey');
-    const isAdmin = localStorage.getItem('isAdmin') === 'true';
-    if (!currentUser || !currentUserKey || !isAdmin) {
+    if (!currentUser || !currentUserKey) {
+      clearAuthState();
       window.location.href = 'cyberbull-landing.html';
       return false;
     }
+
+    const serverUser = getUserFromServerSync(currentUserKey);
+    if (!serverUser || !serverUser.isAdmin) {
+      clearAuthState();
+      window.location.href = 'cyberbull-landing.html';
+      return false;
+    }
+
+    localStorage.setItem(currentUserKey, JSON.stringify(serverUser));
+    localStorage.setItem('isAdmin', 'true');
     return true;
   }
 
@@ -27,12 +77,19 @@ window.globalAuth = (function() {
       if (profile) return profile;
     }
     const raw = localStorage.getItem(userKey);
-    if (!raw) return null;
-    try {
-      return JSON.parse(raw);
-    } catch {
-      return null;
+    if (raw) {
+      try {
+        return JSON.parse(raw);
+      } catch {
+        // ignore malformed local cache
+      }
     }
+    const serverUser = getUserFromServerSync(userKey);
+    if (serverUser) {
+      localStorage.setItem(userKey, JSON.stringify(serverUser));
+      return serverUser;
+    }
+    return null;
   }
 
   async function saveUserData(userKey, userObj) {
@@ -62,9 +119,14 @@ window.globalAuth = (function() {
 
   function requireGuest() {
     const currentUser = localStorage.getItem('currentUser');
-    if (currentUser) {
-      window.location.href = 'cyberbull-student.html';
-      return false;
+    const currentUserKey = localStorage.getItem('currentUserKey');
+    if (currentUser && currentUserKey) {
+      const serverUser = getUserFromServerSync(currentUserKey);
+      if (serverUser) {
+        window.location.href = 'cyberbull-student.html';
+        return false;
+      }
+      clearAuthState();
     }
     return true;
   }

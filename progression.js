@@ -58,6 +58,13 @@ function getUserByKey(userKey) {
 
 function saveUser(userKey, user) {
   if (!userKey || !user) return;
+  if (window.globalAuth && typeof window.globalAuth.saveUserData === 'function') {
+    window.globalAuth.saveUserData(userKey, user).catch(err => {
+      console.warn('Progression global save failed via globalAuth', err);
+    });
+    return;
+  }
+
   // Prefer fetch (async). If not available, fall back to synchronous XHR for legacy callers.
   if (window.fetch) {
     fetch('/api/saveUser', {

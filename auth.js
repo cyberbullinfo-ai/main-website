@@ -135,6 +135,90 @@ window.globalAuth = (function() {
     }
   }
 
+  async function getFirebaseUserAsync(userKey) {
+    if (!userKey || !window.firebaseAPI?.isEnabled || !window.firebaseAPI.fetchUserProfile) return null;
+    try {
+      return await window.firebaseAPI.fetchUserProfile(userKey);
+    } catch (err) {
+      console.warn('Async Firebase auth check failed', err);
+      return null;
+    }
+  }
+
+  async function getGlobalUserAsync(userKey) {
+    if (!userKey) return null;
+    const serverUser = await getUserFromServerAsync(userKey);
+    if (serverUser) return serverUser;
+    return await getFirebaseUserAsync(userKey);
+  }
+
+  async function checkGlobalPasswordAsync(userKey, password) {
+    if (!userKey || typeof password === 'undefined') return false;
+    if (window.fetch) {
+      try {
+        const verifyResp = await fetch('/api/checkPassword', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userKey, password })
+        });
+        if (verifyResp.ok) return true;
+        if (verifyResp.status === 401) return false;
+      } catch (err) {
+        console.warn('Global password check failed via server', err);
+      }
+    }
+
+    const firebaseUser = await getFirebaseUserAsync(userKey);
+    if (firebaseUser && firebaseUser.password === password) return true;
+    return false;
+  }
+
+  async function saveGlobalUserAsync(userKey, userObj) {
+    if (!userKey || !userObj) return false;
+    let serverSaved = false;
+    let lastServerStatus = null;
+
+    if (window.fetch) {
+      try {
+        const response = await fetch('/api/saveUser', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userKey, userObj })
+        });
+        lastServerStatus = response.status;
+        if (response.ok) {
+          serverSaved = true;
+        }
+      } catch (error) {
+        console.warn('Global saveUser API failed', error);
+      }
+    }
+
+    if (serverSaved) {
+      if (window.firebaseAPI?.isEnabled && window.firebaseAPI.saveUserProfile) {
+        window.firebaseAPI.saveUserProfile(userKey, userObj).catch(err => {
+          console.warn('Firebase saveUserProfile fallback failed after server save', err);
+        });
+      }
+      return true;
+    }
+
+    if (window.firebaseAPI?.isEnabled && window.firebaseAPI.saveUserProfile) {
+      try {
+        await window.firebaseAPI.saveUserProfile(userKey, userObj);
+        return true;
+      } catch (err) {
+        console.warn('Firebase saveUserProfile fallback failed', err);
+      }
+    }
+
+    if (lastServerStatus === 404 || lastServerStatus === 405 || lastServerStatus === 0) {
+      return false;
+    }
+
+    return false;
+  }
+
   function requireAuth() {
     const currentUser = localStorage.getItem('currentUser');
     const currentUserKey = localStorage.getItem('currentUserKey');
@@ -146,6 +230,17 @@ window.globalAuth = (function() {
 
     const serverUser = getUserFromServerSync(currentUserKey);
     if (!serverUser) {
+      if (window.firebaseAPI?.isEnabled) {
+        const firebaseProfile = window.firebaseAPI.getUserProfile(currentUserKey);
+        if (firebaseProfile) {
+          localStorage.setItem(currentUserKey, JSON.stringify(firebaseProfile));
+          return true;
+        }
+      }
+      const cachedLocal = localStorage.getItem(currentUserKey);
+      if (cachedLocal) {
+        return true;
+      }
       clearAuthState();
       window.location.href = 'cyberbull-landing.html';
       return false;
@@ -165,15 +260,35 @@ window.globalAuth = (function() {
     }
 
     const serverUser = getUserFromServerSync(currentUserKey);
-    if (!serverUser || !serverUser.isAdmin) {
-      clearAuthState();
-      window.location.href = 'cyberbull-landing.html';
-      return false;
+    if (serverUser && serverUser.isAdmin) {
+      localStorage.setItem(currentUserKey, JSON.stringify(serverUser));
+      localStorage.setItem('isAdmin', 'true');
+      return true;
     }
 
-    localStorage.setItem(currentUserKey, JSON.stringify(serverUser));
-    localStorage.setItem('isAdmin', 'true');
-    return true;
+    if (window.firebaseAPI?.isEnabled) {
+      const firebaseProfile = window.firebaseAPI.getUserProfile(currentUserKey);
+      if (firebaseProfile && firebaseProfile.isAdmin) {
+        localStorage.setItem(currentUserKey, JSON.stringify(firebaseProfile));
+        localStorage.setItem('isAdmin', 'true');
+        return true;
+      }
+    }
+
+    const cachedLocal = localStorage.getItem(currentUserKey);
+    if (cachedLocal) {
+      try {
+        const parsed = JSON.parse(cachedLocal);
+        if (parsed && parsed.isAdmin) {
+          localStorage.setItem('isAdmin', 'true');
+          return true;
+        }
+      } catch (e) { /* ignore */ }
+    }
+
+    clearAuthState();
+    window.location.href = 'cyberbull-landing.html';
+    return false;
   }
 
   function getUserData(userKey) {
@@ -186,41 +301,19 @@ window.globalAuth = (function() {
     if (serverUser) {
       return serverUser;
     }
+    const cachedLocal = localStorage.getItem(userKey);
+    if (cachedLocal) {
+      try {
+        return JSON.parse(cachedLocal);
+      } catch (e) {
+        return null;
+      }
+    }
     return null;
   }
 
   async function saveUserData(userKey, userObj) {
-    if (!userKey || !userObj) return false;
-    try {
-      if (window.fetch) {
-        const response = await fetch('/api/saveUser', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userKey, userObj })
-        });
-        if (!response.ok) {
-          console.warn('Global saveUser API returned failure', response.status);
-          // try Firebase fallback when server returns 405 or 5xx
-          if ((response.status === 405 || response.status >= 500) && window.firebaseAPI?.isEnabled && window.firebaseAPI.saveUserProfile) {
-            try {
-              await window.firebaseAPI.saveUserProfile(userKey, userObj);
-              return true;
-            } catch (ferr) {
-              console.error('Firebase fallback save failed', ferr);
-              return false;
-            }
-          }
-          return false;
-        }
-      }
-      if (window.firebaseAPI?.isEnabled && window.firebaseAPI.saveUserProfile) {
-        await window.firebaseAPI.saveUserProfile(userKey, userObj);
-      }
-      return true;
-    } catch (error) {
-      console.error('saveUserData failed', error);
-      return false;
-    }
+    return await saveGlobalUserAsync(userKey, userObj);
   }
 
   function requireGuest() {
@@ -242,6 +335,9 @@ window.globalAuth = (function() {
     requireAdminAuth,
     requireGuest,
     getUserData,
-    saveUserData
+    saveUserData,
+    getGlobalUserAsync,
+    checkGlobalPasswordAsync,
+    saveGlobalUserAsync
   };
 })();

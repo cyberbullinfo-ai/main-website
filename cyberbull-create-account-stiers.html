@@ -250,18 +250,8 @@
     }
 
     async function refreshStiersStatus() {
-      try {
-        const existsResponse = await fetch(`/api/getUser/${encodeURIComponent(userKey)}`);
-        if (existsResponse.ok) {
-          stiersAccountExists = true;
-        } else if (existsResponse.status === 404) {
-          stiersAccountExists = false;
-        } else {
-          updateStatus('Unable to verify global account server. Try again later.', 'error');
-        }
-      } catch (err) {
-        updateStatus('Unable to connect to the global account server. Try again later.', 'error');
-      }
+      const existingUser = await window.globalAuth.getGlobalUserAsync(userKey);
+      stiersAccountExists = !!existingUser;
       updateUI();
     }
 
@@ -306,67 +296,37 @@
       }
 
       if (stiersAccountExists) {
-        try {
-          const loginResponse = await fetch(`/api/getUser/${encodeURIComponent(userKey)}`);
-          if (loginResponse.status === 404) {
-            updateStatus('STIERS-account bestaat niet. Laad de pagina opnieuw en maak het account aan.', 'error');
-            return;
-          }
-          if (!loginResponse.ok) {
-            updateStatus('Unable to verify global account server. Try again later.', 'error');
-            return;
-          }
-
-          const serverUser = await loginResponse.json();
-          // Verify password without exposing it
-          try {
-            const verify = await fetch('/api/checkPassword', {
-              method: 'POST', headers: {'Content-Type':'application/json'},
-              body: JSON.stringify({ userKey: userKey, password })
-            });
-            if (!verify.ok) {
-              updateStatus('Ongeldig wachtwoord voor STIERS.', 'error');
-              return;
-            }
-          } catch (err) {
-            console.error('Password verification failed', err);
-            updateStatus('Unable to verify password with global server.', 'error');
-            return;
-          }
-
-          localStorage.setItem('currentUser', username);
-          localStorage.setItem('currentUserKey', userKey);
-          localStorage.setItem('currentSchool', domain);
-          localStorage.removeItem('isAdmin');
-
-          if (window.firebaseAPI?.isEnabled && window.firebaseAPI.saveUserProfile) {
-            window.firebaseAPI.saveUserProfile(userKey, serverUser).catch(err => console.error('Failed to save profile to Firebase', err));
-          }
-
-          updateStatus('Ingelogd als STIERS. Je wordt doorgestuurd...', 'success');
-          setTimeout(() => window.location.href = 'cyberbull-hub.html', 1200);
-          return;
-        } catch (err) {
-          console.error('STIERS login failed', err);
-          updateStatus('Unable to connect to the global account server. Try again later.', 'error');
+        const loginUser = await window.globalAuth.getGlobalUserAsync(userKey);
+        if (!loginUser) {
+          updateStatus('STIERS-account bestaat niet. Laad de pagina opnieuw en maak het account aan.', 'error');
           return;
         }
+
+        const passwordOk = await window.globalAuth.checkGlobalPasswordAsync(userKey, password);
+        if (!passwordOk) {
+          updateStatus('Ongeldig wachtwoord voor STIERS.', 'error');
+          return;
+        }
+
+        localStorage.setItem('currentUser', username);
+        localStorage.setItem('currentUserKey', userKey);
+        localStorage.setItem('currentSchool', domain);
+        localStorage.removeItem('isAdmin');
+
+        if (window.firebaseAPI?.isEnabled && window.firebaseAPI.saveUserProfile) {
+          window.firebaseAPI.saveUserProfile(userKey, loginUser).catch(err => console.error('Failed to save profile to Firebase', err));
+        }
+
+        updateStatus('Ingelogd als STIERS. Je wordt doorgestuurd...', 'success');
+        setTimeout(() => window.location.href = 'cyberbull-hub.html', 1200);
+        return;
       }
 
-      try {
-        const existsResponse = await fetch(`/api/getUser/${encodeURIComponent(userKey)}`);
-        if (existsResponse.ok) {
-          stiersAccountExists = true;
-          updateUI();
-          updateStatus('Het STIERS-account bestaat al. Log in met STIERS.', 'info');
-          return;
-        }
-        if (existsResponse.status !== 404) {
-          updateStatus('Unable to verify global account server. Try again later.', 'error');
-          return;
-        }
-      } catch (err) {
-        updateStatus('Unable to connect to the global account server. Try again later.', 'error');
+      const existsUser = await window.globalAuth.getGlobalUserAsync(userKey);
+      if (existsUser) {
+        stiersAccountExists = true;
+        updateUI();
+        updateStatus('Het STIERS-account bestaat al. Log in met STIERS.', 'info');
         return;
       }
 
@@ -386,39 +346,9 @@
         isAdmin: false
       };
 
-      try {
-        const saveResponse = await fetch('/api/saveUser', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userKey, userObj })
-        });
-
-        if (!saveResponse.ok) {
-          let payload = null;
-          try { payload = await saveResponse.json(); } catch(e) { /* ignore */ }
-          const message = payload?.error || payload?.detail || (`Unable to save STIERS account globally (code ${saveResponse.status}).`);
-          if ((saveResponse.status === 405 || saveResponse.status >= 500) && window.firebaseAPI?.isEnabled && window.firebaseAPI.saveUserProfile) {
-            try {
-              await window.firebaseAPI.saveUserProfile(userKey, userObj);
-              localStorage.setItem('currentUser', username);
-              localStorage.setItem('currentUserKey', userKey);
-              localStorage.setItem('currentSchool', domain);
-              localStorage.removeItem('isAdmin');
-              updateStatus('STIERS-account aangemaakt (saved to Firebase). Je wordt doorgestuurd...', 'success');
-              setTimeout(() => window.location.href = 'cyberbull-hub.html', 1200);
-              return;
-            } catch (ferr) {
-              console.error('Firebase fallback save failed', ferr);
-              updateStatus(message + ' Please try again later.', 'error');
-              return;
-            }
-          }
-          updateStatus(message + ' Please try again later.', 'error');
-          return;
-        }
-      } catch (err) {
-        console.error('STIERS global save failed', err);
-        updateStatus('Unable to connect to the global account server. Try again later.', 'error');
+      const saved = await window.globalAuth.saveGlobalUserAsync(userKey, userObj);
+      if (!saved) {
+        updateStatus('Unable to save STIERS account globally. Please try again later.', 'error');
         return;
       }
 

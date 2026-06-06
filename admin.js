@@ -157,19 +157,14 @@ async function adminLogin(domain, username, password){
     if (user.password === password) verified = true;
   }
   // Otherwise try verifying with the global server without exposing passwords
-  if (!verified && window.fetch) {
+  if (!verified) {
     try {
-      const verifyResp = await fetch('/api/checkPassword', {
-        method: 'POST', headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ userKey: key, password })
-      });
-      if (verifyResp.ok) {
-        verified = true;
-        // fetch non-sensitive user profile data
-        try {
-          const response = await fetch(`/api/getUser/${encodeURIComponent(key)}`);
-          if (response.ok) user = await response.json();
-        } catch (err) { /* ignore profile fetch errors */ }
+      verified = await window.globalAuth.checkGlobalPasswordAsync(key, password);
+      if (verified) {
+        const fetchedUser = await window.globalAuth.getGlobalUserAsync(key);
+        if (fetchedUser) {
+          user = fetchedUser;
+        }
       }
     } catch (err) {
       console.warn('Admin login fetch failed', err);

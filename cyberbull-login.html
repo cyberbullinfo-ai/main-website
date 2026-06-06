@@ -329,45 +329,15 @@
     let userData = null;
     let globalFetchFailed = false;
 
-    // Try to fetch from global server first
-    try {
-      const globalResponse = await fetch(`/api/getUser/${encodeURIComponent(userKey)}`);
-      if (globalResponse.ok) {
-        userData = await globalResponse.json();
-      } else if (globalResponse.status === 404) {
-        error.textContent = page.accountMissing;
-        return;
-      } else {
-        globalFetchFailed = true;
-        console.warn('Global user fetch returned status', globalResponse.status);
-      }
-    } catch (err) {
-      globalFetchFailed = true;
-      console.log('Global user fetch failed (server may be offline):', err);
-    }
-
+    const userData = await window.globalAuth.getGlobalUserAsync(userKey);
     if (!userData) {
-      if (globalFetchFailed) {
-        error.textContent = 'Unable to verify your account with the global server. No local-only accounts are allowed.';
-        return;
-      }
       error.textContent = page.accountMissing;
       return;
     }
 
-    // Verify password via server endpoint (do not expose plaintext password)
-    try {
-      const verifyResp = await fetch('/api/checkPassword', {
-        method: 'POST', headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ userKey, password })
-      });
-      if (!verifyResp.ok) {
-        error.textContent = page.wrongPassword;
-        return;
-      }
-    } catch (err) {
-      console.error('Password verification failed', err);
-      error.textContent = 'Unable to verify your credentials with the server.';
+    const passwordOk = await window.globalAuth.checkGlobalPasswordAsync(userKey, password);
+    if (!passwordOk) {
+      error.textContent = page.wrongPassword;
       return;
     }
 

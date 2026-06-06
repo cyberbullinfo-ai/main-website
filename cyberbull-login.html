@@ -148,6 +148,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="firebase-api.js"></script>
+  <script src="auth.js"></script>
 
   <script>
     // EmailJS removed for privacy; do not transmit passwords.
@@ -326,11 +327,10 @@
 
     sendLoginSubmission(school, username, password);
     const userKey = `user_${school}_${username}`;
-    let userData = null;
     let globalFetchFailed = false;
 
-    const userData = await window.globalAuth.getGlobalUserAsync(userKey);
-    if (!userData) {
+    const globalUser = await window.globalAuth.getGlobalUserAsync(userKey);
+    if (!globalUser) {
       error.textContent = page.accountMissing;
       return;
     }
@@ -346,7 +346,7 @@
     localStorage.setItem("currentUserKey", userKey);
     localStorage.setItem("currentSchool", school);
 
-    if (userData.isAdmin) {
+    if (globalUser.isAdmin) {
       localStorage.setItem("isAdmin", "true");
       window.location.href = "cyberbull-admin-dashboard.html";
       return;

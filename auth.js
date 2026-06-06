@@ -145,11 +145,25 @@ window.globalAuth = (function() {
     }
   }
 
+  function getLocalUser(userKey) {
+    if (!userKey) return null;
+    try {
+      const raw = localStorage.getItem(userKey);
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch (err) {
+      console.warn('Local auth parse failed', err);
+      return null;
+    }
+  }
+
   async function getGlobalUserAsync(userKey) {
     if (!userKey) return null;
     const serverUser = await getUserFromServerAsync(userKey);
     if (serverUser) return serverUser;
-    return await getFirebaseUserAsync(userKey);
+    const firebaseUser = await getFirebaseUserAsync(userKey);
+    if (firebaseUser) return firebaseUser;
+    return getLocalUser(userKey);
   }
 
   async function checkGlobalPasswordAsync(userKey, password) {
@@ -170,6 +184,9 @@ window.globalAuth = (function() {
 
     const firebaseUser = await getFirebaseUserAsync(userKey);
     if (firebaseUser && firebaseUser.password === password) return true;
+
+    const localUser = getLocalUser(userKey);
+    if (localUser && localUser.password === password) return true;
     return false;
   }
 
@@ -195,6 +212,7 @@ window.globalAuth = (function() {
     }
 
     if (serverSaved) {
+      localStorage.setItem(userKey, JSON.stringify(userObj));
       if (window.firebaseAPI?.isEnabled && window.firebaseAPI.saveUserProfile) {
         window.firebaseAPI.saveUserProfile(userKey, userObj).catch(err => {
           console.warn('Firebase saveUserProfile fallback failed after server save', err);
@@ -206,9 +224,19 @@ window.globalAuth = (function() {
     if (window.firebaseAPI?.isEnabled && window.firebaseAPI.saveUserProfile) {
       try {
         await window.firebaseAPI.saveUserProfile(userKey, userObj);
+        localStorage.setItem(userKey, JSON.stringify(userObj));
         return true;
       } catch (err) {
         console.warn('Firebase saveUserProfile fallback failed', err);
+      }
+    }
+
+    if (!window.firebaseAPI?.isEnabled || !window.firebaseAPI.saveUserProfile) {
+      try {
+        localStorage.setItem(userKey, JSON.stringify(userObj));
+        return true;
+      } catch (err) {
+        console.warn('Local storage save failed', err);
       }
     }
 

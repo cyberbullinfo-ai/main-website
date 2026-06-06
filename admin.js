@@ -170,8 +170,14 @@ async function adminLogin(domain, username, password){
       console.warn('Admin login fetch failed', err);
     }
   }
-  if (!verified) return {success:false,message:'Invalid credentials'};
-  if(!user) return {success:false,message:'User not found'};
+  if (!verified) {
+    const authError = window.globalAuth?.getLastAuthError?.();
+    return {success:false,message: authError ? 'Backend unavailable. Please check the server/API.' : 'Invalid credentials'};
+  }
+  if(!user) {
+    const authError = window.globalAuth?.getLastAuthError?.();
+    return {success:false,message: authError ? 'Backend unavailable. Please check the server/API.' : 'User not found'};
+  }
   if(!user.isAdmin) return {success:false,message:'User is not an admin'};
   localStorage.setItem('currentUser', username);
   localStorage.setItem('currentUserKey', key);

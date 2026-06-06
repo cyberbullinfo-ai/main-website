@@ -349,7 +349,12 @@
 
       const saved = await window.globalAuth.saveGlobalUserAsync(userKey, userObj);
       if (!saved) {
-        updateStatus('Unable to save STIERS account globally. Please try again later.', 'error');
+        const authError = window.globalAuth.getLastAuthError?.();
+        if (authError) {
+          updateStatus('Backend niet bereikbaar. Controleer de server/API.', 'error');
+        } else {
+          updateStatus('Unable to save STIERS account globally. Please try again later.', 'error');
+        }
         return;
       }
 

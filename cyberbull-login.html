@@ -212,6 +212,7 @@
       wrongPassword: 'Fout wachtwoord. Probeer opnieuw.',
       accountConflict: 'Dit account bestaat al op ${school}. Gebruik alstublieft een ander wachtwoord.',
       accountMissing: 'Account niet gevonden. Maak eerst een account aan.',
+      backendUnavailable: 'Backend niet bereikbaar. Controleer server/API.',
       connected: 'Verbonden met ',
       noSchoolName: 'Selecteer eerst een schooldomein.',
       invalidDomain: 'niet geldige smartschool domein',
@@ -232,6 +233,7 @@
       wrongPassword: 'Wrong password. Try again.',
       accountConflict: 'This account already exists on ${school}. Please use a different password.',
       accountMissing: 'Account not found. Please create an account first.',
+      backendUnavailable: 'Backend unavailable. Check the server/API.',
       connected: 'Connected with ',
       noSchoolName: 'Please select a school domain first.',
       invalidDomain: 'Invalid Smartschool domain.',
@@ -331,7 +333,12 @@
 
     const globalUser = await window.globalAuth.getGlobalUserAsync(userKey);
     if (!globalUser) {
-      error.textContent = page.accountMissing;
+      const authError = window.globalAuth.getLastAuthError?.();
+      if (authError) {
+        error.textContent = page.backendUnavailable;
+      } else {
+        error.textContent = page.accountMissing;
+      }
       return;
     }
 

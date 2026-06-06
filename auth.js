@@ -92,6 +92,12 @@ window.showPrompt = function(message, defaultValue = '') {
 };
 
 window.globalAuth = (function() {
+  let lastGlobalAuthError = null;
+
+  function setLastGlobalAuthError(err) {
+    lastGlobalAuthError = err ? String(err) : null;
+  }
+
   function clearAuthState() {
     const keysToRemove = [];
     for (let i = 0; i < localStorage.length; i++) {
@@ -128,9 +134,11 @@ window.globalAuth = (function() {
     try {
       const resp = await fetch(`/api/getUser/${encodeURIComponent(userKey)}`);
       if (!resp.ok) return null;
+      setLastGlobalAuthError(null);
       return await resp.json();
     } catch (err) {
       console.warn('Async auth server check failed', err);
+      setLastGlobalAuthError('Backend unavailable');
       return null;
     }
   }
@@ -138,21 +146,12 @@ window.globalAuth = (function() {
   async function getFirebaseUserAsync(userKey) {
     if (!userKey || !window.firebaseAPI?.isEnabled || !window.firebaseAPI.fetchUserProfile) return null;
     try {
-      return await window.firebaseAPI.fetchUserProfile(userKey);
+      const profile = await window.firebaseAPI.fetchUserProfile(userKey);
+      if (profile) setLastGlobalAuthError(null);
+      return profile;
     } catch (err) {
       console.warn('Async Firebase auth check failed', err);
-      return null;
-    }
-  }
-
-  function getLocalUser(userKey) {
-    if (!userKey) return null;
-    try {
-      const raw = localStorage.getItem(userKey);
-      if (!raw) return null;
-      return JSON.parse(raw);
-    } catch (err) {
-      console.warn('Local auth parse failed', err);
+      setLastGlobalAuthError('Firebase unavailable');
       return null;
     }
   }
@@ -161,9 +160,7 @@ window.globalAuth = (function() {
     if (!userKey) return null;
     const serverUser = await getUserFromServerAsync(userKey);
     if (serverUser) return serverUser;
-    const firebaseUser = await getFirebaseUserAsync(userKey);
-    if (firebaseUser) return firebaseUser;
-    return getLocalUser(userKey);
+    return await getFirebaseUserAsync(userKey);
   }
 
   async function checkGlobalPasswordAsync(userKey, password) {
@@ -175,18 +172,22 @@ window.globalAuth = (function() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userKey, password })
         });
-        if (verifyResp.ok) return true;
+        if (verifyResp.ok) {
+          setLastGlobalAuthError(null);
+          return true;
+        }
         if (verifyResp.status === 401) return false;
+        if (verifyResp.status === 404) return false;
       } catch (err) {
         console.warn('Global password check failed via server', err);
+        setLastGlobalAuthError('Backend unavailable');
       }
     }
 
     const firebaseUser = await getFirebaseUserAsync(userKey);
-    if (firebaseUser && firebaseUser.password === password) return true;
-
-    const localUser = getLocalUser(userKey);
-    if (localUser && localUser.password === password) return true;
+    if (firebaseUser) {
+      return firebaseUser.password === password;
+    }
     return false;
   }
 
@@ -205,14 +206,15 @@ window.globalAuth = (function() {
         lastServerStatus = response.status;
         if (response.ok) {
           serverSaved = true;
+          setLastGlobalAuthError(null);
         }
       } catch (error) {
         console.warn('Global saveUser API failed', error);
+        setLastGlobalAuthError('Backend unavailable');
       }
     }
 
     if (serverSaved) {
-      localStorage.setItem(userKey, JSON.stringify(userObj));
       if (window.firebaseAPI?.isEnabled && window.firebaseAPI.saveUserProfile) {
         window.firebaseAPI.saveUserProfile(userKey, userObj).catch(err => {
           console.warn('Firebase saveUserProfile fallback failed after server save', err);
@@ -224,24 +226,12 @@ window.globalAuth = (function() {
     if (window.firebaseAPI?.isEnabled && window.firebaseAPI.saveUserProfile) {
       try {
         await window.firebaseAPI.saveUserProfile(userKey, userObj);
-        localStorage.setItem(userKey, JSON.stringify(userObj));
+        setLastGlobalAuthError(null);
         return true;
       } catch (err) {
         console.warn('Firebase saveUserProfile fallback failed', err);
+        setLastGlobalAuthError('Firebase unavailable');
       }
-    }
-
-    if (!window.firebaseAPI?.isEnabled || !window.firebaseAPI.saveUserProfile) {
-      try {
-        localStorage.setItem(userKey, JSON.stringify(userObj));
-        return true;
-      } catch (err) {
-        console.warn('Local storage save failed', err);
-      }
-    }
-
-    if (lastServerStatus === 404 || lastServerStatus === 405 || lastServerStatus === 0) {
-      return false;
     }
 
     return false;
@@ -261,13 +251,8 @@ window.globalAuth = (function() {
       if (window.firebaseAPI?.isEnabled) {
         const firebaseProfile = window.firebaseAPI.getUserProfile(currentUserKey);
         if (firebaseProfile) {
-          localStorage.setItem(currentUserKey, JSON.stringify(firebaseProfile));
           return true;
         }
-      }
-      const cachedLocal = localStorage.getItem(currentUserKey);
-      if (cachedLocal) {
-        return true;
       }
       clearAuthState();
       window.location.href = 'cyberbull-landing.html';
@@ -297,21 +282,9 @@ window.globalAuth = (function() {
     if (window.firebaseAPI?.isEnabled) {
       const firebaseProfile = window.firebaseAPI.getUserProfile(currentUserKey);
       if (firebaseProfile && firebaseProfile.isAdmin) {
-        localStorage.setItem(currentUserKey, JSON.stringify(firebaseProfile));
         localStorage.setItem('isAdmin', 'true');
         return true;
       }
-    }
-
-    const cachedLocal = localStorage.getItem(currentUserKey);
-    if (cachedLocal) {
-      try {
-        const parsed = JSON.parse(cachedLocal);
-        if (parsed && parsed.isAdmin) {
-          localStorage.setItem('isAdmin', 'true');
-          return true;
-        }
-      } catch (e) { /* ignore */ }
     }
 
     clearAuthState();
@@ -328,14 +301,6 @@ window.globalAuth = (function() {
     const serverUser = getUserFromServerSync(userKey);
     if (serverUser) {
       return serverUser;
-    }
-    const cachedLocal = localStorage.getItem(userKey);
-    if (cachedLocal) {
-      try {
-        return JSON.parse(cachedLocal);
-      } catch (e) {
-        return null;
-      }
     }
     return null;
   }
@@ -356,6 +321,10 @@ window.globalAuth = (function() {
       clearAuthState();
     }
     return true;
+  }
+
+  function getLastAuthError() {
+    return lastGlobalAuthError;
   }
 
   return {

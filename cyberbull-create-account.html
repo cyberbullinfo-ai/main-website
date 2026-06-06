@@ -683,7 +683,8 @@
 
       const saved = await window.globalAuth.saveGlobalUserAsync(userKey, userObj);
       if (!saved) {
-        error.textContent = 'Unable to save account globally. Please try again later.';
+        const authError = window.globalAuth.getLastAuthError?.();
+        error.textContent = authError ? 'Backend niet bereikbaar. Controleer de server/API.' : 'Unable to save account globally. Please try again later.';
         return;
       }
 

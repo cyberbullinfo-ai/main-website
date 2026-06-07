@@ -244,13 +244,21 @@ window.globalAuth = (function() {
       window.location.href = 'cyberbull-landing.html';
       return false;
     }
+    // Prefer Firebase when enabled (avoid unnecessary sync XHR on static hosts)
+    if (window.firebaseAPI?.isEnabled) {
+      try {
+        const profile = window.firebaseAPI.getUserProfile(currentUserKey);
+        if (profile) {
+          localStorage.setItem(currentUserKey, JSON.stringify(profile));
+          return true;
+        }
+      } catch (e) {
+        console.warn('Firebase profile check failed', e);
+      }
+    }
 
     const serverUser = getUserFromServerSync(currentUserKey);
     if (!serverUser) {
-      if (window.firebaseAPI?.isEnabled) {
-        // If Firebase is enabled, trust the existing authenticated session state.
-        return true;
-      }
       clearAuthState();
       window.location.href = 'cyberbull-landing.html';
       return false;

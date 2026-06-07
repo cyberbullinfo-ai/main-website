@@ -74,9 +74,10 @@ http://localhost:3000/
 
 ## Notes for deployment
 
-- This repo is not just a static GitHub Pages site anymore: to use backend global accounts, you must run the Node server or deploy it to a Node host.
-- `db.json` stores your persistent users and chat state. Keep it with the server deployment.
-- If you want a public deployment, host `pong-server.js` on any Node-compatible provider and use the same repo files.
+- This repo can run with a Node.js backend (`pong-server.js`) for local or hosted global account persistence.
+- If you want a static-only deployment, Firebase can also provide global account storage and make the site work without the Node backend.
+- `db.json` stores persistent users and chat state for the Node backend option.
+- If you want a public deployment, host `pong-server.js` on any Node-compatible provider and use the same repo files, or publish the static files with Firebase configured for accounts.
 
 ## How to use
 

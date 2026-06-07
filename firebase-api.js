@@ -27,28 +27,55 @@ window.firebaseAPI = {
   subscribedConversations: new Set(),
 
   init() {
+    const self = this;
+
+    function continueInit() {
+      if (!window.FIREBASE_CONFIG || !window.FIREBASE_CONFIG.projectId) {
+        console.warn('Firebase config not configured. Fill firebase-api.js with your project settings.');
+        return;
+      }
+
+      if (!firebase.apps.length) {
+        firebase.initializeApp(window.FIREBASE_CONFIG);
+      }
+
+      self.db = firebase.firestore();
+      self.auth = firebase.auth ? firebase.auth() : null;
+      self.rtdb = firebase.database ? firebase.database() : null;
+      self.isEnabled = true;
+
+      self.subscribeGlobalMessages();
+      self.subscribePresence();
+      self.subscribeUsers();
+    }
+
     if (typeof firebase === 'undefined') {
-      console.warn('Firebase SDK not loaded');
+      // Try to load the compat CDN builds automatically so pages don't need to include them manually.
+      const cdnBase = 'https://www.gstatic.com/firebasejs/9.22.2/';
+      const scripts = [
+        cdnBase + 'firebase-app-compat.js',
+        cdnBase + 'firebase-auth-compat.js',
+        cdnBase + 'firebase-firestore-compat.js',
+        cdnBase + 'firebase-database-compat.js'
+      ];
+      let loaded = 0;
+      scripts.forEach(src => {
+        const s = document.createElement('script');
+        s.src = src;
+        s.async = false;
+        s.onload = () => {
+          loaded++;
+          if (loaded === scripts.length) continueInit();
+        };
+        s.onerror = () => {
+          console.warn('Failed to load Firebase SDK script', src);
+        };
+        document.head.appendChild(s);
+      });
       return;
     }
 
-    if (!window.FIREBASE_CONFIG || !window.FIREBASE_CONFIG.projectId) {
-      console.warn('Firebase config not configured. Fill firebase-api.js with your project settings.');
-      return;
-    }
-
-    if (!firebase.apps.length) {
-      firebase.initializeApp(window.FIREBASE_CONFIG);
-    }
-
-    this.db = firebase.firestore();
-    this.auth = firebase.auth ? firebase.auth() : null;
-    this.rtdb = firebase.database ? firebase.database() : null;
-    this.isEnabled = true;
-
-    this.subscribeGlobalMessages();
-    this.subscribePresence();
-    this.subscribeUsers();
+    continueInit();
   },
 
   getConversationId(userKey1, userKey2) {

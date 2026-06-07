@@ -59,6 +59,24 @@ function saveUser(key, userObj){
       renderStatsOverview?.();
     }).catch(err => {
       console.warn('Global save attempt failed', err);
+      if (window.firebaseAPI?.isEnabled && window.firebaseAPI.saveUserProfile) {
+        window.firebaseAPI.saveUserProfile(key, userObj)
+          .then(() => {
+            if (Array.isArray(window.serverUsers)) {
+              const existing = window.serverUsers.findIndex(u => u.key === key || u.userKey === key);
+              if (existing >= 0) {
+                window.serverUsers[existing] = { key, ...userObj };
+              } else {
+                window.serverUsers.push({ key, ...userObj });
+              }
+            } else {
+              window.serverUsers = [{ key, ...userObj }];
+            }
+            renderAccountManager?.();
+            renderStatsOverview?.();
+          })
+          .catch(ferr => console.warn('Firebase fallback save failed', ferr));
+      }
     });
   }
 }
@@ -69,9 +87,9 @@ async function loadServerUsers(){
   if (!window.fetch) return;
   try {
     const res = await fetch('/api/users');
-    if (!res.ok) return;
+    if (!res.ok) throw new Error('Server users endpoint returned ' + res.status);
     const keys = await res.json();
-    if (!Array.isArray(keys)) return;
+    if (!Array.isArray(keys)) throw new Error('Server users list invalid');
     const serverUsers = [];
     for (const key of keys) {
       if (!key || typeof key !== 'string') continue;
@@ -90,7 +108,15 @@ async function loadServerUsers(){
     renderAccountManager();
     renderStatsOverview();
   } catch (error) {
-    console.warn('Failed to load server users', error);
+    console.warn('Failed to load server users, falling back to Firebase cache', error);
+    if (window.firebaseAPI?.isEnabled && Array.isArray(window.firebaseAPI.usersCache)) {
+      window.serverUsers = window.firebaseAPI.usersCache.map(raw => {
+        const key = raw.key || raw.userKey;
+        return key ? { key, ...raw } : null;
+      }).filter(Boolean);
+      renderAccountManager();
+      renderStatsOverview();
+    }
   }
 }
 

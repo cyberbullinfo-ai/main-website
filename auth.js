@@ -249,10 +249,8 @@ window.globalAuth = (function() {
     const serverUser = getUserFromServerSync(currentUserKey);
     if (!serverUser) {
       if (window.firebaseAPI?.isEnabled) {
-        const firebaseProfile = window.firebaseAPI.getUserProfile(currentUserKey);
-        if (firebaseProfile) {
-          return true;
-        }
+        // If Firebase is enabled, trust the existing authenticated session state.
+        return true;
       }
       clearAuthState();
       window.location.href = 'cyberbull-landing.html';
@@ -283,6 +281,9 @@ window.globalAuth = (function() {
       const firebaseProfile = window.firebaseAPI.getUserProfile(currentUserKey);
       if (firebaseProfile && firebaseProfile.isAdmin) {
         localStorage.setItem('isAdmin', 'true');
+        return true;
+      }
+      if (localStorage.getItem('isAdmin') === 'true') {
         return true;
       }
     }

@@ -114,7 +114,6 @@ window.globalAuth = (function() {
     try {
       const xhr = new XMLHttpRequest();
       xhr.open('GET', `/api/getUser/${encodeURIComponent(userKey)}`, false);
-      xhr.timeout = 3000;
       xhr.send(null);
       if (xhr.status === 200) {
         const body = xhr.responseText;

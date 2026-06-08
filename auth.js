@@ -175,6 +175,16 @@ window.globalAuth = (function() {
   async function getGlobalUserAsync(userKey) {
     if (!userKey) return null;
     // Prefer Firebase when available (static hosts benefit from Firestore)
+    // If firebaseAPI exists but is still initializing, wait briefly for it to become enabled.
+    if (window.firebaseAPI && !window.firebaseAPI.isEnabled) {
+      const start = Date.now();
+      while (Date.now() - start < 3000) {
+        if (window.firebaseAPI.isEnabled) break;
+        // small delay
+        // eslint-disable-next-line no-await-in-loop
+        await new Promise(r => setTimeout(r, 150));
+      }
+    }
     if (window.firebaseAPI?.isEnabled) {
       const fb = await getFirebaseUserAsync(userKey);
       if (fb) return fb;

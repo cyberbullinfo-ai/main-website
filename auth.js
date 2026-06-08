@@ -267,28 +267,47 @@ window.globalAuth = (function() {
     return false;
   }
 
-  function requireAuth() {
-    const currentUser = localStorage.getItem('currentUser');
-    const currentUserKey = localStorage.getItem('currentUserKey');
-    if (!currentUser || !currentUserKey) {
-      clearAuthState();
-      window.location.href = 'cyberbull-landing.html';
-      return false;
-    }
-    // If Firebase is present but still initializing, wait briefly instead of immediately falling back to server.
-    if (window.firebaseAPI && !window.firebaseAPI.isEnabled) {
-      try {
-        const start = window._cb_auth_wait_start || Date.now();
-        window._cb_auth_wait_start = start;
-        const waited = Date.now() - start;
-        if (waited < 5000) {
-          setTimeout(() => { try { requireAuth(); } catch(e){} }, 300);
-          return; // postpone decision until firebaseAPI finishes initializing
+async function requireAuthAsync() {
+      const currentUser = localStorage.getItem('currentUser');
+      const currentUserKey = localStorage.getItem('currentUserKey');
+      if (!currentUser || !currentUserKey) {
+        clearAuthState();
+        window.location.href = 'cyberbull-landing.html';
+        return false;
+      }
+      if (window.firebaseAPI) {
+        const start = Date.now();
+        while (!window.firebaseAPI.isEnabled && Date.now() - start < 8000) {
+          await new Promise(r => setTimeout(r, 200));
         }
-        // exceeded wait window; continue to server fallback
-      } catch (e) { /* ignore */ }
+        if (window.firebaseAPI.isEnabled) {
+          try {
+            const profile = window.firebaseAPI.getUserProfile(currentUserKey);
+            if (profile) {
+              localStorage.setItem(currentUserKey, JSON.stringify(profile));
+              return true;
+            }
+            const asyncProfile = await getFirebaseUserAsync(currentUserKey);
+            if (asyncProfile) {
+              localStorage.setItem(currentUserKey, JSON.stringify(asyncProfile));
+              return true;
+            }
+          } catch (e) {
+            console.warn('Firebase profile check failed', e);
+          }
+        }
+      }
+      return requireAuth();
     }
 
+    function requireAuth() {
+      const currentUser = localStorage.getItem('currentUser');
+      const currentUserKey = localStorage.getItem('currentUserKey');
+      if (!currentUser || !currentUserKey) {
+        clearAuthState();
+        window.location.href = 'cyberbull-landing.html';
+        return false;
+      }
     // Prefer Firebase when enabled (avoid unnecessary sync XHR on static hosts)
     if (window.firebaseAPI?.isEnabled) {
       try {
@@ -382,6 +401,7 @@ window.globalAuth = (function() {
 
   return {
     requireAuth,
+    requireAuthAsync,
     requireAdminAuth,
     requireGuest,
     getUserData,

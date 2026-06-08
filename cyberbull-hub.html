@@ -150,17 +150,29 @@
 <body>
   <script>
     (function waitForFirebaseThenAuth(){
-      const maxWait = 3000;
-      const interval = 100;
+      const maxWait = 10000;
+      const interval = 200;
       let waited = 0;
       function check(){
         if (window.firebaseAPI?.isEnabled) {
-          try { window.globalAuth.requireAuth(); } catch(e){ console.warn('requireAuth failed', e); }
+          try {
+            if (window.globalAuth.requireAuthAsync) {
+              window.globalAuth.requireAuthAsync().catch(e => console.warn('requireAuthAsync failed', e));
+            } else {
+              window.globalAuth.requireAuth();
+            }
+          } catch(e){ console.warn('requireAuth failed', e); }
           return;
         }
         waited += interval;
         if (waited >= maxWait) {
-          try { window.globalAuth.requireAuth(); } catch(e){ console.warn('requireAuth failed', e); }
+          try {
+            if (window.globalAuth.requireAuthAsync) {
+              window.globalAuth.requireAuthAsync().catch(e => console.warn('requireAuthAsync failed', e));
+            } else {
+              window.globalAuth.requireAuth();
+            }
+          } catch(e){ console.warn('requireAuth failed', e); }
           return;
         }
         setTimeout(check, interval);

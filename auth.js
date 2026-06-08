@@ -265,6 +265,20 @@ window.globalAuth = (function() {
       window.location.href = 'cyberbull-landing.html';
       return false;
     }
+    // If Firebase is present but still initializing, wait briefly instead of immediately falling back to server.
+    if (window.firebaseAPI && !window.firebaseAPI.isEnabled) {
+      try {
+        const start = window._cb_auth_wait_start || Date.now();
+        window._cb_auth_wait_start = start;
+        const waited = Date.now() - start;
+        if (waited < 5000) {
+          setTimeout(() => { try { requireAuth(); } catch(e){} }, 300);
+          return; // postpone decision until firebaseAPI finishes initializing
+        }
+        // exceeded wait window; continue to server fallback
+      } catch (e) { /* ignore */ }
+    }
+
     // Prefer Firebase when enabled (avoid unnecessary sync XHR on static hosts)
     if (window.firebaseAPI?.isEnabled) {
       try {

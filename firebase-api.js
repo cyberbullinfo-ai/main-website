@@ -41,7 +41,7 @@ window.firebaseAPI = {
 
       self.db = firebase.firestore();
       try {
-        self.db.settings({ experimentalForceLongPolling: true, useFetchStreams: false });
+        self.db.settings({ experimentalForceLongPolling: true, useFetchStreams: false }, { merge: true });
       } catch (err) {
         console.warn('Could not apply Firestore settings', err);
       }

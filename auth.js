@@ -120,7 +120,8 @@ window.globalAuth = (function() {
       return true;
     }
     const host = (window.location && window.location.hostname) || '';
-    if (host.includes('.github.io')) {
+    const path = (window.location && window.location.pathname) || '';
+    if (host.includes('.github.io') || path.indexOf('/main-website/') !== -1 || path === '/main-website') {
       return false;
     }
     return true;

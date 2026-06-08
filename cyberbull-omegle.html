@@ -297,7 +297,7 @@
 
     async function addMessage(sessionKey, message) {
       if (useFirebaseOmegle) {
-        await omegleMessagesCol.add({ ...message, sessionKey });
+        await omegleSessionsCol.doc(sessionKey).collection('messages').add({ ...message });
         return;
       }
       const messages = getMessages(sessionKey);
@@ -748,8 +748,7 @@
         console.error('Omegle session snapshot failed', error);
       });
 
-      messagesListener = omegleMessagesCol
-        .where('sessionKey', '==', sessionKey)
+      messagesListener = omegleSessionsCol.doc(sessionKey).collection('messages')
         .orderBy('timestamp')
         .onSnapshot(snapshot => {
           firebaseMessages = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));

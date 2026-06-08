@@ -694,7 +694,11 @@
     const currentUserKey = localStorage.getItem("currentUserKey");
     const schoolDomain = localStorage.getItem("schoolDomain");
 
-    window.globalAuth.requireAuth();
+    if (window.globalAuth.requireAuthAsync) {
+      window.globalAuth.requireAuthAsync().catch(e => console.warn('requireAuthAsync failed', e));
+    } else {
+      window.globalAuth.requireAuth();
+    }
 
     if (window.firebaseAPI?.isEnabled) {
       window.firebaseAPI.subscribeUserFriendData(currentUserKey);

@@ -67,7 +67,11 @@
 </head>
 <body>
   <script>
-    window.globalAuth.requireAuth();
+    if (window.globalAuth.requireAuthAsync) {
+      window.globalAuth.requireAuthAsync().catch(e => console.warn('requireAuthAsync failed', e));
+    } else {
+      window.globalAuth.requireAuth();
+    }
   </script>
   <div class="page">
     <div class="topbar">

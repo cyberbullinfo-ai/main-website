@@ -115,6 +115,17 @@ window.globalAuth = (function() {
     lastGlobalAuthError = err ? String(err) : null;
   }
 
+  function isServerApiFallbackAllowed() {
+    if (window.API_ORIGIN && typeof window.API_ORIGIN === 'string' && window.API_ORIGIN.trim()) {
+      return true;
+    }
+    const host = (window.location && window.location.hostname) || '';
+    if (host.includes('.github.io')) {
+      return false;
+    }
+    return true;
+  }
+
   function clearAuthState() {
     const keysToRemove = [];
     for (let i = 0; i < localStorage.length; i++) {
@@ -127,7 +138,7 @@ window.globalAuth = (function() {
   }
 
   function getUserFromServerSync(userKey) {
-    if (!userKey || typeof XMLHttpRequest !== 'function') return null;
+    if (!userKey || typeof XMLHttpRequest !== 'function' || !isServerApiFallbackAllowed()) return null;
     try {
       const xhr = new XMLHttpRequest();
       xhr.open('GET', apiUrl(`/api/getUser/${encodeURIComponent(userKey)}`), false);
@@ -146,7 +157,7 @@ window.globalAuth = (function() {
 
   // Non-blocking alternative to fetch user data from server
   async function getUserFromServerAsync(userKey) {
-    if (!userKey || !window.fetch) return null;
+    if (!userKey || !window.fetch || !isServerApiFallbackAllowed()) return null;
     try {
       const resp = await fetch(apiUrl(`/api/getUser/${encodeURIComponent(userKey)}`));
       if (!resp.ok) return null;
@@ -204,6 +215,10 @@ window.globalAuth = (function() {
       if (firebaseUser) return firebaseUser.password === password;
     }
 
+    if (!isServerApiFallbackAllowed()) {
+      return false;
+    }
+
     if (window.fetch) {
       try {
         const verifyResp = await fetch(apiUrl('/api/checkPassword'), {
@@ -240,6 +255,10 @@ window.globalAuth = (function() {
         console.warn('Firebase saveUserProfile failed', err);
         setLastGlobalAuthError('Firebase unavailable');
       }
+    }
+
+    if (!isServerApiFallbackAllowed()) {
+      return false;
     }
 
     if (window.fetch) {
@@ -321,6 +340,16 @@ async function requireAuthAsync() {
       }
     }
 
+    if (!isServerApiFallbackAllowed()) {
+      const storedProfile = localStorage.getItem(currentUserKey);
+      if (storedProfile) {
+        return true;
+      }
+      clearAuthState();
+      window.location.href = 'cyberbull-landing.html';
+      return false;
+    }
+
     const serverUser = getUserFromServerSync(currentUserKey);
     if (!serverUser) {
       clearAuthState();
@@ -359,6 +388,10 @@ async function requireAuthAsync() {
       }
     }
 
+    if (!isServerApiFallbackAllowed()) {
+      return localStorage.getItem('isAdmin') === 'true';
+    }
+
     clearAuthState();
     window.location.href = 'cyberbull-landing.html';
     return false;
@@ -385,6 +418,10 @@ async function requireAuthAsync() {
     const currentUser = localStorage.getItem('currentUser');
     const currentUserKey = localStorage.getItem('currentUserKey');
     if (currentUser && currentUserKey) {
+      if (!isServerApiFallbackAllowed()) {
+        window.location.href = 'cyberbull-student.html';
+        return false;
+      }
       const serverUser = getUserFromServerSync(currentUserKey);
       if (serverUser) {
         window.location.href = 'cyberbull-student.html';

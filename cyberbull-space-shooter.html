@@ -234,7 +234,11 @@
   <script src="config.js"></script>
   <script src="auth.js"></script>
   <script>
-    window.globalAuth.requireAuth();
+    if (window.globalAuth.requireAuthAsync) {
+      window.globalAuth.requireAuthAsync().catch(e => console.warn('requireAuthAsync failed', e));
+    } else {
+      window.globalAuth.requireAuth();
+    }
     const currentUserKey = localStorage.getItem('currentUserKey');
   </script>
   <canvas id="game"></canvas>

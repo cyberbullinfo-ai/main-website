@@ -44,7 +44,7 @@ function getUserByKey(userKey) {
   if (!userKey || typeof XMLHttpRequest !== 'function') return null;
   try {
     const xhr = new XMLHttpRequest();
-    xhr.open('GET', `/api/getUser/${encodeURIComponent(userKey)}`, false);
+    xhr.open('GET', apiUrl ? apiUrl(`/api/getUser/${encodeURIComponent(userKey)}`) : `/api/getUser/${encodeURIComponent(userKey)}`, false);
     xhr.timeout = 3000;
     xhr.send(null);
     if (xhr.status === 200 && xhr.responseText) {
@@ -67,7 +67,7 @@ function saveUser(userKey, user) {
 
   // Prefer fetch (async). If not available, fall back to synchronous XHR for legacy callers.
   if (window.fetch) {
-    fetch('/api/saveUser', {
+    fetch(apiUrl ? apiUrl('/api/saveUser') : '/api/saveUser', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userKey, userObj: user })
@@ -95,7 +95,7 @@ function saveUser(userKey, user) {
   if (typeof XMLHttpRequest === 'function') {
     try {
       const xhr = new XMLHttpRequest();
-      xhr.open('POST', '/api/saveUser', false);
+      xhr.open('POST', apiUrl ? apiUrl('/api/saveUser') : '/api/saveUser', false);
       xhr.setRequestHeader('Content-Type', 'application/json');
       xhr.send(JSON.stringify({ userKey, userObj: user }));
       if (xhr.status !== 200 && xhr.status !== 204) {

@@ -94,6 +94,11 @@ http://localhost:3000/
 ## Notes
 
 - This repo now supports server-side global accounts via `/api/*` and persistent storage in `db.json`.
+
+Deployment notes:
+- To keep accounts & chat global on GitHub Pages you must host the Node backend (`pong-server.js`) somewhere accessible (VPS, Render, Heroku, Fly, etc.) and set `window.API_ORIGIN` in `config.js` to that backend origin (e.g. `https://api.example.com`).
+- Alternatively run the Node server yourself and point `API_ORIGIN` to your server (useful for testing locally: `http://localhost:3000`).
+- A GitHub Actions workflow `.github/workflows/deploy.yml` is included to automatically publish the repository root to the `gh-pages` branch on pushes to `main`.
 - If the backend is unavailable, the frontend can still attempt Firebase profile storage when configured.
 - Static GitHub Pages alone is no longer sufficient for the full backend-powered account flow unless you deploy the Node server or use Firebase.
 

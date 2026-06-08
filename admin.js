@@ -4,6 +4,22 @@ function getUserKey(domain, username){
   return `user_${domain}_${username}`;
 }
 
+// API path helper to account for GitHub Pages subpath deployments (e.g. /main-website)
+// Respect a central `config.js` `window.apiUrl` or provide fallback behavior
+if (!window.apiUrl) {
+  window.apiUrl = function(path) {
+    if (!path) return path;
+    if (!path.startsWith('/')) path = '/' + path;
+    if (window.API_ORIGIN && typeof window.API_ORIGIN === 'string' && window.API_ORIGIN.trim()) {
+      const base = window.API_ORIGIN.replace(/\/$/, '');
+      return base + path;
+    }
+    const p = (window.location && window.location.pathname) || '';
+    const subpath = (p.indexOf('/main-website/') !== -1 || p === '/main-website') ? '/main-website' : '';
+    return (subpath || '') + path;
+  };
+}
+
 function getUserByKey(key){
   if (!key) return null;
   if (window.firebaseAPI?.isEnabled) {
@@ -26,7 +42,7 @@ function getUserByKey(key){
 function saveUser(key, userObj){
   if (!key || !userObj) return;
   if (window.fetch) {
-    fetch('/api/saveUser', {
+    fetch(apiUrl('/api/saveUser'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userKey: key, userObj })
@@ -86,7 +102,7 @@ window.serverUsers = [];
 async function loadServerUsers(){
   if (!window.fetch) return;
   try {
-    const res = await fetch('/api/users');
+    const res = await fetch(apiUrl('/api/users'));
     if (!res.ok) throw new Error('Server users endpoint returned ' + res.status);
     const keys = await res.json();
     if (!Array.isArray(keys)) throw new Error('Server users list invalid');
@@ -94,7 +110,7 @@ async function loadServerUsers(){
     for (const key of keys) {
       if (!key || typeof key !== 'string') continue;
       try {
-        const userRes = await fetch(`/api/getUser/${encodeURIComponent(key)}`);
+        const userRes = await fetch(apiUrl(`/api/getUser/${encodeURIComponent(key)}`));
         if (!userRes.ok) continue;
         const userData = await userRes.json();
         if (userData) {
@@ -357,7 +373,7 @@ function deleteUser(key){
     showAlert('Global delete is unavailable.');
     return;
   }
-  fetch('/api/deleteUser', {
+  fetch(apiUrl('/api/deleteUser'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ userKey: key })

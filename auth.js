@@ -91,6 +91,23 @@ window.showPrompt = function(message, defaultValue = '') {
   });
 };
 
+// API path helper: if site is served under a subpath (e.g. /main-website/),
+// prefix API calls with that subpath so relative absolute paths resolve correctly.
+// Prefer centralized config if present
+if (!window.apiUrl) {
+  window.apiUrl = function(path) {
+    if (!path) return path;
+    if (!path.startsWith('/')) path = '/' + path;
+    if (window.API_ORIGIN && typeof window.API_ORIGIN === 'string' && window.API_ORIGIN.trim()) {
+      const base = window.API_ORIGIN.replace(/\/$/, '');
+      return base + path;
+    }
+    const p = (window.location && window.location.pathname) || '';
+    const subpath = (p.indexOf('/main-website/') !== -1 || p === '/main-website') ? '/main-website' : '';
+    return (subpath || '') + path;
+  };
+}
+
 window.globalAuth = (function() {
   let lastGlobalAuthError = null;
 
@@ -113,7 +130,7 @@ window.globalAuth = (function() {
     if (!userKey || typeof XMLHttpRequest !== 'function') return null;
     try {
       const xhr = new XMLHttpRequest();
-      xhr.open('GET', `/api/getUser/${encodeURIComponent(userKey)}`, false);
+      xhr.open('GET', apiUrl(`/api/getUser/${encodeURIComponent(userKey)}`), false);
       xhr.send(null);
       if (xhr.status === 200) {
         const body = xhr.responseText;
@@ -131,7 +148,7 @@ window.globalAuth = (function() {
   async function getUserFromServerAsync(userKey) {
     if (!userKey || !window.fetch) return null;
     try {
-      const resp = await fetch(`/api/getUser/${encodeURIComponent(userKey)}`);
+      const resp = await fetch(apiUrl(`/api/getUser/${encodeURIComponent(userKey)}`));
       if (!resp.ok) return null;
       setLastGlobalAuthError(null);
       return await resp.json();
@@ -157,16 +174,29 @@ window.globalAuth = (function() {
 
   async function getGlobalUserAsync(userKey) {
     if (!userKey) return null;
+    // Prefer Firebase when available (static hosts benefit from Firestore)
+    if (window.firebaseAPI?.isEnabled) {
+      const fb = await getFirebaseUserAsync(userKey);
+      if (fb) return fb;
+    }
     const serverUser = await getUserFromServerAsync(userKey);
     if (serverUser) return serverUser;
-    return await getFirebaseUserAsync(userKey);
+    // fallback to firebase again in case server failed but firebase became available
+    if (window.firebaseAPI?.isEnabled) return await getFirebaseUserAsync(userKey);
+    return null;
   }
 
   async function checkGlobalPasswordAsync(userKey, password) {
     if (!userKey || typeof password === 'undefined') return false;
+    // Prefer Firebase when available
+    if (window.firebaseAPI?.isEnabled) {
+      const firebaseUser = await getFirebaseUserAsync(userKey);
+      if (firebaseUser) return firebaseUser.password === password;
+    }
+
     if (window.fetch) {
       try {
-        const verifyResp = await fetch('/api/checkPassword', {
+        const verifyResp = await fetch(apiUrl('/api/checkPassword'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userKey, password })
@@ -183,10 +213,6 @@ window.globalAuth = (function() {
       }
     }
 
-    const firebaseUser = await getFirebaseUserAsync(userKey);
-    if (firebaseUser) {
-      return firebaseUser.password === password;
-    }
     return false;
   }
 
@@ -194,42 +220,37 @@ window.globalAuth = (function() {
     if (!userKey || !userObj) return false;
     let serverSaved = false;
     let lastServerStatus = null;
-
-    if (window.fetch) {
-      try {
-        const response = await fetch('/api/saveUser', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userKey, userObj })
-        });
-        lastServerStatus = response.status;
-        if (response.ok) {
-          serverSaved = true;
-          setLastGlobalAuthError(null);
-        }
-      } catch (error) {
-        console.warn('Global saveUser API failed', error);
-        setLastGlobalAuthError('Backend unavailable');
-      }
-    }
-
-    if (serverSaved) {
-      if (window.firebaseAPI?.isEnabled && window.firebaseAPI.saveUserProfile) {
-        window.firebaseAPI.saveUserProfile(userKey, userObj).catch(err => {
-          console.warn('Firebase saveUserProfile fallback failed after server save', err);
-        });
-      }
-      return true;
-    }
-
+    // Prefer Firebase first for static/public hosting
     if (window.firebaseAPI?.isEnabled && window.firebaseAPI.saveUserProfile) {
       try {
         await window.firebaseAPI.saveUserProfile(userKey, userObj);
         setLastGlobalAuthError(null);
         return true;
       } catch (err) {
-        console.warn('Firebase saveUserProfile fallback failed', err);
+        console.warn('Firebase saveUserProfile failed', err);
         setLastGlobalAuthError('Firebase unavailable');
+      }
+    }
+
+    if (window.fetch) {
+      try {
+        const response = await fetch(apiUrl('/api/saveUser'), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userKey, userObj })
+        });
+        lastServerStatus = response.status;
+        if (response.ok) {
+          setLastGlobalAuthError(null);
+          // Also write to Firebase async if available
+          if (window.firebaseAPI?.isEnabled && window.firebaseAPI.saveUserProfile) {
+            window.firebaseAPI.saveUserProfile(userKey, userObj).catch(err => console.warn('Firebase saveUserProfile fallback failed after server save', err));
+          }
+          return true;
+        }
+      } catch (error) {
+        console.warn('Global saveUser API failed', error);
+        setLastGlobalAuthError('Backend unavailable');
       }
     }
 

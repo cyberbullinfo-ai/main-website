@@ -40,6 +40,11 @@ window.firebaseAPI = {
       }
 
       self.db = firebase.firestore();
+      try {
+        self.db.settings({ experimentalForceLongPolling: true, useFetchStreams: false });
+      } catch (err) {
+        console.warn('Could not apply Firestore settings', err);
+      }
       self.auth = firebase.auth ? firebase.auth() : null;
       self.rtdb = firebase.database ? firebase.database() : null;
       self.isEnabled = true;
